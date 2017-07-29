@@ -1,0 +1,4 @@
+boot load address:10002000
+boot version:01.02
+app load address:10020000
+app version:01.02

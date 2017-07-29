@@ -1,0 +1,51 @@
+/*********************************************************************
+*              SEGGER MICROCONTROLLER GmbH & Co. K.G.                *
+*        Solutions for real time microcontroller applications        *
+**********************************************************************
+*                                                                    *
+*        (c) 2011-2015 SEGGER Microcontroller GmbH & Co. KG          *
+*                                                                    *
+* Internet: www.segger.com Support: support@segger.com               *
+*                                                                    *
+**********************************************************************
+----------------------------------------------------------------------
+Purpose : 
+---------------------------END-OF-HEADER------------------------------
+*/
+
+/*********************************************************************
+*
+*       ResetTarget
+*/
+void ResetTarget(void) {
+  // In case cores 1-3 are reset, we do nothing, 
+  //  as we would lose connection to these cores, when resetting the device
+  //  as a reset disables the clock to them.
+}
+
+/*********************************************************************
+*
+*       ConfigTargetSettings
+*
+*  Function description
+*    Called before InitTarget(). Maninly used to set some global DLL variables
+*    to customize the normal connect procedure. For ARM CoreSight devices this may be specifying
+*    the base address of some CoreSight components (ETM, ...) that cannot be auto-detected
+*    by J-Link due to erroneous ROM tables etc. May also be used to specify the device name in case debugger does not pass it to the DLL.
+*
+*  Notes
+*    (1) May not, under absolutely NO circumstances, call any API functions that perform target communication.
+*    (2) Should only set some global DLL variables
+*/
+void ConfigTargetSettings(void) {
+  Report("******************************************************");
+  Report("J-Link script: Cortex-M7 core J-Link script");
+  Report("******************************************************");
+  JTAG_AllowTAPReset = 1;                                                       // J-Link is allowed to use a TAP reset for JTAG-chain auto-detection
+  CORESIGHT_AddAP(0, CORESIGHT_APB_AP);
+  CORESIGHT_AddAP(1, CORESIGHT_AHB_AP);         // AHB-AP which controls 1st Cortex-M7
+  CORESIGHT_AddAP(2, CORESIGHT_AHB_AP);         // AHB-AP which controls 2nd Cortex-M7
+  CORESIGHT_AddAP(3, CORESIGHT_AHB_AP);         // AHB-AP which controls 3rd Cortex-M7
+  CPU = CORTEX_M7;
+  CORESIGHT_IndexAHBAPToUse = 1;                // Select 1st M7
+}

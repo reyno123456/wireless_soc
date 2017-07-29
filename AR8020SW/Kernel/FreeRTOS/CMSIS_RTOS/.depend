@@ -1,0 +1,19 @@
+cmsis_os.o: cmsis_os.c cmsis_os.h \
+ ../../../Library/ThirdParty/CMSIS/Include/core_cmFunc.h \
+ ../../../Kernel/FreeRTOS/include/FreeRTOS.h \
+ ../../../Configure/Include/FreeRTOSConfig.h \
+ ../../../Kernel/FreeRTOS/include/projdefs.h \
+ ../../../Kernel/FreeRTOS/include/portable.h \
+ ../../../Kernel/FreeRTOS/include/deprecated_definitions.h \
+ ../../../Kernel/FreeRTOS/portable/GCC/ARM_CM7/r0p1/portmacro.h \
+ ../../../Kernel/FreeRTOS/include/mpu_wrappers.h \
+ ../../../Kernel/FreeRTOS/include/task.h \
+ ../../../Kernel/FreeRTOS/include/list.h \
+ ../../../Kernel/FreeRTOS/include/timers.h \
+ ../../../Kernel/FreeRTOS/include/task.h \
+ ../../../Kernel/FreeRTOS/include/queue.h \
+ ../../../Kernel/FreeRTOS/include/semphr.h \
+ ../../../Kernel/FreeRTOS/include/queue.h \
+ ../../../Kernel/FreeRTOS/include/event_groups.h \
+ ../../../Kernel/FreeRTOS/include/timers.h \
+ ../../../Driver/HAL/STM32F7xx_HAL_Driver/Inc/uart.h
