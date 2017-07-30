@@ -15,4 +15,6 @@ void command_TestHalUartTx(unsigned char *ch, unsigned char *len);
 
 void command_TestHalUartRx(unsigned char *ch);
 
+void test_uart_with_os();
+
 #endif

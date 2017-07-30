@@ -12,6 +12,7 @@
 #include "test_os_signal.h"
 #include "test_os_message.h"
 #include "test_os_timer.h"
+#include "test_hal_uart.h"
 
 
 #define m7_malloc pvPortMalloc
@@ -293,6 +294,10 @@ void command_TestTask(char* arg1)
 
         case 9:
             test_os_timer();
+        break;
+
+        case 10:
+            test_uart_with_os();
         break;
 
         default:
