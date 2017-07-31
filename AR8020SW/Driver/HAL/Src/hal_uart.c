@@ -79,12 +79,10 @@ HAL_RET_T HAL_UART_Init(ENUM_HAL_UART_COMPONENT e_uartComponent,
     uint8_t u8_uartCh;
     uint8_t u8_uartVecNum;
 
-    dlog_info("addr of g_s_periMutex = %p", &g_s_periMutex);
-/*
+    dlog_info("addr of g_s_periMutex = %p", g_s_periMutex);
     dlog_info("addr of g_s_periMutex->uart = 0x%08x", g_s_periMutex->uart);
     dlog_info("addr of g_s_periMutex->spi = 0x%08x", g_s_periMutex->spi);
     dlog_info("addr of g_s_periMutex->can = 0x%08x", g_s_periMutex->can);
-*/
     
     if ( -1 == periperal_get_free(mutex_uart, e_uartComponent) )
     {

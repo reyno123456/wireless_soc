@@ -43,6 +43,8 @@ int main(void)
     
     HAL_BB_InitSky(NULL);
 
+	dlog_set_output_level(LOG_LEVEL_WARNING);
+
     for( ;; )
     {
         SYS_EVENT_Process();

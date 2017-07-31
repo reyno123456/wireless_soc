@@ -15,7 +15,7 @@ typedef struct
     uint32_t can;
 }PERIPERIAL_MUTEX_DATA;
 
-extern PERIPERIAL_MUTEX_DATA g_s_periMutex;
+extern PERIPERIAL_MUTEX_DATA *g_s_periMutex;
 
 typedef enum _emu_Mutex_Periperal
 {
