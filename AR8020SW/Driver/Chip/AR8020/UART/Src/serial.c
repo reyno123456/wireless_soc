@@ -331,21 +331,21 @@ void uart_putdata(unsigned char index,  const char *s, unsigned short dataLen)
         s_st_uartTxArray[index].u16_uartSendBuffLen = dataLen;
         s_st_uartTxArray[index].u16_uartSendBuffLentmp = 0;
 /*         s_st_uartTxArray[index].ps8_uartSendBuff = s; */
-        dlog_info("line = %d, s_st_uartTxArray[%d].ps8_uartSendBuff = %p", __LINE__, index, 
-                    s_st_uartTxArray[index].ps8_uartSendBuff);              
+        //dlog_info("line = %d, s_st_uartTxArray[%d].ps8_uartSendBuff = %p", __LINE__, index, 
+        //            s_st_uartTxArray[index].ps8_uartSendBuff);              
         if(0 == get_new_buffer((uint8_t**)(&s_st_uartTxArray[index].ps8_uartSendBuff),
                                (uint8_t*)s,
                                (uint32_t*)&s_st_uartTxArray[index].txLenLast, 
                                dataLen))
         {
-            dlog_info("success");
+            //dlog_info("success");
         }
         else
         {
             dlog_info("fail");
         }
-        dlog_info("line = %d, s_st_uartTxArray[%d].ps8_uartSendBuff = %p", __LINE__, index, 
-                    s_st_uartTxArray[index].ps8_uartSendBuff);              
+        //dlog_info("line = %d, s_st_uartTxArray[%d].ps8_uartSendBuff = %p", __LINE__, index, 
+        //            s_st_uartTxArray[index].ps8_uartSendBuff);              
     }
     else
     {

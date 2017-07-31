@@ -102,5 +102,7 @@ STRU_BoardCfg stru_boardCfg =
 
     .u8_bbStartMcs10M               = 3,
     .u8_bbStartMcs20M               = 2,
+
+    .name                        = "ARCast"
 };
 

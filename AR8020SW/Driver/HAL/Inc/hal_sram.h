@@ -97,6 +97,10 @@ void HAL_SRAM_ChannelConfig(ENUM_HAL_SRAM_CHANNEL_TYPE e_channelType,
 
 uint8_t *HAL_SRAM_GetVideoBypassChannelBuff(ENUM_HAL_SRAM_VIDEO_CHANNEL e_channel);
 
+
+void HAL_SRAM_TransferBypassVideoStream(ENUM_HAL_SRAM_VIDEO_CHANNEL e_channel, void *buff, uint32_t length);
+
+
 #ifdef ARCAST
 uint32_t HAL_SRAM_GetMp3BufferLength(void);
 uint32_t HAL_SRAM_GetMp3Data(uint32_t dataLen, uint8_t *dataBuff);

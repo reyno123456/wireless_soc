@@ -29,7 +29,7 @@ void command_TestNvSetBbRcId(uint8_t *id1, uint8_t *id2, uint8_t *id3, uint8_t *
     idArr[3] = (uint8_t)(strtoul(id4, NULL, 0));
     idArr[4] = (uint8_t)(strtoul(id5, NULL, 0));
 
-    HAL_NV_SetBbRcId(idArr);
+    HAL_BB_SaveRcId(idArr);
 
     dlog_info("id:0x%x 0x%x 0x%x 0x%x 0x%x",idArr[0], idArr[1], idArr[2], idArr[3], idArr[4]);
 }

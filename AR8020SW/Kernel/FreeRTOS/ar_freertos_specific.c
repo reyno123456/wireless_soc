@@ -136,16 +136,22 @@ static void putSysEventMsgQ(void)
 
 void ar_osSysEventMsgQGet(void)
 {
-    createSysEventMsgQ();
-    
-    getSysEventMsgQ();
+    if (osKernelRunning())
+    {
+        createSysEventMsgQ();
+
+        getSysEventMsgQ();
+    }
 }
 
 void ar_osSysEventMsgQPut(void)
 {
-    createSysEventMsgQ();
+    if (osKernelRunning())
+    {
+        createSysEventMsgQ();
 
-    putSysEventMsgQ();
+        putSysEventMsgQ();
+    }
 }
 
 void ar_osWirelessTaskInit(void TaskHandler(void const *argument))

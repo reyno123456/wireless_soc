@@ -39,7 +39,8 @@ SRC_C   := main_sky.c \
            ../../Example/test_hal_uart.c \
            ../../Example/testhal_pwm.c \
            ../../Example/testhal_gpio.c \
-           ../../Example/test_hal_nv.c
+           ../../Example/test_hal_nv.c \
+           ../../Example/test_bypass_encoder.c
 SRC_CXX :=
 endif
 

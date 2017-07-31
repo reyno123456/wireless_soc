@@ -12,11 +12,13 @@ History:
 
 #include <stdio.h>
 #include <stdint.h>
-#include "boardParameters.h"
+
+#include "debuglog.h"
 #include "sys_event.h"
 #include "bb_ctrl.h"
 #include "bb_grd_ctrl.h"
 #include "hal_bb.h"
+#include "bb_customerctx.h"
 
 
 /** 
@@ -25,10 +27,18 @@ History:
  * @return  HAL_OK:                         means init baseband 
  *          HAL_BB_ERR_INIT:                means some error happens in init session 
  */
-HAL_RET_T HAL_BB_InitGround( void )
+HAL_RET_T HAL_BB_InitGround( STRU_CUSTOMER_CFG *stru_customerCfg )
 {
-    BB_init(BB_GRD_MODE, &stru_boardCfg);
-	BB_GRD_start();
+    if (NULL == stru_customerCfg || NULL == stru_customerCfg->pstru_boardCfg)
+    {
+        BB_init(BB_GRD_MODE, &stru_boardCfg, stru_customerCfg);
+    }
+    else
+    {
+        BB_init(BB_GRD_MODE, stru_customerCfg->pstru_boardCfg , stru_customerCfg);
+    }
+
+    BB_GRD_start();
 
     return HAL_OK;
 }

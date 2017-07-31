@@ -133,6 +133,7 @@ void command_TestWbFlash(char *spi_base)
  
     //Winbond_SPI_FLASH Setting 
     dlog_info("WB WRITE START\n");
+
     
     Test_WbFlashCommand(SPI_BASE_ADDR,0x06);         //write enable
     do{

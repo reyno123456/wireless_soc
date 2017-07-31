@@ -52,6 +52,9 @@
 #define HID_EPIN_VIDEO_ADDR           0x86
 #define HID_EPIN_VIDEO_SIZE           512
 
+#define HID_EPOUT_VIDEO_ADDR          0x06
+#define HID_EPOUT_VIDEO_SIZE          512
+
 #define HID_EPIN_AUDIO_ADDR           0x85
 #define HID_EPIN_AUDIO_SIZE           512
 
@@ -67,7 +70,7 @@
 #define HID_CUSTOMER_IN_ADDR          0x83
 #define HID_CUSTOMER_IN_SIZE          512
 
-#define USB_HID_CONFIG_DESC_SIZ       123
+#define USB_HID_CONFIG_DESC_SIZ       130
 
 //#define USB_HID_CONFIG_DESC_SIZ       91
 #define USB_HID_DESC_SIZ              9
@@ -123,6 +126,7 @@ typedef struct _USBD_HID_Itf
     void (* dataOut)(void *, uint8_t);
     void (* userInit)(void);
     void (* customerOut)(void *, uint32_t, uint8_t);
+    void (* recvVideoStream)(void *, uint32_t, uint8_t);
 }USBD_HID_ItfTypeDef;
 
 

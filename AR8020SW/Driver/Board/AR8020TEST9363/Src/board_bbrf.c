@@ -172,5 +172,7 @@ STRU_BoardCfg stru_boardCfg =
     .pstru_rf2GrdRegsAfterCali   = NULL,
 
     .u8_bbStartMcs10M            = 0,
-    .u8_bbStartMcs20M            = 0,    
+    .u8_bbStartMcs20M            = 0,
+
+    .name                        = "AR9363"
 };

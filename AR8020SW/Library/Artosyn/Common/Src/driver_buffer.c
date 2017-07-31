@@ -24,7 +24,7 @@ int8_t get_new_buffer(uint8_t **drv_buf, uint8_t *usr_buf, uint32_t *txLenLast, 
     {
         if (0 != *txLenLast)
         {
-            dlog_info("line = %d, u32_size = %d, *txLenLast = %d", __LINE__, u32_size, *txLenLast);
+            //dlog_info("line = %d, u32_size = %d, *txLenLast = %d", __LINE__, u32_size, *txLenLast);
             if ((u32_size > *txLenLast) || (u32_size < *txLenLast/10))
             {
                 *drv_buf = realloc(*drv_buf, u32_size);
@@ -37,12 +37,12 @@ int8_t get_new_buffer(uint8_t **drv_buf, uint8_t *usr_buf, uint32_t *txLenLast, 
                 else
                 {
                     *txLenLast = u32_size;
-                    dlog_info("line = %d", __LINE__);
+                    //dlog_info("line = %d", __LINE__);
                 }
             }
             else
             {
-                dlog_warning("keep current length");
+                //dlog_warning("keep current length");
             }
         }        
     }

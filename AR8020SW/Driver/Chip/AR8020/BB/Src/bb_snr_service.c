@@ -117,14 +117,14 @@ int grd_check_piecewiseSnrPass(uint8_t u8_flag_start, uint16_t u16_thld)
 
     if( stru_snr.u8_failCount0 > 0 || stru_snr.u8_failCount1 > 0 )
     {
-        dlog_info("sliceSNR Loc:%d thld:0x%x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x \n", loc, u16_thld,
+        /*dlog_info("sliceSNR Loc:%d thld:0x%x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x \n", loc, u16_thld,
                     stru_snr.u16_pieceSNR[0],  stru_snr.u16_pieceSNR[1],  stru_snr.u16_pieceSNR[2],  stru_snr.u16_pieceSNR[3],
                     stru_snr.u16_pieceSNR[4],  stru_snr.u16_pieceSNR[5],  stru_snr.u16_pieceSNR[6],  stru_snr.u16_pieceSNR[7],
                     stru_snr.u16_pieceSNR[8],  stru_snr.u16_pieceSNR[9],  stru_snr.u16_pieceSNR[10], stru_snr.u16_pieceSNR[11],
                     stru_snr.u16_pieceSNR[12], stru_snr.u16_pieceSNR[13], stru_snr.u16_pieceSNR[14], stru_snr.u16_pieceSNR[15]
                 );
 
-        dlog_info("SNR Fail=%d %d %d ret=%d \n", u8_flag_start, stru_snr.u8_failCount0, stru_snr.u8_failCount1, ret);    
+        dlog_info("SNR Fail=%d %d %d ret=%d \n", u8_flag_start, stru_snr.u8_failCount0, stru_snr.u8_failCount1, ret);   */ 
     }
     return ret;    
 }
@@ -598,7 +598,7 @@ void grd_judge_qam_mode(void)
     QAMUPDONW snr_qamupdown  = QAMKEEP;
     QAMUPDONW harq_qamupdown = QAMKEEP;
     QAMUPDONW ldpc_qamupdown = QAMKEEP;
-    uint8_t thresh = ((BW_20M == (context.CH_bandwidth)) ? (QAM_CHANGE_THRESHOLD_COUNT - 2) : (QAM_CHANGE_THRESHOLD_COUNT - 1));
+    uint8_t thresh = ((BW_20M == (context.e_bandwidth)) ? (QAM_CHANGE_THRESHOLD_COUNT - 2) : (QAM_CHANGE_THRESHOLD_COUNT - 1));
     
 
     grd_get_snr();
@@ -613,7 +613,7 @@ void grd_judge_qam_mode(void)
     if (context.qam_skip_mode == MANUAL)
     {
         static int loop = 0;
-        if ( loop ++ > 100)
+        if ( loop ++ > 1000)
         {
             dlog_info("-BRC MANUAL-");
             loop = 0;
@@ -636,6 +636,6 @@ void grd_judge_qam_mode(void)
             return;
         }
     
-    grd_set_txmsg_mcs_change(context.CH_bandwidth, context.qam_ldpc);
+    grd_set_txmsg_mcs_change(context.e_bandwidth, context.qam_ldpc);
     grd_start_SnrHarqCnt( );
 }

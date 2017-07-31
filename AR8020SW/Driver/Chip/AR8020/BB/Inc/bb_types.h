@@ -107,6 +107,14 @@ typedef enum
     MCS_RC_CODE_RATE_SELECT,
 } ENUM_WIRELESS_MCS_CHANGE_ITEM;
 
+typedef enum
+{
+    RCID_AUTO_SEARCH,   //set rc id in auto search
+    RCID_CONNECT_ID,    //connect to one rc id
+    RCID_DISCONNECT,    //Disconnect to one rc id
+    RCID_SAVE_RCID
+} ENUM_WIRELESS_RCID_ITEM;
+
 
 typedef enum
 {
@@ -121,6 +129,7 @@ typedef struct
     uint8_t                 u8_configClass;
     uint8_t                 u8_configItem;
     uint32_t                u32_configValue;
+    uint32_t                u32_configValue1;
 } STRU_WIRELESS_CONFIG_CHANGE;
 
 
@@ -175,7 +184,7 @@ typedef struct
     uint8_t         agc_value[4];           //13 12 11 10
     uint8_t         harq_count;             //14
     uint8_t         modulation_mode;        //15
-    uint8_t         ch_bandwidth;           //16
+    uint8_t         e_bandwidth;           //16
     uint8_t         code_rate;              //17
     uint8_t         osd_enable;             //18
     uint8_t         IT_channel;             //19
@@ -209,7 +218,7 @@ typedef struct
     uint8_t         skyGround;
     uint8_t         band;
     uint8_t         bandWidth;
-    uint8_t         itHopping;
+    uint8_t         itHopMode;
     uint8_t         rcHopping;
     uint8_t         adapterBitrate;
     uint8_t         channel1_on;

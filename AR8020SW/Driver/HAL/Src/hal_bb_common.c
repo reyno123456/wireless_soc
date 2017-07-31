@@ -21,6 +21,7 @@ History:
 #include "rf_if.h"
 #include "hal_bb.h"
 #include "debuglog.h"
+#include "bb_customerctx.h"
 
 
 /** 
@@ -39,7 +40,7 @@ HAL_RET_T HAL_BB_SetFreqBandwidthSelectionProxy(ENUM_CH_BW e_bandwidth)
     st_cmd.u8_configItem   = FREQ_BAND_WIDTH_SELECT;
     st_cmd.u32_configValue = (uint32_t)e_bandwidth;
 
-	u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
     if( u8_ret )
     {
         return HAL_OK;
@@ -97,7 +98,7 @@ HAL_RET_T HAL_BB_SetFreqBandProxy(ENUM_RF_BAND e_band)
     st_cmd.u8_configItem   = FREQ_BAND_SELECT;
     st_cmd.u32_configValue = (uint32_t)e_band;
 
-	u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
     if( u8_ret )
     {
         return HAL_OK;
@@ -154,7 +155,7 @@ HAL_RET_T HAL_BB_SetItChannelProxy(uint8_t u8_channelNum)
     st_cmd.u8_configItem   = FREQ_CHANNEL_SELECT;
     st_cmd.u32_configValue = u8_channelNum;
 
-	u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
     if( u8_ret )
     {
         return HAL_OK;
@@ -185,7 +186,7 @@ HAL_RET_T HAL_BB_SetMcsModeProxy(ENUM_RUN_MODE e_mode)
     st_cmd.u8_configItem   = MCS_MODE_SELECT;
     st_cmd.u32_configValue = (uint32_t)e_mode;
 
-	u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
 
     if( u8_ret )
     {
@@ -214,7 +215,7 @@ HAL_RET_T HAL_BB_SetItQamProxy(ENUM_BB_QAM e_qam)
     st_cmd.u8_configItem   = MCS_MODULATION_SELECT;
     st_cmd.u32_configValue = (uint32_t)e_qam;
 
-	u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
     if( u8_ret )
     {
         return HAL_OK;
@@ -297,7 +298,7 @@ HAL_RET_T HAL_BB_SetEncoderBrcModeProxy(ENUM_RUN_MODE e_mode)
     st_cmd.u8_configItem   = ENCODER_DYNAMIC_BIT_RATE_MODE;
     st_cmd.u32_configValue = (uint32_t)e_mode;
 
-	u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
     if( u8_ret )
     {
         return HAL_OK;
@@ -541,107 +542,10 @@ HAL_RET_T HAL_BB_SetItOnlyFreqProxy(uint8_t mode)
     cmd.u8_configItem   = MICS_IT_ONLY_MODE;
     cmd.u32_configValue = mode;
 
-	return SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&cmd);
+    return SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&cmd);
 }
 
 
-/** 
- * @brief   write RF 8003s register by spi
- * @param   u8_addr:                        rf 8003s register register address 
- * @param   u8_data:                        the data value to write to register 
- * @retval  HAL_OK,                         means write succesfully
- * @retval  HAL_BB_ERR_SPI_WRITE            spi write fail
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_RF8003S_WriteReg(uint16_t u16_addr, uint8_t u8_data)
-{ 
-    if (0 == RF_SPI_WriteReg(u16_addr, u8_data))
-    {
-        return HAL_OK;
-    }
-    else
-    {
-        return HAL_BB_ERR_SPI_WRITE;
-    }
-}
-
-/** 
- * @brief   read RF 8003s register by spi
- * @param   u8_addr:                        rf 8003s register register address 
- * @param   pu8_regValue:                   pointer to the address to store rf 8003 register value
- * @retval  HAL_OK,                         means read succesfully
- * @retval  HAL_BB_ERR_SPI_READ             spi read fail
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_RF8003S_ReadByte(uint16_t u16_addr, uint8_t *pu8_regValue)
-{
-    if ( 0 == RF_SPI_ReadReg(u16_addr, pu8_regValue))
-    {
-        return HAL_OK;
-    }
-    else
-    {
-        return HAL_BB_ERR_SPI_READ;
-    }
-}
-
-
-/** 
- * @brief   write baseband register by spi
- * @param   e_page                          register in the page
- * @param   u8_addr:                        rf 8003s register register address 
- * @param   u8_data:                        the data value to write to register 
- * @retval  HAL_OK,                         means write succesfully
- * @retval  HAL_BB_ERR_SPI_WRITE            spi write fail
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_BB_WriteByte(ENUM_REG_PAGES e_page, uint8_t u8_addr, uint8_t u8_data)
-{
-    if (0 == BB_SPI_WriteByte(e_page, u8_addr, u8_data))
-    {
-        return HAL_OK;
-    }
-    else
-    {
-        return HAL_BB_ERR_SPI_READ;
-    }
-}
-
-
-/** 
- * @brief   write current page baseband register by spi
- * @param   u8_addr:                        rf 8003s register register address 
- * @param   u8_data:                        the data value to write to register 
- * @retval  HAL_OK,                         means write succesfully
- * @retval  HAL_BB_ERR_SPI_WRITE            spi write fail
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_BB_CurPageWriteByte(uint8_t u8_addr, uint8_t u8_data)
-{
-    if (0 == BB_SPI_curPageWriteByte(u8_addr, u8_data))
-    {
-        return HAL_OK;
-    }
-    else
-    {
-        return HAL_BB_ERR_SPI_READ;
-    }
-}
-
-/** 
- * @brief   read current page baseband register by spi
- * @param   u8_addr:                        rf 8003s register register address 
- * @param   pu8_regValue:                   pointer to the address to store rf 8003 register value 
- * @retval  HAL_OK,                         means write succesfully
- * @retval  HAL_BB_ERR_SPI_WRITE            spi write fail
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_BB_CurPageReadByte(uint8_t u8_addr, uint8_t *pu8_regValue)
-{
-    *pu8_regValue = BB_SPI_curPageReadByte(u8_addr);
-    
-    return HAL_OK;
-}
 
 
 /** 
@@ -788,15 +692,111 @@ HAL_RET_T HAL_BB_SoftResetProxy(void)
     }
 }
 
-/** 
- * @brief   
- * @param   
- * @retval            
- */
-HAL_RET_T HAL_BB_SPI_DisableEnable(uint8_t u8_flag)
+
+/*
+ * @brief       Force baseband to disconnect from one device in searching mode
+ * @retval      HAL_OK,                 means command is sent sucessfully. 
+ * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
+ * @note        The function can only be called by cpu0,1   
+*/
+HAL_RET_T HAL_BB_GroundDisConnectSkyByRcId(uint8_t * pu8_rcid)
 {
-    BB_SPI_DisableEnable(u8_flag);
-    
-    return HAL_OK;
+    uint8_t u8_ret;
+    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
+
+    st_cmd.u8_configClass   = WIRELESS_AUTO_SEARCH_ID;
+    st_cmd.u8_configItem    = RCID_DISCONNECT;
+    st_cmd.u32_configValue  = (pu8_rcid[0] << 24) | (pu8_rcid[1] << 16) | (pu8_rcid[2] << 8) | pu8_rcid[3];
+    st_cmd.u32_configValue1 = pu8_rcid[4];
+
+    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    if( u8_ret )
+    {
+        return HAL_OK;
+    }
+    else
+    {
+        return HAL_BB_ERR_EVENT_NOTIFY;
+    }
 }
 
+
+HAL_RET_T HAL_BB_GroundConnectToSkyByRcId(uint8_t *pu8_rcId)
+{
+    uint8_t u8_ret;
+    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
+
+    st_cmd.u8_configClass   = WIRELESS_AUTO_SEARCH_ID;
+    st_cmd.u8_configItem    = RCID_CONNECT_ID;
+    st_cmd.u32_configValue  = (pu8_rcId[0] << 24) | (pu8_rcId[1] << 16) | (pu8_rcId[2] << 8) | pu8_rcId[3];
+    st_cmd.u32_configValue1 = pu8_rcId[4];
+
+    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    if( u8_ret )
+    {
+        return HAL_OK;
+    }
+    else
+    {
+        return HAL_BB_ERR_EVENT_NOTIFY;
+    }
+}
+
+
+/*
+ *  set device enter into searching rc id mode
+*/
+HAL_RET_T HAL_BB_SearchRcId(uint8_t flag_skyFollowGroundInSearching)
+{
+    uint8_t u8_ret;
+    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
+
+    st_cmd.u8_configClass   = WIRELESS_AUTO_SEARCH_ID;
+    st_cmd.u8_configItem    = RCID_AUTO_SEARCH;
+    st_cmd.u32_configValue  = flag_skyFollowGroundInSearching;
+
+    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    if( u8_ret )
+    {
+        return HAL_OK;
+    }
+    else
+    {
+        return HAL_BB_ERR_EVENT_NOTIFY;
+    }
+}
+
+/*
+ *  set rc id, and save to flash
+*/
+HAL_RET_T HAL_BB_SaveRcId(uint8_t *pu8_rcId)
+{
+    uint8_t u8_ret;
+    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
+
+    st_cmd.u8_configClass   = WIRELESS_AUTO_SEARCH_ID;
+    st_cmd.u8_configItem    = RCID_SAVE_RCID;
+    st_cmd.u32_configValue  = (pu8_rcId[0] << 24) | (pu8_rcId[1] << 16) | (pu8_rcId[2] << 8) | pu8_rcId[3];
+    st_cmd.u32_configValue1 = pu8_rcId[4];
+
+    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    if( u8_ret )
+    {
+        return HAL_OK;
+    }
+    else
+    {
+        return HAL_BB_ERR_EVENT_NOTIFY;
+    }
+}
+
+
+HAL_RET_T HAL_BB_GetRcId(uint8_t *pu8_rcId, uint8_t bufsize)
+{
+    if (0 == BB_GetRcId(pu8_rcId, bufsize))
+    {
+        return HAL_OK;
+    }
+
+    return HAL_BB_ERR_MEM_NOT_ENOUGH;
+}

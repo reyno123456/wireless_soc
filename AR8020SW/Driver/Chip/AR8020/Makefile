@@ -79,6 +79,7 @@ install:
 	@cp -f I2C/Inc/i2c.h $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f BB/Inc/bb_ctrl.h $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f BB/Inc/bb_types.h $(OUTPUT_HEADER_STAGING_DIR)
+	@cp -f BB/Inc/bb_customerctx.h $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f BB/Inc/bb_spi_com.h $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f SysCtl/Inc/timer.h $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f BB/Src/$(CFG_BIN) $(OUTPUT_BIN_STAGING_DIR)/

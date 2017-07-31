@@ -15,9 +15,6 @@ History:
 #include "bb_ctrl_internal.h"
 
 
-
-static uint8_t regout;
-
 #define  RF9363_RF_CLOCKRATE    (9)    //1MHz clockrate
 
 typedef struct _STRU_RF9363_REG
@@ -146,13 +143,9 @@ void config_9363_regs(STRU_RF9363_REG *RF1_9363_regs, uint16_t idx)
             }
         }
         else if(flag == 0xe0)
-        {/*
-            addr = (RF1_9363_regs->addr_h<<8)| (RF1_9363_regs->addr_l);
+        {
+            uint8_t regout;
             RF_SPI_ReadReg(addr, &regout);
-            if( addr == 0xa3)
-            {
-                dlog_warning("Read 0x%x 0x%x", addr, regout);            
-            }*/
         }
         else
         {
@@ -284,24 +277,24 @@ void RF_CaliProcess(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
 }
 
 
-void BB_grd_notify_it_skip_freq_1(void)
-{
-    return;
-}
-
-void BB_grd_notify_it_skip_freq(ENUM_RF_BAND band, uint8_t u8_ch)
+void BB_grd_NotifyItFreqByCh(ENUM_RF_BAND band, uint8_t u8_ch)
 {
 
 }
 
-uint8_t BB_write_ItRegs(uint32_t u32_it)
+
+void BB_grd_NotifyItFreqByValue(uint32_t u32_itFrq)
 {
-    return 0;
 }
 
 
+void BB_write_ItRegs(uint32_t u32_it)
+{
 
-uint8_t BB_set_ITfrq(ENUM_RF_BAND band, uint8_t ch)
+}
+
+
+uint8_t BB_set_ItFrqByCh(ENUM_RF_BAND band, uint8_t ch)
 {
     return 0;
 }
@@ -318,7 +311,7 @@ uint8_t BB_set_Rcfrq(ENUM_RF_BAND band, uint8_t ch)
 }
 
 
-uint8_t BB_set_sweepfrq(ENUM_RF_BAND band, ENUM_CH_BW e_bw, uint8_t ch)
+uint8_t BB_set_SweepFrq(ENUM_RF_BAND band, ENUM_CH_BW e_bw, uint8_t ch)
 {
     return 0;
 }

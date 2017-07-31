@@ -4,11 +4,12 @@
 #include "debuglog.h"
 #include "hal_bb.h"
 #include "hal_sram.h"
-#include "bb_types.h"
+#include "bb_spi.h"
 #include "cmsis_os.h"
 #include "md5.h"
 #include "nor_flash.h"
 #include "hal.h"
+#include "rf_if.h"
 
 STRU_WIRELESS_INFO_DISPLAY             *g_pstWirelessInfoDisplay;        //OSD Info in SRAM
 STRU_WIRELESS_INFO_DISPLAY              g_stWirelessInfoSend;            //send OSD to PAD or PC
@@ -326,7 +327,7 @@ uint8_t WIRELESS_INTERFACE_ENTER_TEST_MODE_Handler(void *param, uint8_t id)
 
     if (WIRELESS_IsInDebugMode() == 1)
     {
-        HAL_BB_WriteByte(PAGE2, 0x02, 0x06);
+        BB_SPI_WriteByte(PAGE2, 0x02, 0x06);
     }
     else
     {
@@ -432,7 +433,7 @@ uint8_t WIRELESS_INTERFACE_WRITE_BB_REG_Handler(void *param, uint8_t id)
 
     if (WIRELESS_IsInDebugMode() == 1)
     {
-        if (HAL_BB_CurPageWriteByte(recvMessage->paramData[0], recvMessage->paramData[1]))
+        if (BB_SPI_curPageWriteByte(recvMessage->paramData[0], recvMessage->paramData[1]))
         {
             dlog_error("write fail!\n");
 
@@ -462,7 +463,7 @@ uint8_t WIRELESS_INTERFACE_READ_BB_REG_Handler(void *param, uint8_t id)
         recvMessage->messageId = 0x0f;
         recvMessage->paramLen = 2;
         recvMessage->paramData[0] = recvMessage->paramData[0];
-        HAL_BB_CurPageReadByte(recvMessage->paramData[0], &recvMessage->paramData[1]);
+        recvMessage->paramData[1] = BB_SPI_curPageReadByte(recvMessage->paramData[0]);
 
         Wireless_InsertMsgIntoReplyBuff(recvMessage, id);
     }
@@ -617,7 +618,7 @@ uint8_t WIRELESS_INTERFACE_SELECT_VIDEO_FREQ_CHANNEL_Handler(void *param, uint8_
     {
         for (u8_index = 0; u8_index < recvMessage->paramData[2]; ++u8_index)
         {
-            HAL_BB_WriteByte(recvMessage->paramData[0],recvMessage->paramData[1],recvMessage->paramData[u8_index+3]);
+            BB_SPI_WriteByte(recvMessage->paramData[0],recvMessage->paramData[1],recvMessage->paramData[u8_index+3]);
             recvMessage->paramData[1] += 1;
         }
     }
@@ -653,7 +654,7 @@ uint8_t WIRELESS_INTERFACE_SET_RC_FREQ_CHANNEL_Handler(void *param, uint8_t id)
     {
         for (u8_index = 0; u8_index < recvMessage->paramData[2]; ++u8_index)
         {
-            HAL_BB_WriteByte(recvMessage->paramData[0],recvMessage->paramData[1],recvMessage->paramData[u8_index+3]);
+            BB_SPI_WriteByte(recvMessage->paramData[0],recvMessage->paramData[1],recvMessage->paramData[u8_index+3]);
             recvMessage->paramData[1] += 1;
         }
     }
@@ -822,7 +823,7 @@ uint8_t WIRELESS_INTERFACE_SWITCH_DEBUG_MODE_Handler(void *param, uint8_t id)
         /*exit debug mode */
         if (eventFlag)
         {
-            HAL_BB_SPI_DisableEnable(0); //
+            BB_SPI_DisableEnable(0); //
             HAL_BB_SetBoardDebugModeProxy(1);  
             eventFlag = 0;
         }
@@ -850,7 +851,7 @@ uint8_t WIRELESS_INTERFACE_WRITE_RF9363_Handler(void *param, uint8_t id)
 
     if (WIRELESS_IsInDebugMode() == 1)
     {
-        if (HAL_RF8003S_WriteReg(u16_addr, recvMessage->paramData[2]))
+        if (RF_SPI_WriteReg(u16_addr, recvMessage->paramData[2]))
         {
             dlog_error("write fail!\n");
             return 1;
@@ -862,11 +863,10 @@ uint8_t WIRELESS_INTERFACE_WRITE_RF_REG_Handler(void *param, uint8_t id)
     STRU_WIRELESS_PARAM_CONFIG_MESSAGE     *recvMessage;
     recvMessage = (STRU_WIRELESS_PARAM_CONFIG_MESSAGE *)param;
 
-    dlog_info("ID = %x\n",recvMessage->messageId);
 
     if (WIRELESS_IsInDebugMode() == 1)
     {
-        if (HAL_RF8003S_WriteReg(recvMessage->paramData[0], recvMessage->paramData[1]))
+        if (RF_SPI_WriteReg(recvMessage->paramData[0], recvMessage->paramData[1]))
         {
             dlog_error("write fail!\n");
 
@@ -916,7 +916,7 @@ uint8_t WIRELESS_INTERFACE_READ_RF9363_Handler(void *param, uint8_t id)
         recvMessage->paramData[0] = recvMessage->paramData[0];
         recvMessage->paramData[1] = recvMessage->paramData[1];
         
-        HAL_RF8003S_ReadByte(addr, &recvMessage->paramData[2]);
+        RF_SPI_ReadReg(addr, &recvMessage->paramData[2]);
         Wireless_InsertMsgIntoReplyBuff(recvMessage, id);
     }
 }
@@ -932,7 +932,7 @@ uint8_t WIRELESS_INTERFACE_READ_RF_REG_Handler(void *param, uint8_t id)
         recvMessage->messageId = 0x3A;
         recvMessage->paramLen = 2;
         recvMessage->paramData[0] = recvMessage->paramData[0];
-        HAL_RF8003S_ReadByte(recvMessage->paramData[0],&recvMessage->paramData[1]);
+        RF_SPI_ReadReg(recvMessage->paramData[0],&recvMessage->paramData[1]);
 
         Wireless_InsertMsgIntoReplyBuff(recvMessage, id);
     }
@@ -1509,7 +1509,7 @@ void Wireless_MessageProcess(void)
         debugMode = g_pstWirelessInfoDisplay->in_debug;
         if (1 == debugMode)
         {
-            HAL_BB_SPI_DisableEnable(debugMode);
+            BB_SPI_DisableEnable(debugMode);
         }
     }
 

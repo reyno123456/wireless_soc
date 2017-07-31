@@ -6,6 +6,8 @@
 #include "sys_event.h"
 #include "hal_sys_ctl.h"
 #include "hal.h"
+#include "test_bb.h"
+
 
 void CONSOLE_Init(void)
 {
@@ -36,8 +38,11 @@ int main(void)
     st_h264Cfg.e_view1Br = HAL_H264_BITRATE_500K;
     st_h264Cfg.u8_view1BrEn = 1;
     HAL_H264_Init(st_h264Cfg);
+
+    BB_ledGpioInit();
+    SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_skyEventHandler);
     
-    HAL_BB_InitSky( );
+    HAL_BB_InitSky(NULL);
 
     for( ;; )
     {

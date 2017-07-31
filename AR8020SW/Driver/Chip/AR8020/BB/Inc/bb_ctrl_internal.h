@@ -20,6 +20,7 @@
 #define RC_FRQ_MASK_THRESHOLD       (5)
 #define RF_FRQ_MAX_NUM              ((MAX_2G_RC_FRQ_SIZE>=MAX_5G_RC_FRQ_SIZE)?MAX_2G_RC_FRQ_SIZE:MAX_5G_RC_FRQ_SIZE)
 
+#define RC_ID_SIZE                  (5)
 
 #define OTHER_BAND(band)    ( (band == RF_2G)?  RF_5G : RF_2G )
 #define BAND_CHANGE_DELAY   (40)
@@ -31,9 +32,9 @@ typedef enum
     FEC_LOCK,
     DELAY_14MS,
     CHECK_FEC_LOCK,
-    ID_MATCH_LOCK,
+    LOCK,
     SEARCH_ID,
-    CHECK_ID_MATCH
+    CHECK_LOCK
 }DEVICE_STATE;
 
 
@@ -41,8 +42,6 @@ typedef enum
 #define TRUE    (1)
 
 
-#define  BLUE_LED_GPIO      (67)
-#define  RED_LED_GPIO       (71)
 
 
 typedef struct _STRU_FRQ_CHANNEL           //  Remote Controller Freq Channnel
@@ -68,8 +67,10 @@ typedef enum
 #define  RC_MASK_CODE           (1)
 #define  SKY_AGC_STATUS         (2)
 #define  RF_BAND_SWITCH         (3)
+#define  RC_ID_SYNC             (4)
 
-typedef struct _SysEvent_SkyStatus
+
+typedef struct _STRU_skyStatusMsg
 {
     uint8_t pid;
     union
@@ -86,9 +87,15 @@ typedef struct _SysEvent_SkyStatus
             uint8_t u8_skyagc2;
         }skyAgc;
 
+        struct
+        {
+            uint8_t u8_skyRcIdArray[RC_ID_SIZE];
+            uint8_t u8_grdRcIdArray[RC_ID_SIZE];
+        }rcId;
+
         uint64_t u64_rcMask;
     } par;
-} STRU_SysEventSkyStatus;
+} STRU_skyStatusMsg;
 
 typedef struct
 {
@@ -121,8 +128,8 @@ typedef struct
     uint8_t             fec_unlock_cnt;
     uint16_t            rc_unlock_cnt;
 
-    ENUM_RUN_MODE       it_skip_freq_mode;
-    ENUM_RUN_MODE       rc_skip_freq_mode;
+    ENUM_RUN_MODE       itHopMode;
+    ENUM_RUN_MODE       rcHopMode;
     ENUM_RUN_MODE       qam_skip_mode;
     ENUM_RUN_MODE       brc_mode;
     ENUM_TRX_CTRL       trx_ctrl;
@@ -130,7 +137,7 @@ typedef struct
 
     ENUM_RF_BAND        e_bandsupport;          //2.4G, 5.8G
     ENUM_RF_BAND        e_curBand;              //current band: 2.4G, 5.8G
-    ENUM_CH_BW          CH_bandwidth;    //10M, 20M
+    ENUM_CH_BW          e_bandwidth;    //10M, 20M
     ENUM_BB_QAM         qam_mode;
     ENUM_BB_QAM         rc_qam_mode;
     ENUM_BB_LDPC        ldpc;
@@ -138,7 +145,7 @@ typedef struct
     
     uint8_t             qam_ldpc;
     uint8_t             enable_plot;
-    uint8_t             id[5];
+    uint8_t             rcid[RC_ID_SIZE];
     uint8_t             need_write_flash;
     uint8_t             pwr;
 
@@ -163,9 +170,6 @@ typedef struct
     uint8_t             ldpc_error_move_cnt;
     DEVICE_STATE        dev_state;
 
-    uint8_t             u8_idSrcSel; /* 0:id comes from flash,this is default value.
-                                        1:id comes from automatic search*/
-    uint8_t             u8_flashId[6]; // 5B(rc_id) + 1B(check)
     uint8_t             u8_debugMode;
     uint8_t             u8_flagdebugRequest;
     STRU_FRQ_CHANNEL    stru_rcRegs;
@@ -179,13 +183,17 @@ typedef struct
     uint8_t             flag_signalBlock;
     uint8_t             u8_agc[4];
     STRU_BandChange     stru_bandChange;
+    STRU_CUSTOMER_CFG *pcustomer_cfg;
+    STRU_BoardCfg         *pstru_boardCfg;
+
+    uint8_t              sky_rc_channel;
 }CONTEXT;
 
 
 typedef struct param
 {
-    ENUM_RUN_MODE   it_skip_freq_mode;
-    ENUM_RUN_MODE   rc_skip_freq_mode;
+    ENUM_RUN_MODE   itHopMode;
+    ENUM_RUN_MODE   rcHopMode;
     ENUM_RUN_MODE   qam_skip_mode;
     uint16_t        qam_change_threshold[QAM_CHANGE_THRESHOLD_COUNT][2];
 }PARAM;
@@ -213,8 +221,6 @@ typedef struct
 } STRU_CALC_DIST_DATA;
 
 
-
-
 typedef struct
 {
     uint64_t    u64_mask; // bit0 <-> freq0  ... bit63 <-> freq63
@@ -225,9 +231,26 @@ typedef struct
 } STRU_RC_FRQ_MASK;
 
 
+typedef enum _ENUM_BB_SEARCH_MODE
+{
+    GROUND_REQUEST_LOCK         = 0,
+    GROUND_IN_RCID_SEARCH       = 1,
+}ENUM_BB_SEARCH_MODE;
+
+typedef union
+{
+    struct
+    {
+        ENUM_BB_SEARCH_MODE u8_groundSearchMode : 4;        //
+        uint8_t u8_itLock                       : 1;        //bit[4]: Lock status
+        uint8_t u8_flagGroundRequestDisconnect  : 1;        //1: rc id means: request sky to disconnect, sky id is specified by 0x83 ~ 0x87 register
+    }stru_rcIdStatus;
+    uint8_t u8_grdRcIdSearchStatus;
+}UNION_grdRcIdSearchStatus;
+
+extern UNION_grdRcIdSearchStatus u_grdRcIdSearchStatus;
 extern volatile CONTEXT context;
 extern volatile DEVICE_STATE dev_state;
-
 
 
 #define MAX(a,b) (((a) > (b)) ?  (a) :  (b) )
@@ -237,25 +260,15 @@ void BB_uart10_spi_sel(uint32_t sel_dat);
 int BB_softReset(ENUM_BB_MODE en_mode);
 
 
-
-
 uint8_t BB_ReadReg(ENUM_REG_PAGES page, uint8_t addr);
 
 uint8_t BB_WriteReg(ENUM_REG_PAGES page, uint8_t addr, uint8_t data);
 
 int BB_WriteRegMask(ENUM_REG_PAGES page, uint8_t addr, uint8_t data, uint8_t mask);
 
-
-uint8_t BB_map_modulation_to_br(uint8_t mod);
-
-ENUM_BB_LDPC BB_get_LDPC(void);
-
-ENUM_BB_QAM BB_get_QAM(void);
-
 void BB_set_RF_Band(ENUM_BB_MODE sky_ground, ENUM_RF_BAND rf_band);
 
 void BB_set_RF_bandwitdh(ENUM_BB_MODE sky_ground, ENUM_CH_BW rf_bw);
-
 
 int BB_GetCmd(STRU_WIRELESS_CONFIG_CHANGE *pconfig);
 
@@ -269,16 +282,16 @@ void BB_set_QAM(ENUM_BB_QAM mod);
 
 void BB_set_LDPC(ENUM_BB_LDPC ldpc);
 
-uint8_t BB_write_ItRegs(uint32_t u32_it);
-
-void sky_set_McsByIndex(ENUM_CH_BW bw, uint8_t idx);
+void BB_write_ItRegs(uint32_t u32_it);
 
 int BB_WriteRegMask(ENUM_REG_PAGES page, uint8_t addr, uint8_t data, uint8_t mask);
 
-PARAM * BB_get_sys_param(void);
-
-int grd_cal_frqOffset( uint8_t ch, ENUM_RF_BAND e_band );
-
 int grd_GetDistAverage(int *pDist);
+
+void BB_grd_NotifyItFreqByValue(uint32_t u32_itFrq);
+
+int32_t cal_chk_sum(uint8_t *pu8_data, uint32_t u32_len, uint8_t *u8_check);
+
+void BB_saveRcid(uint8_t *u8_idArray);
 
 #endif
