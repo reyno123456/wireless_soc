@@ -7,6 +7,7 @@
 *.map
 *.mif
 *.depend
+*.mk
 .nfs*
-Output/
+AR8020SW/Output/
 .APPLICATION_SCENARIO
