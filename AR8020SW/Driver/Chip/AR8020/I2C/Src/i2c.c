@@ -320,8 +320,6 @@ void I2C_Master_IntrSrvc(uint32_t u32_vectorNum)
     uint8_t tmpLen;
     static uint32_t u32_cnt = 0;
 
-    static uint8_t* tmpBuf;
-
     if (VIDEO_I2C_INTR_VIDEO_VECTOR_NUM == u32_vectorNum)
     {
         u8_i2cCh = 5;

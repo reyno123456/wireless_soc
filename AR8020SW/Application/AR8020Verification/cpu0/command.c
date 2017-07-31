@@ -750,23 +750,6 @@ void command_malloc(char *size)
     dlog_info("RINTSTS = 0x%08x", read_reg32((uint32_t *)(0x42000000 + 0x44)));
     dlog_info("cdetect = 0x%08x", read_reg32((uint32_t *)(0x42000000 + 0x50)));
 
-    int i;
-	int *pn=(int*)malloc(5*sizeof(int));
-	dlog_info("malloc %p",pn);
-	for(i=0;i<5;i++)
-    	pn[i]=i;
-
-    pn=(int*)realloc(pn,10*sizeof(int));
-	dlog_info("realloc %p",pn);
-	
-    for(i=5;i<10;i++)
-	    pn[i]=i;
-	
-    for(i=0;i<10;i++)
-	dlog_info("%d",pn[i]);
-	
-    free(pn);
-
 	return;
 }
 

@@ -42,6 +42,8 @@ INCDIRS :=  -IInc \
             -I$(TOP_DIR)/Driver/Chip/AR8020/SysCtl/Inc \
             -I$(TOP_DIR)/Configure/Include \
             -I$(TOP_DIR)/Driver/Chip/AR8020/UART/Inc \
+            -I$(TOP_DIR)/Driver/Chip/AR8020/BB/Inc \
+            -I$(TOP_DIR)/Driver/Chip/AR8020/SPI/Inc \
             -I$(TOP_DIR)/Driver/HAL/Inc \
             -I$(OUTPUT_HEADER_STAGING_DIR)
 

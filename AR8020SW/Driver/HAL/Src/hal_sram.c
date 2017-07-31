@@ -149,6 +149,38 @@ uint8_t *HAL_SRAM_GetVideoBypassChannelBuff(ENUM_HAL_SRAM_VIDEO_CHANNEL e_channe
 }
 
 
+void HAL_SRAM_TransferBypassVideoStream(ENUM_HAL_SRAM_VIDEO_CHANNEL e_channel, void *buff, uint32_t length)
+{
+    static uint8_t     *bypass_address_raw[HAL_SRAM_VIDEO_CHANNEL_NUM] = {
+                                (uint8_t *)VIDEO_BYPASS_CHANNEL_0_DEST_ADDR,
+                                (uint8_t *)VIDEO_BYPASS_CHANNEL_1_DEST_ADDR };
+    static uint8_t     *bypass_address[HAL_SRAM_VIDEO_CHANNEL_NUM] = {
+                                (uint8_t *)VIDEO_BYPASS_CHANNEL_0_DEST_ADDR,
+                                (uint8_t *)VIDEO_BYPASS_CHANNEL_1_DEST_ADDR };
+
+    if (e_channel < HAL_SRAM_VIDEO_CHANNEL_NUM)
+    {
+        memcpy((void *)bypass_address[e_channel],
+               (void *)buff,
+               length);
+
+        bypass_address[e_channel] += length;
+
+        /* prevent exceed the channel area */
+        if (bypass_address[e_channel] >= (bypass_address_raw[e_channel] + 0x600000))
+        {
+            bypass_address[e_channel] = bypass_address_raw[e_channel];
+        }
+    }
+    else
+    {
+        dlog_error("invalid channel number");
+    }
+
+    return;
+}
+
+
 #ifdef ARCAST
 uint32_t HAL_SRAM_GetMp3BufferLength(void)
 {

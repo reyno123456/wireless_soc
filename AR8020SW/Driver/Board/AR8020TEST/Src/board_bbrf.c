@@ -71,5 +71,7 @@ STRU_BoardCfg stru_boardCfg =
 
     .u8_bbStartMcs10M               = 0,
     .u8_bbStartMcs20M               = 0,
+
+    .name                        = "AR8020TEST"
 };
 

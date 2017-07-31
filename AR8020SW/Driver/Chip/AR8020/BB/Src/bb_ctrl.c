@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include "debuglog.h"
 #include "bb_spi.h"
@@ -24,8 +25,6 @@
 volatile CONTEXT context;
 static volatile ENUM_REG_PAGES en_curPage;
 
-
-
 /*
   * cali_reg: Store the calibration registers value
  */
@@ -33,17 +32,17 @@ static volatile ENUM_REG_PAGES en_curPage;
 static uint8_t *BB_sky_regs = NULL;
 static uint8_t *BB_grd_regs = NULL;
 
-static void BB_GetNv(void);
 
 static int BB_before_RF_cali(void);
 
+static void BB_GetRcIdFromFlash(uint8_t *pu8_rcid);
 static void BB_after_RF_cali(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg);
 
 static void BB_RF_start_cali( void );
 
 static void BB_regs_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg)
 {
-    uint32_t page_cnt=0;    
+    uint32_t page_cnt=0;
     uint8_t *regs = (en_mode == BB_SKY_MODE) ? BB_sky_regs : BB_grd_regs;
 
     //update the board registers
@@ -118,60 +117,87 @@ int BB_softReset(ENUM_BB_MODE en_mode)
         }
     }
 
+    if (count >= 5)
+    {
+        dlog_error("Reset Error");
+    }
     en_curPage = PAGE2;
     return 0;
 }
 
 
-void BB_use_param_setting(PARAM *user_setting)
+int32_t cal_chk_sum(uint8_t *pu8_data, uint32_t u32_len, uint8_t *u8_check)
 {
-    memcpy( (uint8_t *)((void *)(context.qam_threshold_range)),
-            (uint8_t *)((void *)(user_setting->qam_change_threshold)),
-            sizeof(context.qam_threshold_range));
+    uint8_t u8_i;
+    uint8_t u8_chk = 0;
 
-    context.it_skip_freq_mode = user_setting->it_skip_freq_mode;
-    context.rc_skip_freq_mode = user_setting->rc_skip_freq_mode;
-    context.qam_skip_mode = user_setting->qam_skip_mode;
+    if (NULL == pu8_data)
+    {
+        return -1;
+    }
 
+    for (u8_i = 0; u8_i < u32_len; u8_i++)
+    {
+        u8_chk += pu8_data[u8_i];
+    }
+    
+    *u8_check = u8_chk;
 
-    context.CH_bandwidth      = BW_10M;
-
-    context.e_rfbandMode      = AUTO;
-    context.trx_ctrl          = IT_RC_MODE;
+    return 0;
 }
 
-
-void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
+STRU_CUSTOMER_CFG stru_defualtCfg = 
 {
-    PARAM *user_setting = BB_get_sys_param();
-    BB_use_param_setting(user_setting);
-    context.en_bbmode = en_mode;
+    .enum_chBandWidth = BW_10M,
+    .flag_useCfgId    = 0,
+    .pstru_boardCfg   = NULL,
+};
 
+void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg, STRU_CUSTOMER_CFG *pstru_customerCfg)
+{
     STRU_SettingConfigure* cfg_addr = NULL;
     GET_CONFIGURE_FROM_FLASH(cfg_addr);
 
+    context.en_bbmode     = en_mode;
+    context.e_bandsupport = pstru_boardCfg->e_bandsupport;
+
+    if (NULL==pstru_customerCfg)
+    {
+        pstru_customerCfg = &stru_defualtCfg;
+    }
     BB_sky_regs   = &(cfg_addr->bb_sky_configure[0][0]);
     BB_grd_regs   = &(cfg_addr->bb_grd_configure[0][0]);
 
-    context.e_bandsupport = boardCfg->e_bandsupport;
-    context.CH_bandwidth  = BW_10M;  //default to 10M
+    context.pcustomer_cfg  = pstru_customerCfg;
+    context.pstru_boardCfg = pstru_boardCfg;
 
-    BB_GetNv();
+    context.e_bandwidth = pstru_customerCfg->enum_chBandWidth;
+
+    //get rc id from  1) user cfg
+    //                2) saved rc id
+    if( 1 == pstru_customerCfg->flag_useCfgId )
+    {
+        memcpy( (void *)context.rcid, (void *)(pstru_customerCfg->rcid), RC_ID_SIZE);
+    }
+    else
+    {
+        BB_GetRcIdFromFlash((uint8_t *)context.rcid);
+    }
 
     BB_uart10_spi_sel(0x00000003);
     BB_SPI_init();
 
-    context.u8_bbStartMcs = ((context.CH_bandwidth == BW_20M) ? (boardCfg->u8_bbStartMcs20M) : (boardCfg->u8_bbStartMcs10M));
+    context.u8_bbStartMcs = ((context.e_bandwidth == BW_20M) ? (pstru_boardCfg->u8_bbStartMcs20M) : (pstru_boardCfg->u8_bbStartMcs10M));
 
-    BB_regs_init(en_mode, boardCfg);
-    RF_init(boardCfg, context.en_bbmode);
-    RF_CaliProcess(en_mode, boardCfg);
+    BB_regs_init(en_mode, pstru_boardCfg);
+    RF_init(pstru_boardCfg, context.en_bbmode);
+    RF_CaliProcess(en_mode, pstru_boardCfg);
 
-    BB_after_RF_cali(en_mode, boardCfg);
+    BB_after_RF_cali(en_mode, pstru_boardCfg);
 
     BB_softReset(en_mode);
     //choose the start band
-    if ( context.e_bandsupport == RF_2G_5G || context.e_bandsupport == RF_2G )
+    if (context.e_bandsupport == RF_2G_5G || context.e_bandsupport == RF_2G)
     {
         context.e_curBand = RF_2G;
     }
@@ -184,11 +210,13 @@ void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
         dlog_warning("RF band: 600MHz");
         context.e_curBand = RF_600M;
     }
+
     BB_set_RF_Band(en_mode, context.e_curBand);
-    BB_set_RF_bandwitdh(en_mode, context.CH_bandwidth);
+    BB_set_RF_bandwitdh(en_mode, context.e_bandwidth);
     BB_softReset(en_mode);
 
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_USER_CFG_CHANGE, BB_HandleEventsCallback);
+    dlog_warning("use board cfg: %s %d %d", pstru_boardCfg->name, context.e_bandwidth, context.e_curBand);
 }
 
 
@@ -273,6 +301,27 @@ uint8_t BB_get_bitrateByMcs(ENUM_CH_BW bw, uint8_t u8_mcs)
 }
 
 
+
+void BB_saveRcid(uint8_t *u8_idArray)
+{
+    STRU_SysEvent_NvMsg st_nvMsg;
+
+    // src:cpu0 dst:cpu2
+    st_nvMsg.u8_nvSrc = INTER_CORE_CPU2_ID;
+    st_nvMsg.u8_nvDst = INTER_CORE_CPU0_ID;
+
+    // parament number
+    st_nvMsg.e_nvNum = NV_NUM_RCID;
+
+    // parament set
+    st_nvMsg.u8_nvPar[0] = 1;
+    memcpy(&(st_nvMsg.u8_nvPar[1]), u8_idArray, 5);
+    cal_chk_sum(&(st_nvMsg.u8_nvPar[1]), 5, &(st_nvMsg.u8_nvPar[6]));
+
+    // send msg
+    SYS_EVENT_Notify(SYS_EVENT_ID_NV_MSG, (void *)(&(st_nvMsg)));
+}
+
 void BB_set_QAM(ENUM_BB_QAM mod)
 {
     uint8_t data = BB_ReadReg(PAGE2, TX_2);
@@ -337,7 +386,7 @@ void BB_set_RF_bandwitdh(ENUM_BB_MODE sky_ground, ENUM_CH_BW rf_bw)
     if (sky_ground == BB_SKY_MODE)
     {
         BB_WriteRegMask(PAGE2, TX_2, (rf_bw << 3), 0x38); /*bit[5:3]*/
-        if (BW_20M == (context.CH_bandwidth))
+        if (BW_20M == (context.e_bandwidth))
         {
             BB_WriteRegMask(PAGE2, 0x05, 0x80, 0xC0);
         }
@@ -427,7 +476,7 @@ int BB_InsertCmd(STRU_WIRELESS_CONFIG_CHANGE *p)
     uint8_t found = 0;
     STRU_WIRELESS_CONFIG_CHANGE *pcmd = (STRU_WIRELESS_CONFIG_CHANGE *)p;
 
-    dlog_info("Insert Message: %d %d %d\r\n", pcmd->u8_configClass, pcmd->u8_configItem, pcmd->u32_configValue);
+    //dlog_info("Insert Message: %d %d %d\r\n", pcmd->u8_configClass, pcmd->u8_configItem, pcmd->u32_configValue);
     for(i = 0; i < sizeof(grd_cmds_poll)/sizeof(grd_cmds_poll[0]); i++)
     {
         if(grd_cmds_poll[i].avail == 0)
@@ -957,39 +1006,39 @@ int BB_SetEncoderBitrateCh2(uint8_t bitrate_Mbps)
     return BB_InsertCmd(&cmd);
 }
 
-static void BB_GetNv(void)
+static void BB_GetRcIdFromFlash(uint8_t *pu8_rcid)
 {
-    volatile uint32_t tmpCnt = 0;
-    volatile STRU_NV *pst_nv = (STRU_NV *)SRAM_NV_MEMORY_ST_ADDR;
+    uint8_t loop = 0;
+    uint8_t flag_found = 0;
+    STRU_NV *pst_nv = (STRU_NV *)SRAM_NV_MEMORY_ST_ADDR;
 
-    while(0x23178546 != (pst_nv->st_nvMng.u32_nvInitFlag) && (tmpCnt++) < 200)
+    while( loop++ < 500 && 0 == flag_found )
     {
-        SysTicks_DelayMS(50);
-        
-    }
-    if (200 <= tmpCnt)
-    {
-        dlog_error("get nv id error");
-    }
-    memcpy((uint8_t*)(context.u8_flashId), (void *)(pst_nv->st_nvDataUpd.u8_nvBbRcId), 5);
-    context.u8_flashId[5] = pst_nv->st_nvDataUpd.u8_nvChk;
-
-    if(TRUE != (pst_nv->st_nvMng.u8_nvVld)) // 
-    {
-        context.u8_idSrcSel = RC_ID_AUTO_SEARCH;
-    }
-    else // 
-    {
-        context.u8_idSrcSel = RC_ID_USE_FLASH_SAVE;
+        if ( 0x23178546 != pst_nv->st_nvMng.u32_nvInitFlag)
+        {
+            SysTicks_DelayMS(1);
+        }
+        else
+        {
+            flag_found = 1;
+        }
     }
 
-    dlog_info("nv:0x%x 0x%x 0x%x 0x%x 0x%x 0x%x",
-               pst_nv->st_nvDataUpd.u8_nvBbRcId[0],
-               pst_nv->st_nvDataUpd.u8_nvBbRcId[1],
-               pst_nv->st_nvDataUpd.u8_nvBbRcId[2],
-               pst_nv->st_nvDataUpd.u8_nvBbRcId[3],
-               pst_nv->st_nvDataUpd.u8_nvBbRcId[4], 
-               pst_nv->st_nvDataUpd.u8_nvChk);
+    if (flag_found)
+    {
+        uint8_t sum = 0;
+        if (0==cal_chk_sum(pst_nv->st_nvDataUpd.u8_nvBbRcId, RC_ID_SIZE, &sum))
+        {
+            if (sum==pst_nv->st_nvDataUpd.u8_nvChk)
+            {
+                memcpy( (void *)pu8_rcid, (void *)(pst_nv->st_nvDataUpd.u8_nvBbRcId), RC_ID_SIZE);
+            }
+            else
+            {
+                dlog_error("ERROR: Not Find rcid");
+            }
+        }
+    }
 }
 
 /** 
@@ -1010,8 +1059,8 @@ int BB_GetDevInfo(void)
     pst_devInfo->band = context.e_curBand;
     
     //pst_devInfo->bandWidth = context.CH_bandwidth;
-    pst_devInfo->itHopping = context.it_skip_freq_mode;
-    pst_devInfo->rcHopping = context.rc_skip_freq_mode;
+    pst_devInfo->itHopMode = context.itHopMode;
+    pst_devInfo->rcHopping = context.rcHopMode;
     pst_devInfo->adapterBitrate = context.qam_skip_mode;
     u8_data = BB_ReadReg(PAGE1, 0x8D);
     pst_devInfo->channel1_on = (u8_data >> 6) & 0x01;
@@ -1135,4 +1184,18 @@ int BB_ChkSpiFlag(void)
     }
 }
 
+int BB_GetRcId(uint8_t *pu8_rcId, uint8_t bufsize)
+{
+    if ( bufsize < RC_ID_SIZE)
+    {
+        return 1;
+    }
+    else
+    {
+        memcpy((void *)pu8_rcId, (void *)context.rcid, RC_ID_SIZE);
+    }
+
+    return 0;
+
+}
 

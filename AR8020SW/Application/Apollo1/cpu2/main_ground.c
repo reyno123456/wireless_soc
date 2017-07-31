@@ -6,6 +6,8 @@
 #include "hal_sys_ctl.h"
 #include "hal.h"
 #include "hal_bb.h"
+#include "test_bb.h"
+
 
 void console_init(uint32_t uart_num, uint32_t baut_rate)
 {
@@ -25,8 +27,11 @@ int main(void)
 
     console_init(2, 115200);
     dlog_info("main ground function start \n");
-    
-    HAL_BB_InitGround();
+
+    BB_ledGpioInit();
+    SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_grdEventHandler);
+
+    HAL_BB_InitGround(NULL);
 
     /* We should never get here as control is now taken by the scheduler */
     for( ;; )
@@ -36,4 +41,4 @@ int main(void)
     }
 } 
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+

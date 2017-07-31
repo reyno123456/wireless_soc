@@ -21,7 +21,7 @@ extern "C"
 #include <stdint.h>
 #include "bb_types.h"
 #include "bb_uart_com.h"
-
+#include "bb_customerctx.h"
 #include "hal_ret_type.h"
 
 
@@ -31,7 +31,7 @@ extern "C"
  * @return  HAL_OK:                         means init baseband 
  *          HAL_BB_ERR_INIT:                means some error happens in init session 
  */
-HAL_RET_T HAL_BB_InitGround( void );
+HAL_RET_T HAL_BB_InitGround( STRU_CUSTOMER_CFG *stru_customerCfg );
 
 
 /** 
@@ -40,7 +40,8 @@ HAL_RET_T HAL_BB_InitGround( void );
  * @return  HAL_OK:                         means init baseband 
  *          HAL_BB_ERR_INIT:                means some error happens in init session 
  */
-HAL_RET_T HAL_BB_InitSky( void );
+HAL_RET_T HAL_BB_InitSky( STRU_CUSTOMER_CFG *stru_customerCfg );
+
 
 
 
@@ -281,63 +282,6 @@ HAL_RET_T HAL_BB_SetItOnlyFreqProxy(uint8_t mode);
 
 
 /** 
- * @brief   write RF 8003s register by spi
- * @param   u8_addr:                        rf 8003s register register address 
- * @param   u8_data:                        the data value to write to register 
- * @retval  HAL_OK,                         means write succesfully
- * @retval  HAL_BB_ERR_SPI_WRITE            spi write fail
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_RF8003S_WriteReg(uint16_t u16_addr, uint8_t u8_data);
-
-
-/** 
- * @brief   read RF 8003s register by spi
- * @param   u8_addr:                        rf 8003s register register address 
- * @param   pu8_regValue:                   pointer to the address to store rf 8003 register value
- * @retval  HAL_OK,                         means read succesfully
- * @retval  HAL_BB_ERR_SPI_READ             spi read fail
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_RF8003S_ReadByte(uint16_t u8_addr, uint8_t *pu8_regValue);
-
-
-/** 
- * @brief   write baseband register by spi
- * @param   e_page                          register in the page
- * @param   u8_addr:                        rf 8003s register register address 
- * @param   u8_data:                        the data value to write to register 
- * @retval  HAL_OK,                         means write succesfully
- * @retval  HAL_BB_ERR_SPI_WRITE            spi write fail
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_BB_WriteByte(ENUM_REG_PAGES e_page, uint8_t u8_addr, uint8_t u8_data);
-
-
-
-/** 
- * @brief   write current page baseband register by spi
- * @param   u8_addr:                        rf 8003s register register address 
- * @param   u8_data:                        the data value to write to register 
- * @retval  HAL_OK,                         means write succesfully
- * @retval  HAL_BB_ERR_SPI_WRITE            spi write fail
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_BB_CurPageWriteByte(uint8_t u8_addr, uint8_t u8_data);
-
-
-
-/** 
- * @brief   read current page baseband register by spi
- * @param   u8_addr:                        rf 8003s register register address 
- * @param   pu8_regValue:                   pointer to the address to store rf 8003 register value 
- * @retval  HAL_OK,                         means write succesfully
- * @retval  HAL_BB_ERR_SPI_WRITE            spi write fail
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_BB_CurPageReadByte(uint8_t u8_addr, uint8_t *pu8_regValue);
-
-/** 
  * @brief   Set baseband sky to auto search the ground RC id
  * @param   NONE
  * @retval  HAL_OK:                    means command is sent sucessfully. 
@@ -352,7 +296,7 @@ HAL_RET_T HAL_BB_SetAutoSearchRcIdProxy(void);
  * @param[in]   e_mode:                  the modulation QAM mode for rc.
  * @retval      HAL_OK,                  means command is sent sucessfully. 
  * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1  
+ * @note        None
  */
 HAL_RET_T HAL_BB_SetRcChannelSelectionModeProxy(ENUM_RUN_MODE e_mode);
 
@@ -361,7 +305,7 @@ HAL_RET_T HAL_BB_SetRcChannelSelectionModeProxy(ENUM_RUN_MODE e_mode);
  * @param[in]   e_qam:                  the modulation QAM mode for image transmit.
  * @retval      HAL_OK,                  means command is sent sucessfully. 
  * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1  
+ * @note        None
  */
 HAL_RET_T HAL_BB_SetFreqBandQamSelectionProxy(ENUM_BB_QAM e_qam);
 
@@ -370,7 +314,7 @@ HAL_RET_T HAL_BB_SetFreqBandQamSelectionProxy(ENUM_BB_QAM e_qam);
  * @param[in]   e_qam:                  the modulation QAM mode for image transmit.
  * @retval      HAL_OK,                  means command is sent sucessfully. 
  * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1  
+ * @note        None
  */
 HAL_RET_T HAL_BB_SetRcQamSelectionProxy(ENUM_BB_QAM e_qam);
 
@@ -380,7 +324,7 @@ HAL_RET_T HAL_BB_SetRcQamSelectionProxy(ENUM_BB_QAM e_qam);
  * @param[in]   u8_data: 0:off, 1:on 
  * @retval      HAL_OK,                  means command is sent sucessfully. 
  * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1        
+ * @note        None
  */
 HAL_RET_T HAL_BB_SwitchOnOffChProxy(uint8_t u8_ch, uint8_t u8_data);
 
@@ -389,7 +333,7 @@ HAL_RET_T HAL_BB_SwitchOnOffChProxy(uint8_t u8_ch, uint8_t u8_data);
  * @param       none.
  * @retval      HAL_OK,                  means command is sent sucessfully. 
  * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1         
+ * @note        None
  */
 HAL_RET_T HAL_BB_SoftResetProxy(void);
 
@@ -398,7 +342,7 @@ HAL_RET_T HAL_BB_SoftResetProxy(void);
  * @param       none.
  * @retval      HAL_OK,                  means command is sent sucessfully. 
  * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1         
+ * @note        None
  */
 HAL_RET_T HAL_BB_CalcDistZeroCalibration(void);
 
@@ -407,16 +351,60 @@ HAL_RET_T HAL_BB_CalcDistZeroCalibration(void);
  * @param       none.
  * @retval      HAL_OK,                  means command is sent sucessfully. 
  * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1         
+ * @note        None
  */
 HAL_RET_T HAL_BB_SetCalcDistZeroPoint(uint32_t value);
 
+
 /** 
- * @brief   
- * @param   
- * @retval            
+ * @brief       request ground to disconnect from the sky by rcid in searching mode
+ * @param       pu8_rcid:                sky rc id request to disconnect
+ * @retval      HAL_OK,                  means command is sent sucessfully. 
+ * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
+ * @note        None
  */
-HAL_RET_T HAL_BB_SPI_DisableEnable(uint8_t u8_flag);
+HAL_RET_T HAL_BB_GroundDisConnectSkyByRcId(uint8_t * pu8_rcid);
+
+
+/** 
+ * @brief       request ground to connect with the sky by rcid
+ * @param       pu8_rcid:                sky rc id request to connect
+ * @retval      HAL_OK,                  means command is sent sucessfully. 
+ * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
+ * @note        None
+ */
+HAL_RET_T HAL_BB_GroundConnectToSkyByRcId(uint8_t *pu8_rcId);
+
+
+/** 
+ * @brief       request ground to search rc id
+ * @param       flag_followGroundInSearching:  not usefull for ground. For sky, it means sky will follow ground in rc id searching mode until ground request disconnect
+ * @retval      HAL_OK,                  means command is sent sucessfully. 
+ * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
+ * @note        None
+ */
+HAL_RET_T HAL_BB_SearchRcId(uint8_t flag_skyFollowGroundInSearching);
+
+
+/** 
+ * @brief       request to save and use the rc id
+ * @param       pu8_rcId: rc id setting, size is Five
+ * @retval      HAL_OK,                  means command is sent sucessfully. 
+ * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
+ * @note        None
+ */
+HAL_RET_T HAL_BB_SaveRcId(uint8_t *pu8_rcId);
+
+
+/** 
+ * @brief       get the current rc id
+ * @param       pu8_rcId: the pointer to save the rc id
+ * @retval      HAL_OK,                  means command is sent sucessfully. 
+ * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
+ * @note        None
+ */
+HAL_RET_T HAL_BB_GetRcId(uint8_t *pu8_rcId, uint8_t bufsize);
+
 
 #ifdef __cplusplus
 }

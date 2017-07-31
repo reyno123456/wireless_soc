@@ -30,18 +30,18 @@ TARGET = ar8020_cpu2.bin
 SRC_S   := start.s
 
 ifeq ($(APPLICATION_SCENARIO), sky)
-    SRC_C   := main_sky.c command.c
+    SRC_C   := main_sky.c command.c ../../Example/test_bb.c
     SRC_CXX :=
 endif
 
 ifeq ($(APPLICATION_SCENARIO), ground)
-    SRC_C   := main_ground.c command.c
+    SRC_C   := main_ground.c command.c ../../Example/test_bb.c
     SRC_CXX :=
 endif
 
 # compile flags
-CFLAGS   += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share
-CXXFLAGS += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share
+CFLAGS   += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share -I../../Example
+CXXFLAGS += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share -I../../Example
 
 # libs
 LD_LIBS := --start-group

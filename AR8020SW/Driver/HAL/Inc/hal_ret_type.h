@@ -101,7 +101,7 @@ typedef uint8_t HAL_BOOL_T;
 #define HAL_BB_ERR_SESSION_RCV                      (HAL_BB_ERR_MASK | 0x7)
 #define HAL_BB_ERR_SPI_WRITE                        (HAL_BB_ERR_MASK | 0x8)
 #define HAL_BB_ERR_SPI_READ                         (HAL_BB_ERR_MASK | 0x9)
-
+#define HAL_BB_ERR_MEM_NOT_ENOUGH                   (HAL_BB_ERR_MASK | 0xA)
 
 
 

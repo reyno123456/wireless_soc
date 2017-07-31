@@ -17,7 +17,10 @@ History:
 #include "bb_ctrl.h"
 #include "bb_sky_ctrl.h"
 #include "hal_bb.h"
-#include "boardParameters.h"
+
+#include "debuglog.h"
+#include "bb_customerctx.h"
+
 
 /** 
  * @brief   init baseband to sky mode
@@ -25,13 +28,22 @@ History:
  * @return  HAL_OK:                         means init baseband 
  *          HAL_BB_ERR_INIT:                means some error happens in init session 
  */
-HAL_RET_T HAL_BB_InitSky( void )
+HAL_RET_T HAL_BB_InitSky(STRU_CUSTOMER_CFG *stru_customerCfg )
 {
-    BB_init( BB_SKY_MODE , &stru_boardCfg);
+    if (NULL == stru_customerCfg|| NULL == stru_customerCfg->pstru_boardCfg)
+    {
+        BB_init( BB_SKY_MODE, &stru_boardCfg, stru_customerCfg);
+    }
+    else
+    {
+        BB_init( BB_SKY_MODE, stru_customerCfg->pstru_boardCfg , stru_customerCfg );
+    }
+
     BB_SKY_start();
 
     return HAL_OK;
 }
+
 
 /** 
  * @brief   Set baseband sky to auto search the ground RC id

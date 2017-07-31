@@ -311,3 +311,21 @@ HAL_RET_T HAL_USB_AudioDataSend(uint8_t *buff, uint16_t audioLen, uint8_t u8_por
 
     return HAL_OK;
 }
+
+
+
+/**
+* @brief  register customer's receive data function
+* @param  void (*customerRecv)(void *)
+* @retval   void
+* @note  
+*/
+void HAL_USB_RegisterEncoderBypassVideo(void (*VideoStreamRecv)(void *, uint32_t, uint8_t))
+{
+    g_stUsbdHidItf.recvVideoStream  = VideoStreamRecv;
+
+    USBD_HID_RegisterInterface(&USBD_Device[HAL_USB_PORT_0], &g_stUsbdHidItf);
+    USBD_HID_RegisterInterface(&USBD_Device[HAL_USB_PORT_1], &g_stUsbdHidItf);
+}
+
+

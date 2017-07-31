@@ -16,6 +16,8 @@ typedef struct
 }STRU_FRQ_OFFSET;
 
 
+static int grd_cal_frqOffset( uint8_t ch, ENUM_RF_BAND e_band );
+
 STRU_FRQ_OFFSET stru_frqOffst = 
 {
     .u8_contCnt = 0,
@@ -39,7 +41,7 @@ int grd_cal_frqOffset( uint8_t ch, ENUM_RF_BAND e_band )
     {
         grd_clear_frqOffset();
         stru_frqOffst.u8_ch = ch;
-        stru_frqOffst.band  = e_band;        
+        stru_frqOffst.band  = e_band;
         return 0;
     }
 

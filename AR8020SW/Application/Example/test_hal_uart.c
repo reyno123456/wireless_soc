@@ -125,7 +125,11 @@ static void uart_send_hander( void const * argument)
                             HAL_UART_DEFAULT_TIMEOUTMS);
 
             free(u8_data);
-            HAL_Delay(1000);
+            HAL_Delay(10);
+			if (len % 100 ==  0)
+			{
+				dlog_info("send len = %d", len);
+			}
         }
         HAL_Delay(1);
     }

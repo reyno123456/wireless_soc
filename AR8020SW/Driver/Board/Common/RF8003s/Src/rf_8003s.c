@@ -96,7 +96,7 @@ int RF_SPI_ReadReg(uint16_t u8_addr, uint8_t *pu8_rxValue)
         dlog_error("pu8_rxValue == NULL");
     }
 
-    return tmp;
+    return 0;
 }
 
 /**
@@ -260,7 +260,9 @@ static void RF8003s_afterCali(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
         } 
         
         BB_SPI_curPageWriteByte(0x01,0x02);             //SPI change into 8020    
-    }    
+    }
+
+    BB_SPI_init();
 }
 
 
@@ -486,7 +488,16 @@ void RF_CaliProcess(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
 }
 
 
-void BB_grd_notify_it_skip_freq(ENUM_RF_BAND band, uint8_t u8_ch)
+void BB_grd_NotifyItFreqByValue(uint32_t u32_itFrq)
+{
+    BB_WriteReg(PAGE2, IT_FRQ_0, ((u32_itFrq >> 24)&0xff));
+    BB_WriteReg(PAGE2, IT_FRQ_1, ((u32_itFrq >> 16)&0xff));
+    BB_WriteReg(PAGE2, IT_FRQ_2, ((u32_itFrq >>  8)&0xff));
+    BB_WriteReg(PAGE2, IT_FRQ_3, ( u32_itFrq & 0xff));
+}
+
+
+void BB_grd_NotifyItFreqByCh(ENUM_RF_BAND band, uint8_t u8_ch)
 {
     STRU_FRQ_CHANNEL *pstru_frq = ((band == RF_2G)?It_2G_frq:It_5G_frq);
 
@@ -497,33 +508,22 @@ void BB_grd_notify_it_skip_freq(ENUM_RF_BAND band, uint8_t u8_ch)
 }
 
 
-void BB_grd_notify_it_skip_freq_1(void)
+void BB_write_ItRegs(uint32_t u32_itFrq)
 {
-    BB_WriteReg(PAGE2, IT_FRQ_0, context.stru_itRegs.frq1);
-    BB_WriteReg(PAGE2, IT_FRQ_1, context.stru_itRegs.frq2);
-    BB_WriteReg(PAGE2, IT_FRQ_2, context.stru_itRegs.frq3);
-    BB_WriteReg(PAGE2, IT_FRQ_3, context.stru_itRegs.frq4);
-    
-}
-
-
-uint8_t BB_write_ItRegs(uint32_t u32_it)
-{
-    context.stru_itRegs.frq1 = (uint8_t)(u32_it >> 24) & 0xff;
-    context.stru_itRegs.frq2 = (uint8_t)(u32_it >> 16) & 0xff;
-    context.stru_itRegs.frq3 = (uint8_t)(u32_it >>  8) & 0xff;
-    context.stru_itRegs.frq4 = (uint8_t)(u32_it) & 0xff;
+    context.stru_itRegs.frq1 = (uint8_t)(u32_itFrq >> 24) & 0xff;
+    context.stru_itRegs.frq2 = (uint8_t)(u32_itFrq >> 16) & 0xff;
+    context.stru_itRegs.frq3 = (uint8_t)(u32_itFrq >>  8) & 0xff;
+    context.stru_itRegs.frq4 = (uint8_t)(u32_itFrq) & 0xff;
 
     BB_WriteReg(PAGE2, AGC3_0, context.stru_itRegs.frq1);
     BB_WriteReg(PAGE2, AGC3_1, context.stru_itRegs.frq2);
     BB_WriteReg(PAGE2, AGC3_2, context.stru_itRegs.frq3);
     BB_WriteReg(PAGE2, AGC3_3, context.stru_itRegs.frq4);
-
 }
 
-uint8_t BB_set_ITfrq(ENUM_RF_BAND band, uint8_t ch)
-{
 
+uint8_t BB_set_ItFrqByCh(ENUM_RF_BAND band, uint8_t ch)
+{
     STRU_FRQ_CHANNEL *it_ch_ptr = ((band == RF_2G)?It_2G_frq:It_5G_frq);
 
     context.stru_itRegs.frq1 = it_ch_ptr[ch].frq1;
@@ -535,7 +535,6 @@ uint8_t BB_set_ITfrq(ENUM_RF_BAND band, uint8_t ch)
     BB_WriteReg(PAGE2, AGC3_1, it_ch_ptr[ch].frq2);
     BB_WriteReg(PAGE2, AGC3_2, it_ch_ptr[ch].frq3);
     BB_WriteReg(PAGE2, AGC3_3, it_ch_ptr[ch].frq4);
-
 }
 
 uint8_t BB_write_RcRegs(uint32_t u32_rc)
@@ -574,7 +573,7 @@ uint8_t BB_set_Rcfrq(ENUM_RF_BAND band, uint8_t ch)
 
 
 
-uint8_t BB_set_sweepfrq(ENUM_RF_BAND band, ENUM_CH_BW e_bw, uint8_t ch)
+uint8_t BB_set_SweepFrq(ENUM_RF_BAND band, ENUM_CH_BW e_bw, uint8_t ch)
 {
     STRU_FRQ_CHANNEL *ch_ptr;
 

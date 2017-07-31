@@ -5,12 +5,28 @@
 #include "command.h"
 #include "sys_event.h"
 #include "hal_sys_ctl.h"
+#include "hal_bb.h"
+#include "hal_gpio.h"
 #include "hal.h"
+#include "test_bb.h"
+#include "bb_customerctx.h"
+
 
 void console_init(uint32_t uart_num, uint32_t baut_rate)
 {
     dlog_init(command_run, NULL, DLOG_CLIENT_PROCESSOR);
 }
+
+/*
+ * should be global data
+*/
+static STRU_CUSTOMER_CFG stru_user_cfg = 
+{
+    .flag_useCfgId    =  0, //use rcid from config
+
+    .enum_chBandWidth = BW_10M,
+    .pstru_boardCfg   =  NULL,
+};
 /**
   * @brief  Main program
   * @param  None
@@ -36,8 +52,10 @@ int main(void)
     st_h264Cfg.e_view1Br = HAL_H264_BITRATE_500K;
     st_h264Cfg.u8_view1BrEn = 1;
     HAL_H264_Init(st_h264Cfg);
-    
-    HAL_BB_InitSky( );
+
+    BB_ledGpioInit();
+    SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_skyEventHandler);
+    HAL_BB_InitSky(&stru_user_cfg);
 
     for( ;; )
     {

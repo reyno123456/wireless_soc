@@ -141,7 +141,7 @@ void BB_SweepStart(ENUM_RF_BAND e_rfBand, ENUM_CH_BW e_bw)
     stru_sweepPower.e_curBand   =  e_rfBand;  //current rf band for sweep
 
     stru_sweepPower.u8_bandSelCnt  =  0;
-    BB_set_sweepfrq( e_rfBand, e_bw, 0 );   
+    BB_set_SweepFrq( e_rfBand, e_bw, 0 );   
 }
 
 
@@ -190,7 +190,7 @@ static uint8_t BB_GetSweepPower(ENUM_RF_BAND e_rfBand, uint8_t bw, uint8_t row, 
                                        
     if(sweep_ch >= u8_maxCh)
     {
-        dlog_error("sweepCh maxchannel: %d %d", sweep_ch, u8_maxCh);
+        dlog_error("sweepCh Error:%d %d %d", e_rfBand, sweep_ch, u8_maxCh);
     }
 
     //get the time domain noise power
@@ -329,7 +329,7 @@ static int BB_SweepBeforeFull( void )
             stru_sweepPower.u8_prevSweepCh = nextch;
         }
 
-        BB_set_sweepfrq( stru_sweepPower.e_curBand, stru_sweepPower.e_bw, stru_sweepPower.u8_prevSweepCh );
+        BB_set_SweepFrq( stru_sweepPower.e_curBand, stru_sweepPower.e_bw, stru_sweepPower.u8_prevSweepCh );
     }
 
     return result;
@@ -401,7 +401,7 @@ static int BB_set_sweepChannel( void )
         }
     }
 
-    BB_set_sweepfrq( stru_sweepPower.e_prevSweepBand, e_bw, stru_sweepPower.u8_prevSweepCh );
+    BB_set_SweepFrq( stru_sweepPower.e_prevSweepBand, e_bw, stru_sweepPower.u8_prevSweepCh );
 
     {
         STRU_WIRELESS_INFO_DISPLAY *osdptr = (STRU_WIRELESS_INFO_DISPLAY *)(SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR);
@@ -466,7 +466,9 @@ static int BB_SweepAfterFull( uint8_t flag )
                 dlog_info("option band sweep is full !!");
             }
 
-            if ( stru_sweepPower.u8_isFull & 0x10 ) //both band sweep is ready, and sweep last channel
+            //both band sweep is ready, and sweep last channel
+            if ( (stru_sweepPower.u8_isFull & 0x10) && (context.locked) && 
+                 (u_grdRcIdSearchStatus.stru_rcIdStatus.u8_groundSearchMode==GROUND_REQUEST_LOCK) && context.e_rfbandMode == AUTO) 
             {
                 flag_checkBandSwitch = 1;
             }
@@ -480,7 +482,7 @@ static int BB_SweepAfterFull( uint8_t flag )
     BB_UpdateOptCh(e_sweepBand, e_bw, u8_prevSweepCh);
 
     //check if band switch need
-    if ( flag_checkBandSwitch && context.e_rfbandMode == AUTO)
+    if (flag_checkBandSwitch && context.e_rfbandMode == AUTO)
     {
         uint8_t i = 0;
         uint8_t flag_bandChange = 0, mainch = 0, optch = 0;
@@ -492,7 +494,6 @@ static int BB_SweepAfterFull( uint8_t flag )
 
         //check whether switch is necessary
         uint8_t cnt = sizeof(stru_sweepPower.band_sel);
-
 
         if ( stru_sweepPower.u8_bandSelCnt >= cnt )
         {
@@ -575,7 +576,7 @@ uint8_t BB_forceSweep( uint8_t opt )
         stru_sweepPower.u8_cycleCnt    = opt;
         stru_sweepPower.u8_prevSweepCh = (opt == MAIN_CH_CYCLE) ? stru_sweepPower.u8_mainSweepCh : 
                                                                   stru_sweepPower.u8_optSweepCh;
-        return BB_set_sweepfrq( stru_sweepPower.e_curBand, stru_sweepPower.u8_prevSweepCh );
+        return BB_set_SweepFrq( stru_sweepPower.e_curBand, stru_sweepPower.u8_prevSweepCh );
     }
 
     return 0;
@@ -1109,7 +1110,7 @@ static void BB_SweepChangeBand(ENUM_RF_BAND e_toRfBand, uint8_t u8_mainCh, uint8
     stru_sweepPower.e_curBand      =  e_toRfBand;  //current rf band for sweep
     stru_sweepPower.u8_bandSelCnt  =  0;
 
-    BB_set_sweepfrq( e_toRfBand, stru_sweepPower.e_bw ,u8_mainCh );
+    BB_set_SweepFrq( e_toRfBand, stru_sweepPower.e_bw ,u8_mainCh );
 }
 
 

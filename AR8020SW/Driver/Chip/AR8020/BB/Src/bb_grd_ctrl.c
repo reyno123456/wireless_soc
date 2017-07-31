@@ -11,7 +11,6 @@
 #include "bb_snr_service.h"
 #include "bb_grd_ctrl.h"
 #include "bb_grd_sweep.h"
-#include "gpio.h"
 #include "bb_uart_com.h"
 
 #define SNR_STATIC_START_VALUE          (100)
@@ -23,16 +22,22 @@
 
 static init_timer_st grd_timer2_6;
 static init_timer_st grd_timer2_7;
-static uint8_t Timer1_Delay1_Cnt = 0;
-static uint8_t snr_static_count = SNR_STATIC_START_VALUE;
-static uint8_t hop_count = 0;
-static uint8_t flag_itFreqskip = 0;
-static uint8_t flag_snrPostCheck;
+
+static uint8_t  Timer1_Delay1_Cnt = 0;
+static uint8_t  snr_static_count  = SNR_STATIC_START_VALUE;
+static uint8_t  hop_count = 0;
+static uint8_t  flag_itFreqskip = 0;
+static uint8_t  flag_snrPostCheck;
 static uint64_t s_u64_rcMask = 0;
-static uint8_t s_u8_rcMaskEnable = 0;
+static uint8_t  s_u8_rcMaskEnable = 0;
+
 static STRU_SkyStatus g_stru_skyStatus;
+
+UNION_grdRcIdSearchStatus u_grdRcIdSearchStatus;
+
 uint8_t grd_rc_channel = 0;
 
+//uint8_t u8_preRcIdArray[5];
 
 STRU_CALC_DIST_DATA s_st_calcDistData = 
 {
@@ -42,14 +47,61 @@ STRU_CALC_DIST_DATA s_st_calcDistData =
     .u32_cnt = 0,
     .u32_lockCnt = 0
 };
+
+uint16_t qam_change_threshold[QAM_CHANGE_THRESHOLD_COUNT][2] =  
+         {{0, 0x6A},      {0x54, 0x129},    {0xec, 0x388}, 
+         {0x2ce, 0xa3e}, {0x823, 0x1d94},  {0x12aa, 0xffff}};
+
 static void BB_grd_uartDataHandler(void *p);
+
 static uint32_t grd_calc_dist_get_avg_value(uint32_t *u32_dist);
+
 static void grd_disable_enable_rc_frq_mask_func(uint8_t flag);
+
 static void grd_init_rc_frq_mask_func(void);
+
 static void grd_write_mask_code_to_sky(uint8_t enable, uint64_t *mask);
-static void grd_set_IT_frq(ENUM_RF_BAND e_band, uint8_t ch);
+
+static void grd_set_ItFrq(ENUM_RF_BAND e_band, uint8_t ch);
+
 static void BB_grd_OSDPlot(void);
+
+static void grd_handle_IT_mode_cmd(ENUM_RUN_MODE mode);
+
+static void grd_calc_dist_zero_calibration(void);
+
 static void grd_calc_dist(void);
+
+static void grd_handle_all_cmds(void);
+
+static void Grd_Timer2_6_Init(void);
+
+static void Grd_Timer2_7_Init(void);
+
+static void grd_handle_RF_band_cmd(ENUM_RF_BAND rf_band);
+
+static void grd_handle_CH_bandwitdh_cmd(ENUM_CH_BW bw);
+
+static void grd_handle_MCS_mode_cmd(ENUM_RUN_MODE mode);
+
+static void grd_handle_MCS_cmd(ENUM_BB_QAM qam, ENUM_BB_LDPC ldpc);
+
+static void grd_handle_brc_mode_cmd(ENUM_RUN_MODE mode);
+
+static void grd_handle_brc_cmd(uint8_t coderate);
+
+static void grd_rc_hopfreq(void);
+
+static void reset_it_span_cnt(void);
+
+static void grd_set_txmsg_qam_change(ENUM_BB_QAM qam, ENUM_CH_BW bw, ENUM_BB_LDPC ldpc);
+
+static void grd_handle_IT_CH_cmd(uint8_t ch);
+
+static void wimax_vsoc_tx_isr(uint32_t u32_vectorNum);
+
+static void grd_set_calc_dist_zero_point(uint32_t value);
+
 
 void BB_GRD_start(void)
 {
@@ -58,19 +110,8 @@ void BB_GRD_start(void)
     context.qam_ldpc = context.u8_bbStartMcs;
     context.flag_mrc = 0;
 
+    grd_set_txmsg_mcs_change(context.e_bandwidth, context.qam_ldpc);
 
-    grd_set_txmsg_mcs_change(context.CH_bandwidth, context.qam_ldpc);
-
-    GPIO_SetMode(RED_LED_GPIO, GPIO_MODE_2);
-    GPIO_SetPinDirect(RED_LED_GPIO, GPIO_DATA_DIRECT_OUTPUT);
-
-    GPIO_SetMode(BLUE_LED_GPIO, GPIO_MODE_2);
-    GPIO_SetPinDirect(BLUE_LED_GPIO, GPIO_DATA_DIRECT_OUTPUT);
-    
-    GPIO_SetPin(RED_LED_GPIO, 0);   //RED LED ON
-    GPIO_SetPin(BLUE_LED_GPIO, 1);  //BLUE LED OFF
-    
-    BB_Grd_SetRCId((uint8_t*)(context.u8_flashId));
     Grd_Timer2_6_Init();
     Grd_Timer2_7_Init();
 
@@ -78,35 +119,89 @@ void BB_GRD_start(void)
 
     //do not notify sky until sweep end and get the best channel from sweep result
     context.cur_IT_ch = 1;
-    grd_set_IT_frq(context.e_curBand, 1);
-    BB_grd_notify_it_skip_freq(context.e_curBand, 1);
+    grd_set_ItFrq(context.e_curBand, 1);
+    BB_grd_NotifyItFreqByCh(context.e_curBand, 1);
 
-    BB_SweepStart(context.e_curBand, context.CH_bandwidth);    
+    BB_SweepStart(context.e_curBand, context.e_bandwidth);
 
+    grd_init_rc_frq_mask_func();
 
     BB_UARTComInit( BB_grd_uartDataHandler ); 
     BB_GetDevInfo();
 
-    grd_init_rc_frq_mask_func();
+    grd_SetRCId((uint8_t *)context.rcid);
+
     reg_IrqHandle(BB_TX_ENABLE_VECTOR_NUM, wimax_vsoc_tx_isr, NULL);
     INTR_NVIC_SetIRQPriority(BB_TX_ENABLE_VECTOR_NUM,INTR_NVIC_EncodePriority(NVIC_PRIORITYGROUP_5,INTR_NVIC_PRIORITY_BB_TX,0));
-    INTR_NVIC_EnableIRQ(BB_TX_ENABLE_VECTOR_NUM);    
+    INTR_NVIC_EnableIRQ(BB_TX_ENABLE_VECTOR_NUM);}
+
+
+static void BB_setWriteSkyRcId(uint8_t *pu8_rcId)
+{
+    BB_WriteReg(PAGE2, GROUND_SYNC_RC_ID_0, pu8_rcId[0]);
+    BB_WriteReg(PAGE2, GROUND_SYNC_RC_ID_1, pu8_rcId[1]);
+    BB_WriteReg(PAGE2, GROUND_SYNC_RC_ID_2, pu8_rcId[2]);
+    BB_WriteReg(PAGE2, GROUND_SYNC_RC_ID_3, pu8_rcId[3]);
+    BB_WriteReg(PAGE2, GROUND_SYNC_RC_ID_4, pu8_rcId[4]);
 }
+
+
+static int BB_setDisconnectRcId(uint8_t *pu8_rcId)
+{
+    if (u_grdRcIdSearchStatus.stru_rcIdStatus.u8_groundSearchMode == GROUND_IN_RCID_SEARCH)
+    {
+        u_grdRcIdSearchStatus.stru_rcIdStatus.u8_flagGroundRequestDisconnect = 1;
+        BB_WriteReg(PAGE2, GRD_SEARCHING, u_grdRcIdSearchStatus.u8_grdRcIdSearchStatus);
+        
+        BB_setWriteSkyRcId(pu8_rcId);
+        
+        dlog_info("disconnect id %x %x %x %x %x %x", pu8_rcId[0], pu8_rcId[1], pu8_rcId[2], pu8_rcId[3], pu8_rcId[4], u_grdRcIdSearchStatus.u8_grdRcIdSearchStatus);
+        return 0;
+    }
+
+    return 1;
+}
+
+
+static void BB_setConnectRcId(uint8_t *pu8_rcId)
+{
+    BB_setWriteSkyRcId(pu8_rcId);
+
+    u_grdRcIdSearchStatus.stru_rcIdStatus.u8_groundSearchMode = GROUND_REQUEST_LOCK;
+    u_grdRcIdSearchStatus.stru_rcIdStatus.u8_flagGroundRequestDisconnect = 0;
+
+    BB_WriteReg(PAGE2, GRD_SEARCHING, u_grdRcIdSearchStatus.u8_grdRcIdSearchStatus);
+    if (context.e_bandsupport == RF_2G_5G  || context.e_bandsupport == RF_2G)
+    {
+        context.e_curBand = RF_2G;
+        grd_handle_RF_band_cmd(RF_2G);
+    }
+
+    dlog_info("Lock id %x %x %x %x %x %x", pu8_rcId[0], pu8_rcId[1], pu8_rcId[2], pu8_rcId[3], pu8_rcId[4], u_grdRcIdSearchStatus.u8_grdRcIdSearchStatus);
+}
+
+
+static void BB_setSearchSkyRcId(void)
+{
+    u_grdRcIdSearchStatus.stru_rcIdStatus.u8_flagGroundRequestDisconnect    = 1;        //notify the current sky to disconnect
+    u_grdRcIdSearchStatus.stru_rcIdStatus.u8_groundSearchMode  = GROUND_IN_RCID_SEARCH;
+
+    BB_WriteReg(PAGE2, GRD_SEARCHING, u_grdRcIdSearchStatus.u8_grdRcIdSearchStatus);
+}
+
 
 static void BB_grd_uartDataHandler(void *p)
 {
     uint64_t tmpMaskCode = 0;
-    STRU_SysEventSkyStatus skyStatus;
-    uint32_t u32_rcvLen = BB_UARTComReceiveMsg(BB_UART_COM_SESSION_0, (uint8_t *)&skyStatus, sizeof(STRU_SysEventSkyStatus));
+    STRU_skyStatusMsg skyStatus;
+    uint32_t u32_rcvLen = BB_UARTComReceiveMsg(BB_UART_COM_SESSION_0, (uint8_t *)&skyStatus, sizeof(skyStatus));
 
-    if ( u32_rcvLen >= sizeof(STRU_SysEventSkyStatus))
+    if ( u32_rcvLen >= sizeof(STRU_skyStatusMsg))
     {
         if (SKY_LOCK_STATUS == skyStatus.pid)
         {
             g_stru_skyStatus.u8_rcCrcLockCnt = skyStatus.par.rcLockCnt.u8_rcCrcLockCnt;
             g_stru_skyStatus.u8_rcNrLockCnt  = skyStatus.par.rcLockCnt.u8_rcNrLockCnt;
-
-            //dlog_info("rclock:%d  nrlock:%d", g_stru_skyStatus.u8_rcCrcLockCnt, g_stru_skyStatus.u8_rcNrLockCnt);
         }
         else if (RC_MASK_CODE == skyStatus.pid)
         {
@@ -116,31 +211,53 @@ static void BB_grd_uartDataHandler(void *p)
             grd_write_mask_code_to_sky(s_u8_rcMaskEnable, &s_u64_rcMask);
             if (tmpMaskCode != s_u64_rcMask)
             {
-         //       dlog_info("rcv_sky_calc_mask_code:0x%x,0x%x", (uint32_t)((s_u64_rcMask)>>32), (uint32_t)(s_u64_rcMask));
+                dlog_warning("rcv_sky_calc_mask_code:0x%x,0x%x", (uint32_t)((s_u64_rcMask)>>32), (uint32_t)(s_u64_rcMask));
             }
         }
         else if (SKY_AGC_STATUS == skyStatus.pid)
         {
             g_stru_skyStatus.u8_skyagc1 = skyStatus.par.skyAgc.u8_skyagc1;
             g_stru_skyStatus.u8_skyagc2 = skyStatus.par.skyAgc.u8_skyagc2;
-            
-         //   dlog_info("sky agc:0x%x 0x%x", g_stru_skyStatus.u8_skyagc1, g_stru_skyStatus.u8_skyagc2);
+        }
+        else if(RC_ID_SYNC == skyStatus.pid)
+        {
+            //dlog_info("Get rc id 0x%x 0x%x 0x%x 0x%x 0x%x",  skyStatus.par.rcId.u8_skyRcIdArray[0], skyStatus.par.rcId.u8_skyRcIdArray[1],
+            //                                                 skyStatus.par.rcId.u8_skyRcIdArray[2], skyStatus.par.rcId.u8_skyRcIdArray[3],
+            //                                                 skyStatus.par.rcId.u8_skyRcIdArray[4]);
+            //if (0 != memcmp( (void *)u8_preRcIdArray, (void *)skyStatus.par.rcId.u8_skyRcIdArray, RC_ID_SIZE))
+            {
+                //memcpy((void *)u8_preRcIdArray, (void *)skyStatus.par.rcId.u8_skyRcIdArray, RC_ID_SIZE);
+                BB_setWriteSkyRcId(skyStatus.par.rcId.u8_skyRcIdArray);
+
+                STRU_SysEvent_DEV_BB_STATUS status;
+                status.pid = BB_GET_RCID;
+                memcpy((void *)status.rcid, (void *)skyStatus.par.rcId.u8_skyRcIdArray, RC_ID_SIZE);
+                SYS_EVENT_Notify(SYS_EVENT_ID_BB_EVENT, (void *)&status);
+            }
         }
     }
 }
 
 
-void BB_Grd_SetRCId(uint8_t *pu8_id)
+void grd_SetRCId(uint8_t *pu8_id)
 {
     BB_WriteReg(PAGE2, GRD_RC_ID_BIT39_32_REG, pu8_id[0]);
     BB_WriteReg(PAGE2, GRD_RC_ID_BIT31_24_REG, pu8_id[1]);
     BB_WriteReg(PAGE2, GRD_RC_ID_BIT23_16_REG, pu8_id[2]);
     BB_WriteReg(PAGE2, GRD_RC_ID_BIT15_08_REG, pu8_id[3]);
     BB_WriteReg(PAGE2, GRD_RC_ID_BIT07_00_REG, pu8_id[4]);
-    
-    dlog_info("id[0~4]:0x%x 0x%x 0x%x 0x%x 0x%x",
-               pu8_id[0], pu8_id[1], pu8_id[2], pu8_id[3], pu8_id[4]);
+
+    dlog_info("id[0~4]:0x%x 0x%x 0x%x 0x%x 0x%x", pu8_id[0], pu8_id[1], pu8_id[2], pu8_id[3], pu8_id[4]);
 }
+
+
+void grd_SetSaveRCId(uint8_t *pu8_id)
+{
+    grd_SetRCId(pu8_id);
+
+    BB_saveRcid(pu8_id);
+}
+
 
 //---------------IT grd hop change--------------------------------
 
@@ -157,18 +274,18 @@ void grd_fec_judge(void)
         context.locked = grd_is_bb_fec_lock();
         if( !context.locked )
         {
-            if (context.fec_unlock_cnt ++ > 20 )
+            if (context.fec_unlock_cnt ++ > 20)
             {
-                if( context.it_skip_freq_mode == AUTO )
+                if( context.itHopMode == AUTO )
                 {
                     uint8_t mainch, optch;
                     if (BB_selectBestCh(context.e_curBand, SELECT_MAIN_OPT, &mainch, &optch, (uint8_t *)NULL, 0))
                     {
                         context.cur_IT_ch  = mainch;
                         BB_Sweep_updateCh(context.e_curBand, mainch);
-                        grd_set_IT_frq(context.e_curBand, mainch);
+                        grd_set_ItFrq(context.e_curBand, mainch);
                         //dlog_info("Select %d %d", mainch, optch);
-                        BB_grd_notify_it_skip_freq(context.e_curBand, context.cur_IT_ch);
+                        BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
                     }
                 }
                 context.fec_unlock_cnt = 0;
@@ -185,8 +302,6 @@ void grd_fec_judge(void)
         if(context.locked)
         {
             context.dev_state = FEC_LOCK;
-            GPIO_SetPin(BLUE_LED_GPIO, 0);  //BLUE LED ON
-            GPIO_SetPin(RED_LED_GPIO, 1);   //RED LED OFF            
             context.fec_unlock_cnt = 0;
         }
         else
@@ -194,22 +309,19 @@ void grd_fec_judge(void)
             #define     UNLOCK_CNT      (64)
             context.fec_unlock_cnt++;
             if(context.fec_unlock_cnt > UNLOCK_CNT)
-            {                
-                GPIO_SetPin(BLUE_LED_GPIO, 1);  //BLUE LED OFF
-                GPIO_SetPin(RED_LED_GPIO, 0);   //RED LED ON
-
+            {
                 grd_checkBackTo2G();
 
-                if( context.it_skip_freq_mode == AUTO )
+                if( context.itHopMode == AUTO )
                 {
                     uint8_t mainch, optch;
                     BB_selectBestCh(context.e_curBand, SELECT_MAIN_OPT, &mainch, &optch, NULL, 0);
                 
                     context.cur_IT_ch  = mainch;
                     BB_Sweep_updateCh(context.e_curBand, mainch);
-                    grd_set_IT_frq(context.e_curBand, mainch);
-                    BB_grd_notify_it_skip_freq(context.e_curBand, context.cur_IT_ch);
-                    dlog_info("unlock: select channel %d %d", mainch, optch);
+                    grd_set_ItFrq(context.e_curBand, mainch);
+                    BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
+                    //dlog_info("unlock: select channel %d %d", mainch, optch);
                 }
 
                 context.fec_unlock_cnt = 0;
@@ -217,17 +329,17 @@ void grd_fec_judge(void)
                 if(context.qam_skip_mode == AUTO && context.qam_ldpc > context.u8_bbStartMcs)
                 {
                     context.qam_ldpc = context.u8_bbStartMcs;
-                    grd_set_txmsg_mcs_change(context.CH_bandwidth, context.qam_ldpc);
+                    grd_set_txmsg_mcs_change(context.e_bandwidth, context.qam_ldpc);
                 }
             }
         }
     }
     else if(context.dev_state == DELAY_14MS)
     {
-        BB_set_ITfrq(context.e_curBand, context.cur_IT_ch);
+        BB_set_ItFrqByCh(context.e_curBand, context.cur_IT_ch);
         reset_it_span_cnt();
         context.dev_state = CHECK_FEC_LOCK;
-        dlog_info("Hop:%d \n", context.cycle_count);
+        //dlog_info("Hop:%d \n", context.cycle_count);
     }
 
 }
@@ -269,7 +381,7 @@ int grd_freq_skip_pre_judge(void)
 
     if (Harqcnt >= 7 && Harqcnt1 >= 7)      //check LDPC error
     {
-        dlog_info("Harq: %d %d", Harqcnt, Harqcnt1);
+        //dlog_info("Harq: %d %d", Harqcnt, Harqcnt1);
         flag = 0;
     }
     else if (Harqcnt >= 3 && Harqcnt1 >= 3) //check snr.
@@ -295,7 +407,7 @@ int grd_freq_skip_pre_judge(void)
             context.cur_IT_ch  = optch;
             BB_Sweep_updateCh(context.e_curBand, context.cur_IT_ch );
 
-            BB_grd_notify_it_skip_freq(context.e_curBand, context.cur_IT_ch);
+            BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
             
             //dlog_info("Set Ch0:%d %d %d %x\n",
             //           context.cur_IT_ch, context.cycle_count, ((BB_ReadReg(PAGE2, FEC_5_RD)& 0xF0) >> 4), grd_get_it_snr());
@@ -329,7 +441,7 @@ void grd_freq_skip_post_judge(void)
             reset_it_span_cnt( );
             context.cur_IT_ch = context.next_IT_ch;
             BB_Sweep_updateCh(context.e_curBand, context.cur_IT_ch );
-            BB_grd_notify_it_skip_freq(context.e_curBand, context.cur_IT_ch);
+            BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
             //dlog_info("Set Ch1:%d %d %d %x\n", context.cur_IT_ch, context.cycle_count,
             //                                 ((BB_ReadReg(PAGE2, FEC_5_RD)& 0xF0) >> 4), grd_get_it_snr());
         }
@@ -341,14 +453,30 @@ void grd_freq_skip_post_judge(void)
 
 uint8_t grd_is_bb_fec_lock(void)
 {
-    static uint8_t status = 0xff;
     uint8_t data = BB_ReadReg(PAGE2, FEC_5_RD) & 0x01;
-    if(status != data)
+
+    if(u_grdRcIdSearchStatus.stru_rcIdStatus.u8_itLock != data)
     {
-        dlog_info("ML:%d", data);
-        status = data;
+        u_grdRcIdSearchStatus.stru_rcIdStatus.u8_itLock = data;
+        BB_WriteReg(PAGE2, GRD_SEARCHING, u_grdRcIdSearchStatus.u8_grdRcIdSearchStatus);
+
+        STRU_SysEvent_DEV_BB_STATUS lockEvent = 
+        {
+            .pid = BB_LOCK_STATUS,
+            .lockstatus = data,
+        };
+
+        SYS_EVENT_Notify(SYS_EVENT_ID_BB_EVENT, (void *)&lockEvent);
+        if (data)
+        {
+            dlog_warning("LOCK");
+        }
+        else
+        {
+            dlog_warning("UNLOCK");
+        }        
     }
-    
+
     return data;
 }
 
@@ -368,7 +496,7 @@ ENUM_BB_QAM Grd_get_QAM(void)
 }
 
 
-void grd_set_txmsg_qam_change(ENUM_BB_QAM qam, ENUM_CH_BW bw, ENUM_BB_LDPC ldpc)
+static void grd_set_txmsg_qam_change(ENUM_BB_QAM qam, ENUM_CH_BW bw, ENUM_BB_LDPC ldpc)
 {
     uint8_t data = (qam << 6) | (bw << 3) | ldpc;
     dlog_info("MCS1=>%d", data);
@@ -379,7 +507,7 @@ void grd_set_txmsg_qam_change(ENUM_BB_QAM qam, ENUM_CH_BW bw, ENUM_BB_LDPC ldpc)
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-void wimax_vsoc_tx_isr(uint32_t u32_vectorNum)
+static void wimax_vsoc_tx_isr(uint32_t u32_vectorNum)
 {
     INTR_NVIC_DisableIRQ(BB_TX_ENABLE_VECTOR_NUM);
     STRU_WIRELESS_INFO_DISPLAY *osdptr = (STRU_WIRELESS_INFO_DISPLAY *)(SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR);
@@ -433,13 +561,11 @@ void Grd_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
     {
         context.flag_mrc = 2;
         BB_WriteRegMask(PAGE1, 0x83, 0x01, 0x01); 
-        //dlog_info("Disable %d\n", context.cycle_count);        
     }
     else if( context.flag_mrc == 2 )
     {
         context.flag_mrc = 0;
-        BB_WriteRegMask(PAGE1, 0x83, 0x00, 0x01);   
-        //dlog_info("Enable %d\n", context.cycle_count);        
+        BB_WriteRegMask(PAGE1, 0x83, 0x00, 0x01);
     }
 
     //Enable BB_TX intr
@@ -496,7 +622,7 @@ void Grd_TIM2_7_IRQHandler(uint32_t u32_vectorNum)
             break;
 
         case 2:
-            if(context.rc_skip_freq_mode == AUTO)
+            if(context.rcHopMode == AUTO)
             {
                 grd_rc_hopfreq();
             }
@@ -513,11 +639,11 @@ void Grd_TIM2_7_IRQHandler(uint32_t u32_vectorNum)
                     if( context.u32_rcValue )
                     {
                         BB_write_RcRegs( context.u32_rcValue );
-                        context.rc_skip_freq_mode = MANUAL;
+                        context.rcHopMode = MANUAL;
                     }
                     else //if context.u32_rcValue ==0, means the auto mode
                     {
-                        context.rc_skip_freq_mode = AUTO;
+                        context.rcHopMode = AUTO;
                     }
                 }
             }
@@ -530,15 +656,15 @@ void Grd_TIM2_7_IRQHandler(uint32_t u32_vectorNum)
             BB_GetDevInfo();
             grd_judge_qam_mode();
             uint8_t u8_mainCh, u8_optCh;
-            if ( 1 == grd_doRfbandChange( &u8_mainCh, &u8_optCh) )
+            if (1 == grd_doRfbandChange( &u8_mainCh, &u8_optCh) )
             {
                 context.cur_IT_ch  = u8_mainCh;
 
                 grd_rc_channel = 0;
                 grd_rc_hopfreq();
 
-                BB_set_ITfrq( context.e_curBand, context.stru_bandChange.u8_ItCh );
-                BB_grd_notify_it_skip_freq( context.e_curBand, context.stru_bandChange.u8_ItCh );
+                BB_set_ItFrqByCh( context.e_curBand, context.stru_bandChange.u8_ItCh );
+                BB_grd_NotifyItFreqByCh( context.e_curBand, context.stru_bandChange.u8_ItCh );
             }
             break;
 
@@ -568,7 +694,7 @@ void Grd_TIM2_7_IRQHandler(uint32_t u32_vectorNum)
         case 6:
             Timer1_Delay1_Cnt++;
             context.u8_harqcnt_lock = BB_ReadReg(PAGE2, FEC_5_RD);
-            if(context.it_skip_freq_mode == AUTO && context.locked )
+            if(context.itHopMode == AUTO && context.locked )
             {
                 flag_snrPostCheck = grd_freq_skip_pre_judge( );
             }
@@ -595,7 +721,7 @@ void Grd_TIM2_7_IRQHandler(uint32_t u32_vectorNum)
     }
 }
 
-void Grd_Timer2_7_Init(void)
+static void Grd_Timer2_7_Init(void)
 {
     grd_timer2_7.base_time_group = 2;
     grd_timer2_7.time_num = 7;
@@ -622,14 +748,14 @@ void Grd_Timer2_6_Init(void)
 //=====================================Grd RC funcions =====
 void grd_rc_hopfreq(void)
 {
-	uint8_t max_ch_size = (context.e_curBand == RF_2G) ? MAX_2G_RC_FRQ_SIZE : MAX_5G_RC_FRQ_SIZE;
+    uint8_t max_ch_size = (context.e_curBand == RF_2G) ? MAX_2G_RC_FRQ_SIZE : MAX_5G_RC_FRQ_SIZE;
 
     grd_rc_channel++;
     if(grd_rc_channel >= max_ch_size)
     {
         grd_rc_channel = 0;
     }
-    
+
     BB_WriteReg(PAGE2, GRD_RC_CHANNEL, grd_rc_channel);
     
     if (s_u8_rcMaskEnable)
@@ -664,9 +790,9 @@ ENUM_BB_LDPC grd_get_IT_LDPC(void)
     return (ENUM_BB_LDPC)( (BB_ReadReg(PAGE2, GRD_FEC_QAM_CR_TLV) >>2) & 0x07);
 }
 
-void grd_handle_IT_mode_cmd(ENUM_RUN_MODE mode)
+static void grd_handle_IT_mode_cmd(ENUM_RUN_MODE mode)
 {
-    context.it_skip_freq_mode = mode;
+    context.itHopMode = mode;
     dlog_info("mode= %d ", mode);
 }
 
@@ -674,7 +800,7 @@ void grd_handle_IT_mode_cmd(ENUM_RUN_MODE mode)
 /*
   *   only set value to context, the request will be handle in 14ms interrupt.
  */
-void grd_handle_IT_CH_cmd(uint8_t ch)
+static void grd_handle_IT_CH_cmd(uint8_t ch)
 {
     context.it_manual_ch = ch;
     dlog_info("ch= %d", ch);    
@@ -727,17 +853,16 @@ static void grd_handle_RF_band_cmd(ENUM_RF_BAND rf_band)
 */
 static void grd_handle_CH_bandwitdh_cmd(ENUM_CH_BW bw)
 {
-    //set and soft-rest
-    if(context.CH_bandwidth != bw)
+    if(context.e_bandwidth != bw)
     {
         BB_set_RF_bandwitdh(BB_GRD_MODE, bw);
 
         BB_WriteReg(PAGE2, RF_CH_BW_CHANGE_0, 0xc0 | (uint8_t)bw);      
 
-        context.CH_bandwidth = bw; 
+        context.e_bandwidth = bw; 
     }
 
-    dlog_info("CH_bandwidth =%d", context.CH_bandwidth);    
+    dlog_info("e_bandwidth =%d", context.e_bandwidth);    
 }
 
 static void grd_handle_CH_qam_cmd(ENUM_BB_QAM qam)
@@ -749,7 +874,7 @@ static void grd_handle_CH_qam_cmd(ENUM_BB_QAM qam)
 
         context.qam_mode = qam; 
         context.ldpc = grd_get_IT_LDPC();   
-        grd_set_mcs_registers(context.qam_mode, context.ldpc, context.CH_bandwidth);
+        grd_set_mcs_registers(context.qam_mode, context.ldpc, context.e_bandwidth);
     }
 
     dlog_info("CH_QAM =%d", context.qam_mode);    
@@ -763,7 +888,7 @@ void grd_handle_CH_ldpc_cmd(ENUM_BB_LDPC e_ldpc)
         context.ldpc = e_ldpc;
         context.qam_mode = grd_get_IT_QAM();
 
-        grd_set_mcs_registers(context.qam_mode, context.ldpc, context.CH_bandwidth);
+        grd_set_mcs_registers(context.qam_mode, context.ldpc, context.e_bandwidth);
     }
     dlog_info("CH_LDPC =%d", context.ldpc);
 }
@@ -771,36 +896,36 @@ void grd_handle_CH_ldpc_cmd(ENUM_BB_LDPC e_ldpc)
         
 static void grd_handle_MCS_mode_cmd(ENUM_RUN_MODE mode)
 {
-	context.qam_skip_mode = mode;
+    context.qam_skip_mode = mode;
     dlog_info("qam_skip_mode = %d\n", context.qam_skip_mode);
     
     if ( mode == AUTO )
     {
-	    ENUM_BB_QAM qam = grd_get_IT_QAM();
-	    ENUM_BB_LDPC ldpc = grd_get_IT_LDPC();
-    
-	    if( qam == MOD_BPSK )
-	    {
-	        context.qam_ldpc = 1;
-	    }
-	    else if( qam == MOD_4QAM )
-	    {
-	        context.qam_ldpc = 2;
-	    }
-	    else if( qam == MOD_16QAM )
-	    {
-	        context.qam_ldpc = 3;
-	    }
-	    else if( qam == MOD_64QAM && ldpc == LDPC_1_2)
-	    {
-	        context.qam_ldpc = 4;
-	    }
-	    else if( qam == MOD_64QAM)
-	    {
-	        context.qam_ldpc = 5;
-	    }
-    
-        grd_set_txmsg_mcs_change(context.CH_bandwidth, context.qam_ldpc);        
+        ENUM_BB_QAM qam = grd_get_IT_QAM();
+        ENUM_BB_LDPC ldpc = grd_get_IT_LDPC();
+
+        if( qam == MOD_BPSK )
+        {
+            context.qam_ldpc = 1;
+        }
+        else if( qam == MOD_4QAM )
+        {
+            context.qam_ldpc = 2;
+        }
+        else if( qam == MOD_16QAM )
+        {
+            context.qam_ldpc = 3;
+        }
+        else if( qam == MOD_64QAM && ldpc == LDPC_1_2)
+        {
+            context.qam_ldpc = 4;
+        }
+        else if( qam == MOD_64QAM)
+        {
+            context.qam_ldpc = 5;
+        }
+
+        grd_set_txmsg_mcs_change(context.e_bandwidth, context.qam_ldpc);        
     }
 }
 
@@ -810,7 +935,7 @@ static void grd_handle_MCS_mode_cmd(ENUM_RUN_MODE mode)
 */
 static void grd_handle_MCS_cmd(ENUM_BB_QAM qam, ENUM_BB_LDPC ldpc)
 {
-    grd_set_txmsg_qam_change(qam, context.CH_bandwidth, ldpc);
+    grd_set_txmsg_qam_change(qam, context.e_bandwidth, ldpc);
     dlog_info("qam, ldpc =%d %d", qam, ldpc);
 }
 
@@ -861,13 +986,55 @@ void BB_grd_notify_rc_skip_freq(uint32_t u32_rcfrq)
 }
 
 
+
+void BB_grd_handleRcSearchCmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
+{
+    uint8_t class   = pcmd->u8_configClass;
+    uint8_t item    = pcmd->u8_configItem;
+    uint32_t value  = pcmd->u32_configValue;
+    uint32_t value1 = pcmd->u32_configValue1;
+
+    uint8_t u8_rcArray[5] = {
+                        (value>>24)&0xff, (value>>16)&0xff, (value>>8)&0xff, value&0xff, 
+                        (value1&0xff)
+                      };
+
+    dlog_warning("%d %0.8x %0.2x", item, value, value1);
+
+    if (WIRELESS_AUTO_SEARCH_ID == class)
+    {
+        switch (item)
+        {
+            case RCID_DISCONNECT:
+                BB_setDisconnectRcId(u8_rcArray);
+                break;
+
+            case RCID_CONNECT_ID:
+                BB_setConnectRcId(u8_rcArray);
+                break;
+
+            case RCID_AUTO_SEARCH:
+                BB_setSearchSkyRcId();
+                break;
+
+            case RCID_SAVE_RCID:
+                grd_SetSaveRCId(u8_rcArray);
+                break;
+    
+           default:
+                dlog_warning("error item=%d", item);
+                break;
+        }
+    }
+}
+
 void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
 {
     uint8_t class  = pcmd->u8_configClass;
     uint8_t item   = pcmd->u8_configItem;
     uint32_t value = pcmd->u32_configValue;
 
-    dlog_info("class item value %d %d 0x%0.8x ", class, item, value);
+    //dlog_info("class item value %d %d 0x%0.8x ", class, item, value);
     if(class == WIRELESS_FREQ_CHANGE)
     {
         switch(item)
@@ -875,7 +1042,6 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
             case FREQ_BAND_MODE:
             {
                 context.e_rfbandMode = (ENUM_RF_BAND)value;
-                dlog_info("rfbandMode = %d", value);
                 break;
             }
 
@@ -924,7 +1090,8 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
             {
                 grd_handle_IT_mode_cmd( (ENUM_RUN_MODE)MANUAL);
                 BB_write_ItRegs( value );
-                BB_grd_notify_it_skip_freq_1();
+                BB_grd_NotifyItFreqByValue( value );
+
                 dlog_info("IT_CHANNEL_FREQ 0x%0.8x ", value);                
                 break;
             }
@@ -945,6 +1112,11 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
         }
     }
 
+    if (class == WIRELESS_AUTO_SEARCH_ID)
+    {
+        BB_grd_handleRcSearchCmd(pcmd);
+    }
+
     if(class == WIRELESS_MCS_CHANGE)
     {
         switch(item)
@@ -957,8 +1129,8 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 //For osd information
                 if ( context.brc_mode == MANUAL)
                 {
-                    context.brc_bps[0] = BB_get_bitrateByMcs(context.CH_bandwidth, context.qam_ldpc);
-                    context.brc_bps[1] = BB_get_bitrateByMcs(context.CH_bandwidth, context.qam_ldpc);                
+                    context.brc_bps[0] = BB_get_bitrateByMcs(context.e_bandwidth, context.qam_ldpc);
+                    context.brc_bps[1] = BB_get_bitrateByMcs(context.e_bandwidth, context.qam_ldpc);                
                 }
             }
     
@@ -967,7 +1139,7 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
             case MCS_MODULATION_SELECT:
             {
                     context.qam_ldpc = value;
-                    grd_set_txmsg_mcs_change(context.CH_bandwidth, value);
+                    grd_set_txmsg_mcs_change(context.e_bandwidth, value);
             }
             break;
 
@@ -1034,7 +1206,7 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 break;                
         }
     }
-	
+
     if(class == WIRELESS_MISC)
     {
         BB_handle_misc_cmds(pcmd);
@@ -1147,7 +1319,7 @@ static void BB_grd_OSDPlot(void)
     u8_data = BB_ReadReg(PAGE2, TX_2);
     osdptr->rc_modulation_mode = (u8_data >> 6) & 0x01;
     osdptr->rc_code_rate       = (u8_data >> 0) & 0x01;
-    osdptr->ch_bandwidth       = context.CH_bandwidth;         
+    osdptr->e_bandwidth        = context.e_bandwidth;         
     osdptr->in_debug           = context.u8_debugMode;
 
     memset(osdptr->sweep_energy, 0, sizeof(osdptr->sweep_energy));
@@ -1155,8 +1327,8 @@ static void BB_grd_OSDPlot(void)
 
     if(context.brc_mode == AUTO)
     {
-        osdptr->encoder_bitrate[0] = BB_get_bitrateByMcs(context.CH_bandwidth, context.qam_ldpc);
-        osdptr->encoder_bitrate[1] = BB_get_bitrateByMcs(context.CH_bandwidth, context.qam_ldpc);
+        osdptr->encoder_bitrate[0] = BB_get_bitrateByMcs(context.e_bandwidth, context.qam_ldpc);
+        osdptr->encoder_bitrate[1] = BB_get_bitrateByMcs(context.e_bandwidth, context.qam_ldpc);
     }
     else
     {
@@ -1177,9 +1349,9 @@ static void BB_grd_OSDPlot(void)
     osdptr->tail = 0xff;    //end of the writing
 }
 
-static void grd_set_IT_frq(ENUM_RF_BAND e_band, uint8_t ch)
+static void grd_set_ItFrq(ENUM_RF_BAND e_band, uint8_t ch)
 {
-    BB_set_ITfrq(e_band, ch);
+    BB_set_ItFrqByCh(e_band, ch);
     context.flag_mrc = 1;
 }
 
@@ -1204,7 +1376,7 @@ static void grd_calc_dist(void)
         {
             s_st_calcDistData.e_status = CALC_DIST_PREPARE;
             s_st_calcDistData.u32_cnt = 0;
-            s_st_calcDistData.u32_calcDistZero = ((BW_20M == (context.CH_bandwidth)) ? (DEFAULT_DIST_ZERO_20M) : (DEFAULT_DIST_ZERO_10M));
+            s_st_calcDistData.u32_calcDistZero = ((BW_20M == (context.e_bandwidth)) ? (DEFAULT_DIST_ZERO_20M) : (DEFAULT_DIST_ZERO_10M));
             break;
         }
         case CALI_ZERO:
@@ -1274,7 +1446,7 @@ static void grd_calc_dist(void)
     }
 }
 
-void grd_calc_dist_zero_calibration(void)
+static void grd_calc_dist_zero_calibration(void)
 {
     s_st_calcDistData.e_status = CALI_ZERO;
     s_st_calcDistData.u32_calcDistValue = 0;
@@ -1283,7 +1455,7 @@ void grd_calc_dist_zero_calibration(void)
     s_st_calcDistData.u32_lockCnt = 0;
 }
 
-void grd_set_calc_dist_zero_point(uint32_t value)
+static void grd_set_calc_dist_zero_point(uint32_t value)
 {
     s_st_calcDistData.u32_calcDistZero = value;
 }
@@ -1353,6 +1525,7 @@ static void grd_write_mask_code_to_sky(uint8_t enable, uint64_t *mask)
         BB_WriteReg(PAGE2, GRD_MASK_CODE + i, pu8_tmpAddr[i]);
     }
 }
+
 
 
 int grd_GetDistAverage(int *pDist)

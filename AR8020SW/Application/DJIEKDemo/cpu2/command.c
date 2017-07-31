@@ -7,6 +7,7 @@
 #include "cmsis_os.h"
 #include "bb_ctrl.h"
 #include "test_bb.h"
+#include "hal_bb.h"
 #include "hal_ret_type.h"
 #include "hal_nvic.h"
 #include "memory_config.h"
@@ -37,6 +38,30 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
                     strtoul(cmdArray[4], NULL, 0)   //param2
                     );
     }
+    else if(memcmp(cmdArray[0], "BB_GroundDis", strlen("BB_Grounddis")) == 0)
+    {
+        uint8_t rcid[5] = { strtoul(cmdArray[1], NULL, 0),
+                            strtoul(cmdArray[2], NULL, 0),
+                            strtoul(cmdArray[3], NULL, 0),
+                            strtoul(cmdArray[4], NULL, 0),
+                            strtoul(cmdArray[5], NULL, 0)};
+
+        HAL_BB_GroundDisConnectSkyByRcId(rcid);
+    }
+    else if(memcmp(cmdArray[0], "BB_Groundconnect", strlen("BB_Groundconnect")) == 0)
+    {
+        uint8_t rcid[5] = { strtoul(cmdArray[1], NULL, 0),
+                            strtoul(cmdArray[2], NULL, 0),
+                            strtoul(cmdArray[3], NULL, 0),
+                            strtoul(cmdArray[4], NULL, 0),
+                            strtoul(cmdArray[5], NULL, 0)};
+
+        HAL_BB_GroundConnectToSkyByRcId(rcid);
+    }
+    else if(memcmp(cmdArray[0], "BB_SearchRcId", strlen("BB_SearchRcId")) == 0)
+    {
+        HAL_BB_SearchRcId(strtoul(cmdArray[1], NULL, 0));
+    }
     else if ((memcmp(cmdArray[0], "set_loglevel", strlen("set_loglevel")) == 0))
     {
         command_set_loglevel(cmdArray[1], cmdArray[2]);
@@ -47,6 +72,9 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
         dlog_error("BB_uart10_spi_sel <value>");
         dlog_error("BB_add_cmds <type> <param0> <param1> <param2>");
         dlog_error("set_loglevel <cpuid> <loglevel>");
+        dlog_error("BB_GroundDis <RC value>");
+        dlog_error("BB_Groundconnect <RC value>");
+        dlog_error("BB_GroundSearchSkyRcId");
     }
 }
 
@@ -60,5 +88,3 @@ static void command_set_loglevel(char* cpu, char* loglevel)
 
     return;
 }
-
-

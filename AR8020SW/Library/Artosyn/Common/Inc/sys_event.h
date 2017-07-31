@@ -91,8 +91,8 @@ void SYS_EVENT_DumpAllListNodes(void);
 // Misc driver event
 
 #define SYS_EVENT_ID_H264_INPUT_FORMAT_CHANGE         (SYS_EVENT_LEVEL_MIDIUM_MASK | 0x0001 | SYS_EVENT_INTER_CORE_MASK)
-#define SYS_EVENT_ID_BB_SUPPORT_BR_CHANGE             (SYS_EVENT_LEVEL_MIDIUM_MASK | 0x0002)
-#define SYS_EVENT_ID_BB_DATA_BUFFER_FULL              (SYS_EVENT_LEVEL_MIDIUM_MASK | 0x0003 | SYS_EVENT_INTER_CORE_MASK)
+#define SYS_EVENT_ID_BB_SUPPORT_BR_CHANGE             (SYS_EVENT_LEVEL_MIDIUM_MASK | 0x0002  | SYS_EVENT_INTER_CORE_MASK)
+#define SYS_EVENT_ID_BB_EVENT                         (SYS_EVENT_LEVEL_MIDIUM_MASK | 0x0003)
 #define SYS_EVENT_ID_USER_CFG_CHANGE                  (SYS_EVENT_LEVEL_HIGH_MASK   | 0x0004 | SYS_EVENT_INTER_CORE_MASK)
 #define SYS_EVENT_ID_USB_PLUG_OUT                     (SYS_EVENT_LEVEL_HIGH_MASK   | 0x0005)
 #define SYS_EVENT_ID_NV_MSG                           (SYS_EVENT_LEVEL_MIDIUM_MASK | 0x0006 | SYS_EVENT_INTER_CORE_MASK)
@@ -176,6 +176,19 @@ typedef struct _SysEvent_DEV_PLUG_OUT
     uint8_t  reserve[SYS_EVENT_HANDLER_PARAMETER_LENGTH - 1];
 } STRU_SysEvent_DEV_PLUG_OUT;
 
+#define BB_LOCK_STATUS  0
+
+#define BB_GET_RCID     1
+
+typedef struct _SysEvent_DEV_BB_STATUS
+{
+    uint8_t  pid;   //
+    union
+    {
+        uint8_t  lockstatus;    //1: lock  0: unlock
+        uint8_t  rcid[5];
+    };
+} STRU_SysEvent_DEV_BB_STATUS;
 #ifdef  __cplusplus
 }
 #endif

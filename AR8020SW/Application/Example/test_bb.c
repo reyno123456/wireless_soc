@@ -5,6 +5,7 @@
 #include "debuglog.h"
 #include "interrupt.h"
 #include "hal_bb.h"
+#include "hal_gpio.h"
 #include "memory_config.h"
 #include "debuglog.h"
 #include "hal_bb.h"
@@ -52,9 +53,80 @@ void command_test_BB_uart(char *index_str)
     }
 }
 
-void command_test_SkyAutoSearhRcId(void)
-{
-    extern int BB_add_cmds(uint8_t type, uint32_t param0, uint32_t param1, uint32_t param2);
 
-    BB_add_cmds(16, 0, 0, 0);
+#define  BLUE_LED_GPIO      (67)
+#define  RED_LED_GPIO       (71)
+
+
+void BB_ledGpioInit(void)
+{
+    HAL_GPIO_SetMode(RED_LED_GPIO, HAL_GPIO_PIN_MODE2);
+    HAL_GPIO_OutPut(RED_LED_GPIO);
+
+    HAL_GPIO_SetMode(BLUE_LED_GPIO, HAL_GPIO_PIN_MODE2);
+    HAL_GPIO_OutPut(BLUE_LED_GPIO);
+
+    HAL_GPIO_SetPin(RED_LED_GPIO,  HAL_GPIO_PIN_RESET); //RED LED ON  
+    HAL_GPIO_SetPin(BLUE_LED_GPIO, HAL_GPIO_PIN_SET);   //BLUE LED OFF
+}
+
+void BB_ledLock(void)
+{
+    HAL_GPIO_SetPin(BLUE_LED_GPIO, HAL_GPIO_PIN_RESET);     //BLUE LED ON
+    HAL_GPIO_SetPin(RED_LED_GPIO, HAL_GPIO_PIN_SET);        //RED LED OFF
+}
+
+void BB_ledUnlock(void)
+{
+    HAL_GPIO_SetPin(BLUE_LED_GPIO, HAL_GPIO_PIN_SET );      //BLUE LED ON
+    HAL_GPIO_SetPin(RED_LED_GPIO,  HAL_GPIO_PIN_RESET);     //RED LED OFF
+}
+
+
+void BB_grdEventHandler(void *p)
+{
+    STRU_SysEvent_DEV_BB_STATUS *pstru_status = (STRU_SysEvent_DEV_BB_STATUS *)p;
+
+    if (pstru_status->pid == BB_LOCK_STATUS)
+    {
+        if (pstru_status->lockstatus == 1)
+        {
+            BB_ledLock();
+        }
+        else
+        {
+            BB_ledUnlock();
+        }
+    }
+    else if(pstru_status->pid == BB_GET_RCID)
+    {
+        dlog_info("Get rcid: 0x%0.2x 0x%0.2x 0x%0.2x 0x%0.2x 0x%0.2x", 
+                             pstru_status->rcid[0], pstru_status->rcid[1], 
+                             pstru_status->rcid[2], pstru_status->rcid[3], pstru_status->rcid[4]);
+
+        HAL_BB_GroundDisConnectSkyByRcId(pstru_status->rcid);
+    }
+}
+
+
+void BB_skyEventHandler(void *p)
+{
+    STRU_SysEvent_DEV_BB_STATUS *pstru_status = (STRU_SysEvent_DEV_BB_STATUS *)p;
+
+    if (pstru_status->pid == BB_LOCK_STATUS)
+    {
+        if (pstru_status->lockstatus == 1)
+        {
+            BB_ledLock();
+        }
+        else
+        {
+            BB_ledUnlock();
+        }
+    }
+    else if(pstru_status->pid == BB_GET_RCID)
+    {
+        dlog_warning("Get rcid: 0x%0.2x 0x%0.2x 0x%0.2x 0x%0.2x 0x%0.2x", pstru_status->rcid[0], pstru_status->rcid[1], 
+                                                                          pstru_status->rcid[2], pstru_status->rcid[3], pstru_status->rcid[4]);
+    }
 }

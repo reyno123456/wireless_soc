@@ -2,7 +2,7 @@
 #define __BB_API_
 
 #include "bb_types.h"
-#include "boardParameters.h"
+#include "bb_customerctx.h"
 
 
 /** 
@@ -10,7 +10,7 @@
  * @param[in]   en_mode: brief @ENUM_BB_MODE
  */
 
-void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg);
+void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg, STRU_CUSTOMER_CFG *pstru_customerCfg);
 
 
 /** 
@@ -127,12 +127,11 @@ int BB_GetDevInfo(void);
 int BB_SwtichOnOffCh(uint8_t u8_ch, uint8_t u8_data);
 
 
-void BB_grd_notify_it_skip_freq(ENUM_RF_BAND band, uint8_t u8_ch);
+void BB_grd_NotifyItFreqByCh(ENUM_RF_BAND band, uint8_t u8_ch);
 
 void BB_grd_notify_rc_skip_freq(uint32_t u32_rcfrq);
 
 
-void BB_grd_notify_it_skip_freq_1(void);
 
 uint8_t BB_get_bitrateByMcs(ENUM_CH_BW bw, uint8_t u8_mcs);
 
@@ -142,5 +141,7 @@ int BB_WrSpiChkFlag(void);
 
 int BB_ChkSpiFlag(void);
 
+
+int BB_GetRcId(uint8_t *pu8_rcId, uint8_t bufsize);
 
 #endif

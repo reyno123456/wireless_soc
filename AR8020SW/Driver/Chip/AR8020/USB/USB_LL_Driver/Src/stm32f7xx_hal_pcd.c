@@ -248,7 +248,6 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
     //HAL_NVIC_SetPriority(OTG0_HS_IRQn, 5, 0);
     /* Enable USBHS Interrupt */
     //HAL_NVIC_EnableIRQ(OTG0_HS_IRQn);
-    INTR_NVIC_SetIRQPriority(OTG_INTR0_VECTOR_NUM, 0);
     INTR_NVIC_EnableIRQ(OTG_INTR0_VECTOR_NUM);
   }
   else if(hpcd->Instance == USB_OTG1_HS)
@@ -257,7 +256,6 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
     //HAL_NVIC_SetPriority(OTG1_HS_IRQn, 5, 0);
     /* Enable USBFS Interrupt */
     //HAL_NVIC_EnableIRQ(OTG1_HS_IRQn);
-    INTR_NVIC_SetIRQPriority(OTG_INTR1_VECTOR_NUM, 0);
     INTR_NVIC_EnableIRQ(OTG_INTR1_VECTOR_NUM);
   }
 
