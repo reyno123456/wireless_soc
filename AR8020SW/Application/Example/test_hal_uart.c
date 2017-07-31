@@ -95,11 +95,20 @@ static void uart_send_hander( void const * argument)
     uint32_t len;
     uint32_t i;
 
+    HAL_RET_T ret;
+
     uint8_t* u8_data = NULL;
 
     if (flag_inited == 0)
     {
-        HAL_UART_Init(1, 4, uartRxCallBack);
+        ret = HAL_UART_Init(1, 4, uartRxCallBack);
+        dlog_info("line = %d, ret = %d", __LINE__, ret);
+        ret = HAL_UART_Init(1, 4, uartRxCallBack);
+        dlog_info("line = %d, ret = %d", __LINE__, ret);
+        ret = HAL_UART_Init(1, 4, uartRxCallBack);
+        dlog_info("line = %d, ret = %d", __LINE__, ret);
+        ret = HAL_UART_Init(1, 4, uartRxCallBack);
+        dlog_info("line = %d, ret = %d", __LINE__, ret);
     }
  
     while(1)

@@ -230,9 +230,13 @@ extern "C" {
 #define SRAM_BB_UART_COM_TX_LOW_PRIO_SHARE_MEMORY_ST_ADDR   (SRAM_BB_UART_COM_TX_HIGH_PRIO_SHARE_MEMORY_ST_ADDR + SRAM_BB_UART_COM_TX_HIGH_PRIO_SHARE_MEMORY_SIZE)
 #define SRAM_BB_UART_COM_TX_LOW_PRIO_SHARE_MEMORY_SIZE      0x800
 
-// 512 bytes, nonvolatile variable,stored in flash
+// 256 bytes, nonvolatile variable,stored in flash
 #define SRAM_NV_MEMORY_ST_ADDR       (SRAM_BB_UART_COM_TX_LOW_PRIO_SHARE_MEMORY_ST_ADDR + SRAM_BB_UART_COM_TX_LOW_PRIO_SHARE_MEMORY_SIZE)
-#define SRAM_NV_MEMORY_SIZE          0x200
+#define SRAM_NV_MEMORY_SIZE          0x100
+
+// 256 byte for periperial mutex reserved
+#define SRAM_PERIPERIAL_MUTEX_ADDR       (SRAM_NV_MEMORY_ST_ADDR + SRAM_NV_MEMORY_SIZE)
+#define SRAM_PERIPERIAL_MUTEX_SIZE          0x100
 
 /*4k system configure*/
 
