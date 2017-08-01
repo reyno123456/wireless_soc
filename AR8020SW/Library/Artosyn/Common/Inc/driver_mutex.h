@@ -16,14 +16,14 @@ typedef struct
 
 extern PERIPERIAL_MUTEX_DATA *g_s_periMutex;
 
-typedef enum _emu_Mutex_Periperal
+typedef enum _emu_driver_mutex
 {
     mutex_uart = 0,
     mutex_spi,
     mutex_can
-}emu_Mutex_Periperal;
+}emu_driver_mutex;
 
-void driver_mutex_set(emu_Mutex_Periperal driver, uint32_t channel);
-int8_t driver_mutex_get(emu_Mutex_Periperal driver, uint32_t channel);
+void driver_mutex_set(emu_driver_mutex driver, uint32_t channel);
+int8_t driver_mutex_get(emu_driver_mutex driver, uint32_t channel);
 
 #endif

@@ -93,7 +93,7 @@ HAL_RET_T HAL_UART_Init(ENUM_HAL_UART_COMPONENT e_uartComponent,
     if ( -1 == driver_mutex_get(mutex_uart, e_uartComponent) )
     {
         dlog_error("fail, e_uartComponent = %d", e_uartComponent);
-        // return -1;
+        return HAL_ERROR;
     }
     //support uart9 and uart10
     if (e_uartComponent > HAL_UART_COMPONENT_8)
