@@ -25,7 +25,7 @@ void driver_mutex_free(emu_driver_mutex driver, uint32_t channel)
         case mutex_can:
             g_s_periMutex->can &=~ (1 << (channel*3));
             g_s_periMutex->can &=~ (CPUINFO_GetLocalCpuId() << (channel*3+1));
-       break;
+        break;
 
         default:break;
     }
