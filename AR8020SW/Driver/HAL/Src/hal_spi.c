@@ -58,7 +58,7 @@ HAL_RET_T HAL_SPI_MasterInit(ENUM_HAL_SPI_COMPONENT e_spiComponent,
     if ( -1 == driver_mutex_get(mutex_spi, e_spiComponent) )
     {
         dlog_error("fail, e_spiComponent = %d", e_spiComponent);
-        return HAL_ERROR;
+        return HAL_OCCUPIED;
     }
     driver_mutex_set(mutex_spi, (uint32_t)e_spiComponent);
    

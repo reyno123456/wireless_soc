@@ -92,7 +92,7 @@ HAL_RET_T HAL_UART_Init(ENUM_HAL_UART_COMPONENT e_uartComponent,
     if ( -1 == driver_mutex_get(mutex_uart, e_uartComponent) )
     {
         dlog_error("fail, e_uartComponent = %d", e_uartComponent);
-        return HAL_ERROR;
+        return HAL_OCCUPIED;
     }
     driver_mutex_set(mutex_uart, (uint32_t)e_uartComponent);
     

@@ -38,7 +38,7 @@ HAL_RET_T HAL_CAN_Init(STRU_HAL_CAN_CONFIG *st_halCanConfig)
     if ( -1 == driver_mutex_get(mutex_can, st_halCanConfig->e_halCanComponent) )
     {
         dlog_error("fail, channel = %d", st_halCanConfig->e_halCanComponent);
-        return HAL_ERROR;
+        return HAL_OCCUPIED;
     }
     driver_mutex_set(mutex_can, (uint32_t)(st_halCanConfig->e_halCanComponent));
 

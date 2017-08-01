@@ -82,19 +82,29 @@ int8_t driver_mutex_get(emu_driver_mutex driver, uint32_t channel)
         break;
 
         case mutex_spi:
-            if (g_s_periMutex->spi & (1 << channel))
+            if( g_s_periMutex->spi & (1 << channel) )
             {
-                dlog_error("spi channel:%d occupied", channel);
-                return -1;
+                cpu_id = ( (g_s_periMutex->spi & cpu_id_mask) >> (channel*3 + 1) );
+                if (cpu_id != CPUINFO_GetLocalCpuId())
+                {
+                    dlog_error("spi channel:%d occupied", channel);
+                    return -1;
+                }
             }
+
         break;
 
         case mutex_can:
-            if (g_s_periMutex->can & (1 << channel))
+            if( g_s_periMutex->can & (1 << channel) )
             {
-                dlog_error("can channel:%d occupied", channel);
-                return -1;
+                cpu_id = ( (g_s_periMutex->can & cpu_id_mask) >> (channel*3 + 1) );
+                if (cpu_id != CPUINFO_GetLocalCpuId())
+                {
+                    dlog_error("can channel:%d occupied", channel);
+                    return -1;
+                }
             }
+
         break;
 
         default:break;

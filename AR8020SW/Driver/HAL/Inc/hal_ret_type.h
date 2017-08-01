@@ -16,7 +16,7 @@ typedef uint8_t HAL_BOOL_T;
 
 #define HAL_TIME_OUT                                (0xFF)
 #define HAL_BUSY                                    (0xFE)
-#define HAL_ERROR                                   (0xFD)
+#define HAL_OCCUPIED                                (0xFD)
 
 
 #define HAL_I2C_ERR_MASK                            (0x10000)
