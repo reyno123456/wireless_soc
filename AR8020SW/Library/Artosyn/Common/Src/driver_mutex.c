@@ -8,6 +8,29 @@
 
 PERIPERIAL_MUTEX_DATA *g_s_periMutex = (PERIPERIAL_MUTEX_DATA*)(SRAM_PERIPERIAL_MUTEX_ADDR);
 
+void driver_mutex_free(emu_driver_mutex driver, uint32_t channel)
+{
+    switch (driver)
+    {
+        case mutex_uart:
+            g_s_periMutex->uart &=~ (1 << (channel*3));
+            g_s_periMutex->uart &=~ (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        break;
+
+        case mutex_spi:
+            g_s_periMutex->spi &=~ (1 << (channel*3));
+            g_s_periMutex->spi &=~ (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        break;
+
+        case mutex_can:
+            g_s_periMutex->can &=~ (1 << (channel*3));
+            g_s_periMutex->can &=~ (CPUINFO_GetLocalCpuId() << (channel*3+1));
+       break;
+
+        default:break;
+    }
+}
+
 void driver_mutex_set(emu_driver_mutex driver, uint32_t channel)
 {
     switch (driver)

@@ -95,13 +95,17 @@ HAL_RET_T HAL_UART_Init(ENUM_HAL_UART_COMPONENT e_uartComponent,
         dlog_error("fail, e_uartComponent = %d", e_uartComponent);
         return HAL_ERROR;
     }
+    driver_mutex_set(mutex_uart, (uint32_t)e_uartComponent);
+
     //support uart9 and uart10
     if (e_uartComponent > HAL_UART_COMPONENT_8)
     {
+        driver_mutex_free(mutex_uart, (uint32_t)e_uartComponent);
         return HAL_UART_ERR_INIT;
     }
     if (e_uartBaudr > HAL_UART_BAUDR_460800)
     {
+        driver_mutex_free(mutex_uart, (uint32_t)e_uartComponent);
         return HAL_UART_ERR_INIT;
     }
     
@@ -129,8 +133,6 @@ HAL_RET_T HAL_UART_Init(ENUM_HAL_UART_COMPONENT e_uartComponent,
         HAL_NVIC_EnableIrq(u8_uartVecNum);
     }
  
-    driver_mutex_set(mutex_uart, (uint32_t)e_uartComponent);
-
     return HAL_OK;
 }
 

@@ -23,6 +23,7 @@ typedef enum _emu_driver_mutex
     mutex_can
 }emu_driver_mutex;
 
+void driver_mutex_free(emu_driver_mutex driver, uint32_t channel);
 void driver_mutex_set(emu_driver_mutex driver, uint32_t channel);
 int8_t driver_mutex_get(emu_driver_mutex driver, uint32_t channel);
 
