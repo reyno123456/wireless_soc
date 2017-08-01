@@ -79,16 +79,15 @@ HAL_RET_T HAL_UART_Init(ENUM_HAL_UART_COMPONENT e_uartComponent,
     uint8_t u8_uartCh;
     uint8_t u8_uartVecNum;
 
-    dlog_info("addr of g_s_periMutex = %p", g_s_periMutex);
-    dlog_info("addr of g_s_periMutex->uart = 0x%08x", g_s_periMutex->uart);
-    dlog_info("addr of g_s_periMutex->spi = 0x%08x", g_s_periMutex->spi);
-    dlog_info("addr of g_s_periMutex->can = 0x%08x", g_s_periMutex->can);
-    
-    static int loop = 0;
-
-    loop++;
-
-    dlog_info("loop = %d", loop);
+    //support uart9 and uart10
+    if (e_uartComponent > HAL_UART_COMPONENT_8)
+    {
+        return HAL_UART_ERR_INIT;
+    }
+    if (e_uartBaudr > HAL_UART_BAUDR_460800)
+    {
+        return HAL_UART_ERR_INIT;
+    }
 
     if ( -1 == driver_mutex_get(mutex_uart, e_uartComponent) )
     {
@@ -96,18 +95,6 @@ HAL_RET_T HAL_UART_Init(ENUM_HAL_UART_COMPONENT e_uartComponent,
         return HAL_ERROR;
     }
     driver_mutex_set(mutex_uart, (uint32_t)e_uartComponent);
-
-    //support uart9 and uart10
-    if (e_uartComponent > HAL_UART_COMPONENT_8)
-    {
-        driver_mutex_free(mutex_uart, (uint32_t)e_uartComponent);
-        return HAL_UART_ERR_INIT;
-    }
-    if (e_uartBaudr > HAL_UART_BAUDR_460800)
-    {
-        driver_mutex_free(mutex_uart, (uint32_t)e_uartComponent);
-        return HAL_UART_ERR_INIT;
-    }
     
     u8_uartCh = (uint8_t)(e_uartComponent);
     u8_uartVecNum = u8_uartCh + HAL_NVIC_UART_INTR0_VECTOR_NUM;

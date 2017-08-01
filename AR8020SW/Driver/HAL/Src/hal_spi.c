@@ -15,7 +15,7 @@ History:
 #include "interrupt.h"
 #include "systicks.h"
 #include "hal.h"
-
+#include "driver_mutex.h"
 
 /**
 * @brief  The SPI initialization function which must be called 
@@ -54,6 +54,13 @@ HAL_RET_T HAL_SPI_MasterInit(ENUM_HAL_SPI_COMPONENT e_spiComponent,
     {
         return HAL_SPI_ERR_INIT;
     }
+
+    if ( -1 == driver_mutex_get(mutex_spi, e_spiComponent) )
+    {
+        dlog_error("fail, e_spiComponent = %d", e_spiComponent);
+        return HAL_ERROR;
+    }
+    driver_mutex_set(mutex_spi, (uint32_t)e_spiComponent);
    
     // BAUDR
     st_spiInit.clk_Mhz = pst_spiInitInfo->u16_halSpiBaudr;

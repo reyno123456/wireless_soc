@@ -59,6 +59,12 @@ int8_t driver_mutex_get(emu_driver_mutex driver, uint32_t channel)
     uint32_t cpu_id;
     uint32_t cpu_id_mask = 0;
 
+/*
+    dlog_info("addr of g_s_periMutex = %p", g_s_periMutex);
+    dlog_info("addr of g_s_periMutex->uart = 0x%08x", g_s_periMutex->uart);
+    dlog_info("addr of g_s_periMutex->spi = 0x%08x", g_s_periMutex->spi);
+    dlog_info("addr of g_s_periMutex->can = 0x%08x", g_s_periMutex->can);
+*/
     cpu_id_mask |= (3 << ((channel*3)+1));
     
     switch (driver)
