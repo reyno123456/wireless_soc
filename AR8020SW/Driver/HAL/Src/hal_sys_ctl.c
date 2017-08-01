@@ -22,6 +22,8 @@ History:
 #include "reg_rw.h"
 #include "hal_nvic.h"
 #include "interrupt.h"
+#include "driver_mutex.h"
+
 
 static STRU_HAL_SYS_CTL_CONFIG s_st_defHalSysCtlCfg =
 {
@@ -159,6 +161,8 @@ HAL_RET_T HAL_SYS_CTL_Init(STRU_HAL_SYS_CTL_CONFIG *pst_usrHalSysCtlCfg)
             Reg_Write32(0xA0030080, 0x81D00000); // SDRAM offset for channel 1
             Reg_Write32(0xA0030084, 0x00000036); // SDRAM 1MB size for both channel 0 and channel 1
         }
+
+        memset(g_s_periMutex, 0, sizeof(PERIPERIAL_MUTEX_DATA));
     }
     
     // Inter core SRAM init

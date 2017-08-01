@@ -14,11 +14,9 @@ typedef uint8_t HAL_BOOL_T;
 
 #define HAL_OK                                      (0)
 
-#define HAL_TRUE                                    (1)
-#define HAL_FALSE                                   (0)
-
 #define HAL_TIME_OUT                                (0xFF)
 #define HAL_BUSY                                    (0xFE)
+#define HAL_ERROR                                   (0xFD)
 
 
 #define HAL_I2C_ERR_MASK                            (0x10000)
@@ -134,7 +132,11 @@ typedef uint8_t HAL_BOOL_T;
 #define HAL_NORFLASH_ERR_MASK                       (0x10500)
 #define HAL_NORFLASH_ERR_ERASE                      (HAL_NORFLASH_ERR_MASK | 0x1)
 
+#define HAL_PERIPERAL_MUTEX_ERR_MASK                (0x10600)
+#define HAL_PERIPERAL_MUTEX_BUSY                    (HAL_PERIPERAL_MUTEX_ERR_MASK | 0x1)
 
+#define HAL_TRUE                                    (1)
+#define HAL_FALSE                                   (0)
 #ifdef __cplusplus
 }
 #endif

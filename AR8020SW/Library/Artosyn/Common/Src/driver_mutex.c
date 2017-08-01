@@ -7,7 +7,7 @@
 
 PERIPERIAL_MUTEX_DATA *g_s_periMutex = (PERIPERIAL_MUTEX_DATA*)(SRAM_PERIPERIAL_MUTEX_ADDR);
 
-void periperal_set_occupied(emu_Mutex_Periperal driver, uint32_t channel)
+void driver_mutex_set(emu_Mutex_Periperal driver, uint32_t channel)
 {
     switch (driver)
     {
@@ -27,7 +27,7 @@ void periperal_set_occupied(emu_Mutex_Periperal driver, uint32_t channel)
     }
 }
 
-int8_t periperal_get_free(emu_Mutex_Periperal driver, uint32_t channel)
+int8_t driver_mutex_get(emu_Mutex_Periperal driver, uint32_t channel)
 {
     switch (driver)
     {

@@ -84,10 +84,16 @@ HAL_RET_T HAL_UART_Init(ENUM_HAL_UART_COMPONENT e_uartComponent,
     dlog_info("addr of g_s_periMutex->spi = 0x%08x", g_s_periMutex->spi);
     dlog_info("addr of g_s_periMutex->can = 0x%08x", g_s_periMutex->can);
     
-    if ( -1 == periperal_get_free(mutex_uart, e_uartComponent) )
+    static int loop = 0;
+
+    loop++;
+
+    dlog_info("loop = %d", loop);
+
+    if ( -1 == driver_mutex_get(mutex_uart, e_uartComponent) )
     {
-        dlog_error("fail");
-        //return -1;
+        dlog_error("fail, e_uartComponent = %d", e_uartComponent);
+        // return -1;
     }
     //support uart9 and uart10
     if (e_uartComponent > HAL_UART_COMPONENT_8)
@@ -123,7 +129,7 @@ HAL_RET_T HAL_UART_Init(ENUM_HAL_UART_COMPONENT e_uartComponent,
         HAL_NVIC_EnableIrq(u8_uartVecNum);
     }
  
-    periperal_set_occupied(mutex_uart, (uint32_t)e_uartComponent);
+    driver_mutex_set(mutex_uart, (uint32_t)e_uartComponent);
 
     return HAL_OK;
 }
