@@ -13,6 +13,7 @@
 #include "hal_nvic.h"
 #include "testhal_dma.h"
 #include "test_sd.h"
+#include "testhal_timer.h"
 
 void command_readMemory(char *addr);
 void command_writeMemory(char *addr, char *value);
@@ -78,7 +79,11 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     {
         command_sd_release();
     }
-    /* error command */
+    else if (memcmp(cmdArray[0], "Testtimer_cpu1", strlen("Testtimer_cpu1")) == 0)
+    {
+        commandhal_TestTim(cmdArray[1], cmdArray[2]);
+    }
+/* error command */
     else if (memcmp(cmdArray[0], "help", strlen("help")) == 0)
     {
         dlog_error("Please use the commands like:");

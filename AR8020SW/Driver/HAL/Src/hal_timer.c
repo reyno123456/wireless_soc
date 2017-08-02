@@ -19,6 +19,8 @@ History:
 #include "hal_ret_type.h"
 #include "timer.h"
 #include "hal_timer.h"
+#include "debuglog.h"
+#include "driver_mutex.h"
 
 void TIMER_ClearNvic(uint32_t e_vectorNum);
 
@@ -37,6 +39,13 @@ HAL_RET_T HAL_TIMER_RegisterTimer(ENUM_HAL_TIMER_NUM e_timerNum, uint32_t u32_ti
     {
         return HAL_TIMER_ERR_UNKNOWN;
     }
+
+    if ( -1 == driver_mutex_get(mutex_timer, e_timerNum) )
+    {
+        dlog_error("fail, channel = %d", e_timerNum);
+        return HAL_OCCUPIED;
+    }
+    driver_mutex_set(mutex_timer, (uint32_t)e_timerNum);
 
     init_timer_st st_timer;
     memset(&st_timer,0,sizeof(init_timer_st));

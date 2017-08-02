@@ -750,6 +750,33 @@ void command_malloc(char *size)
     dlog_info("RINTSTS = 0x%08x", read_reg32((uint32_t *)(0x42000000 + 0x44)));
     dlog_info("cdetect = 0x%08x", read_reg32((uint32_t *)(0x42000000 + 0x50)));
 
+    typedef struct
+    {
+        uint32_t timer0to7;
+        uint32_t timer8to15;
+        uint32_t timer16to23;
+    }TIMER_MUTEX_DATA;
+
+    typedef struct
+    {
+        uint32_t uart;
+        uint32_t spi;
+        uint32_t can;
+        uint32_t i2c;
+        uint32_t pwm;
+        TIMER_MUTEX_DATA s_timer;
+        uint32_t nor_flash;
+    }DRIVER_MUTEX_DATA;
+
+    extern DRIVER_MUTEX_DATA *g_s_periMutex;
+    dlog_info("addr of g_s_periMutex = %p", g_s_periMutex);
+    dlog_info("addr of g_s_periMutex->uart = 0x%08x", g_s_periMutex->uart);
+    dlog_info("addr of g_s_periMutex->spi = 0x%08x", g_s_periMutex->spi);
+    dlog_info("addr of g_s_periMutex->can = 0x%08x", g_s_periMutex->can);
+    dlog_info("addr of g_s_periMutex->timer0to7 = 0x%08x", g_s_periMutex->s_timer.timer0to7);
+    dlog_info("addr of g_s_periMutex->timer8to15 = 0x%08x", g_s_periMutex->s_timer.timer8to15);
+    dlog_info("addr of g_s_periMutex->timer16to23 = 0x%08x", g_s_periMutex->s_timer.timer16to23);
+
 	return;
 }
 

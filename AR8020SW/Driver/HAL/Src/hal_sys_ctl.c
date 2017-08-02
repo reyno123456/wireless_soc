@@ -162,7 +162,7 @@ HAL_RET_T HAL_SYS_CTL_Init(STRU_HAL_SYS_CTL_CONFIG *pst_usrHalSysCtlCfg)
             Reg_Write32(0xA0030084, 0x00000036); // SDRAM 1MB size for both channel 0 and channel 1
         }
 
-        memset(g_s_periMutex, 0, sizeof(PERIPERIAL_MUTEX_DATA));
+        memset(g_s_periMutex, 0, sizeof(DRIVER_MUTEX_DATA));
     }
     
     // Inter core SRAM init
