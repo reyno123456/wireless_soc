@@ -1,3 +1,13 @@
+/*****************************************************************************
+Copyright: 2016-2020, Artosyn. Co., Ltd.
+File name: driver_mutex.h
+Description: 
+Author: Wumin @ Artosy Software Team
+Version: 0.0.1
+Date: 2017/17/19
+History:
+         0.0.1    2017/08/02    for driver mutex used
+*****************************************************************************/
 #ifndef _DRIVER_MUTEX_H
 #define _DRIVER_MUTEX_H
 
@@ -14,7 +24,6 @@ typedef struct
     uint32_t spi;
     uint32_t can;
     uint32_t i2c;
-    uint32_t pwm;
     TIMER_MUTEX_DATA s_timer;
     uint32_t nor_flash;
 }DRIVER_MUTEX_DATA;
@@ -25,7 +34,6 @@ typedef enum _emu_driver_mutex
     mutex_spi,
     mutex_can,
     mutex_i2c,
-    mutex_pwm,
     mutex_timer,
     mutex_nor_flash
 }emu_driver_mutex;
