@@ -18,7 +18,8 @@ History:
 #include "hal_ret_type.h"
 #include "timer.h"
 #include "hal_pwm.h"
-
+#include "debuglog.h"
+#include "driver_mutex.h"
 /**
 * @brief    register pwm
 * @param    e_pwmNum: pwm number, the right number should be 0-127.
@@ -34,6 +35,20 @@ HAL_RET_T HAL_PWM_RegisterPwm(ENUM_HAL_PWM_NUM e_pwmNum, uint32_t u32_lowus, uin
     {
         return HAL_PWM_ERR_UNKNOWN;
     }
+
+    if ( -1 == driver_mutex_get(mutex_timer, e_pwmNum) )
+    {
+        dlog_error("fail, timer for pwm channel = %d", e_pwmNum);
+        return HAL_OCCUPIED;
+    }
+    driver_mutex_set(mutex_timer, (uint32_t)e_pwmNum);
+
+    if ( -1 == driver_mutex_get(mutex_pwm, e_pwmNum) )
+    {
+        dlog_error("fail, pwm channel = %d", e_pwmNum);
+        return HAL_OCCUPIED;
+    }
+    driver_mutex_set(mutex_pwm, (uint32_t)e_pwmNum);
 
     init_timer_st st_pwm;
     memset(&st_pwm,0,sizeof(init_timer_st));

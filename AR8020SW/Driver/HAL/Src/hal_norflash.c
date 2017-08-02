@@ -10,15 +10,21 @@ History:
 *****************************************************************************/
 
 #include <stdint.h>
-
 #include "nor_flash.h"
 #include "debuglog.h"
-
 #include "hal_ret_type.h"
 #include "hal_norflash.h"
+#include "driver_mutex.h"
 
 HAL_RET_T HAL_NORFLASH_Init(void)
 {
+    if ( -1 == driver_mutex_get(mutex_nor_flash, 0) )
+    {
+        dlog_error("fail");
+        return HAL_OCCUPIED;
+    }
+    driver_mutex_set(mutex_nor_flash, 0);
+
     NOR_FLASH_Init();
 }
 

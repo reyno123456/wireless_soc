@@ -14,6 +14,7 @@
 #include "testhal_dma.h"
 #include "test_sd.h"
 #include "testhal_timer.h"
+#include "testhal_pwm.h"
 
 void command_readMemory(char *addr);
 void command_writeMemory(char *addr, char *value);
@@ -82,6 +83,10 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     else if (memcmp(cmdArray[0], "Testtimer_cpu1", strlen("Testtimer_cpu1")) == 0)
     {
         commandhal_TestTim(cmdArray[1], cmdArray[2]);
+    }
+    else if (memcmp(cmdArray[0], "Testpwm_cpu1", strlen("Testpwm_cpu1")) == 0)
+    {
+        commandhal_TestPwm(cmdArray[1], cmdArray[2], cmdArray[3]);
     }
 /* error command */
     else if (memcmp(cmdArray[0], "help", strlen("help")) == 0)

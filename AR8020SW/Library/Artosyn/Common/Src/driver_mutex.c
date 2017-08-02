@@ -50,6 +50,11 @@ void driver_mutex_free(emu_driver_mutex driver, uint32_t channel)
             }
         break;
 
+        case mutex_nor_flash:
+            g_s_periMutex->nor_flash &=~ (1 << (channel*3));
+            g_s_periMutex->nor_flash &=~ (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        break;
+
         default:break;
     }
 }
@@ -95,6 +100,12 @@ void driver_mutex_set(emu_driver_mutex driver, uint32_t channel)
                 g_s_periMutex->s_timer.timer16to23 |= (CPUINFO_GetLocalCpuId() << ((channel-16)*3+1));
             }
         break;
+
+        case mutex_nor_flash:
+            g_s_periMutex->nor_flash |= (1 << (channel*3));
+            g_s_periMutex->nor_flash |= (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        break;
+
         default:break;
     }
 }
@@ -206,6 +217,18 @@ int8_t driver_mutex_get(emu_driver_mutex driver, uint32_t channel)
                         dlog_error("timer channel:%d occupied", channel);
                         return -1;
                     }
+                }
+            }
+        break;
+
+        case mutex_nor_flash:
+            if( g_s_periMutex->nor_flash & (1 << (channel*3)) )
+            {
+                cpu_id = ( (g_s_periMutex->nor_flash & cpu_id_mask) >> (channel*3 + 1) );
+                if (cpu_id != CPUINFO_GetLocalCpuId())
+                {
+                    dlog_error("nor flash occupied");
+                    return -1;
                 }
             }
         break;
