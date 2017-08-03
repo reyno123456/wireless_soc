@@ -9,5 +9,6 @@
 *.depend
 *.mk
 .nfs*
+*.ini
 AR8020SW/Output/
 .APPLICATION_SCENARIO
