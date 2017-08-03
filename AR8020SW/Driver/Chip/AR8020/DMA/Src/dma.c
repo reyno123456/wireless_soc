@@ -14,15 +14,14 @@ History:
                               channel cfg_low ip have been fixed by 0x18B1FFF5
                  2017/6/28    remove some dump code
 *****************************************************************************/
+#include <string.h>
 #include "dma.h"
 #include "debuglog.h"
 #include "reg_rw.h"
 #include "cpu_info.h"
 #include "interrupt.h"
 #include "memory_config.h"
-#include "cmsis_os.h"
 #include "systicks.h"
-#include <string.h>
 #include "data_type.h"
 
 typedef struct

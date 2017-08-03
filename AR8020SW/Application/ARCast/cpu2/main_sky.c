@@ -28,6 +28,7 @@ int main(void)
     CONSOLE_Init();   
     dlog_info("cpu2 start!!! \n");
 
+/*
     STRU_HAL_H264_CONFIG st_h264Cfg;
     st_h264Cfg.u8_view0En = 1;
     st_h264Cfg.u8_view0Gop = 10;
@@ -43,6 +44,7 @@ int main(void)
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_skyEventHandler);
     
     HAL_BB_InitSky(NULL);
+*/
 
     for( ;; )
     {

@@ -16,6 +16,7 @@
 #include "hal_nv.h"
 #include "hal_dma.h"
 #include "hal_sd.h"
+#include "hal_rtc.h"
 
 void console_init(uint32_t uart_num, uint32_t baut_rate)
 {
@@ -79,6 +80,8 @@ int main(void)
     HAL_NV_Init();
 
 	HAL_DMA_init();
+    HAL_RTC_INIT();
+
 /*
 	HAL_SD_Init();
 

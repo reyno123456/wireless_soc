@@ -7,6 +7,7 @@
 #include "hal_sys_ctl.h"
 #include "hal.h"
 #include "test_bb.h"
+#include "hal_dma.h"
 
 void console_init(uint32_t uart_num, uint32_t baut_rate)
 {
@@ -44,6 +45,7 @@ int main(void)
     
     HAL_BB_InitSky(NULL);
 */
+    HAL_DMA_init();
 
 	dlog_set_output_level(LOG_LEVEL_WARNING);
 

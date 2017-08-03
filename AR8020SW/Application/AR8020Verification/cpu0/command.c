@@ -39,6 +39,7 @@
 #include "testhal_dma.h"
 #include "ar_freertos_specific.h"
 #include "hal.h"
+#include "hal_rtc.h"
 
 
 void command_readMemory(char *addr);
@@ -428,6 +429,32 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     {
         command_TestLocalIrq();
     }  
+    else if ((memcmp(cmdArray[0], "srtc", strlen("srtc")) == 0))
+    {
+        
+        STRU_HAL_UTC_CALENDAR *pst_halRtcCalendar = (STRU_HAL_UTC_CALENDAR *)malloc(sizeof(STRU_HAL_UTC_CALENDAR) * sizeof(uint8_t));
+        pst_halRtcCalendar->u16_year = strtoul(cmdArray[1], NULL, 0);
+        pst_halRtcCalendar->u8_month = strtoul(cmdArray[2],NULL,0);
+        pst_halRtcCalendar->u8_day = strtoul(cmdArray[3],NULL,0);
+        pst_halRtcCalendar->u8_hour = strtoul(cmdArray[4],NULL,0);
+        pst_halRtcCalendar->u8_minute = strtoul(cmdArray[5],NULL,0);
+        pst_halRtcCalendar->u8_second = strtoul(cmdArray[6],NULL,0);
+        HAL_UTC_Set(pst_halRtcCalendar);
+        free(pst_halRtcCalendar);
+    }
+    else if ((memcmp(cmdArray[0], "grtc", strlen("grtc")) == 0))
+    {
+
+        STRU_HAL_UTC_CALENDAR *pst_halRtcCalendar = (STRU_HAL_UTC_CALENDAR *)malloc(sizeof(STRU_HAL_UTC_CALENDAR) * sizeof(uint8_t));
+        HAL_UTC_Get(pst_halRtcCalendar);
+        dlog_info("utc %d_%d_%d %d:%d:%d ", pst_halRtcCalendar->u16_year,
+                                            pst_halRtcCalendar->u8_month,
+                                            pst_halRtcCalendar->u8_day,
+                                            pst_halRtcCalendar->u8_hour,
+                                            pst_halRtcCalendar->u8_minute,
+                                            pst_halRtcCalendar->u8_second);
+        free(pst_halRtcCalendar);
+    }
     else if ((memcmp(cmdArray[0], "set_loglevel", strlen("set_loglevel")) == 0))
     {
         command_set_loglevel(cmdArray[1], cmdArray[2]);

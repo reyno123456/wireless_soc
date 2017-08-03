@@ -6,6 +6,7 @@
 #include "hal_uart.h"
 #include "hal_sd.h"
 #include "common_func.h"
+#include "hal_dma.h"
 
 void CONSOLE_Init(void)
 {    
@@ -28,6 +29,8 @@ int main(void)
     HAL_SD_Fatfs_Init();
 /*     HAL_Delay(1000); */
     DLOG_Critical("cpu1 start!!!, time = %s", __TIME__);
+
+	HAL_DMA_init();
 
     /* We should never get here as control is now taken by the scheduler */
     for( ;; )

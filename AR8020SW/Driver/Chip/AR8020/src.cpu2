@@ -27,7 +27,8 @@ SRC_C := SysCtl/Src/reg_rw.c \
          BB/Src/bb_sys_param.c \
          BB/Src/bb_ctrl.c \
          BB/Src/bb_spi_com.c \
-         BB/Src/bb_uart_com.c
+         BB/Src/bb_uart_com.c \
+         DMA/Src/dma.c
 
 INCDIRS := -IUART/Inc \
            -IH264Encoder/Inc \
@@ -45,4 +46,5 @@ INCDIRS := -IUART/Inc \
            -I$(TOP_DIR)/Driver/Chip/AR8020/WirelessInfo/Inc \
            -I$(TOP_DIR)/Driver/HAL/Inc \
            -I$(TOP_DIR)/Configure/Include \
-           -I$(TOP_DIR)/Driver/Board
+           -I$(TOP_DIR)/Driver/Board \
+           -I$(TOP_DIR)/Driver/Chip/AR8020/DMA/Inc
