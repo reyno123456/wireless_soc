@@ -80,7 +80,6 @@ int main(void)
     HAL_NV_Init();
 
 	HAL_DMA_init();
-    HAL_RTC_INIT();
 
 /*
 	HAL_SD_Init();

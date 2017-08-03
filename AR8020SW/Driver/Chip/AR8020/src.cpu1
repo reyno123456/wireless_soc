@@ -46,7 +46,9 @@ SRC_C := SysCtl/Src/reg_rw.c \
          USB/USB_LL_Driver/Src/stm32f7xx_hal_pcd_ex.c \
          USB/USB_LL_Driver/Src/stm32f7xx_hal_hcd.c \
          SD/Src/sd_core.c \
-         SD/Src/sd_host.c
+         SD/Src/sd_host.c \
+         SysCtl/Src/rtc.c
+
 
 
 INCDIRS := -ISysCtl/Inc \

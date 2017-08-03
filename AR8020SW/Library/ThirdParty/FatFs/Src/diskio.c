@@ -36,10 +36,13 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdlib.h>
+#include <stdint.h>
 #include "diskio.h"
 #include "ff_gen_drv.h"
 #include "systicks.h"
 #include "debuglog.h"
+#include "hal_rtc.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -159,6 +162,7 @@ __attribute__((weak)) DWORD get_fattime (void)
     dlog_info("%d time = %d", __LINE__, SysTicks_GetTickCount());
     return (DWORD)SysTicks_GetTickCount();
 #endif
+#if 0
     return ((2017UL-1980) << 25) /* Year = 2017 */  
             | (11UL << 21) /* Month = 11 */  
             | (2UL << 16) /* Day = 2 */  
@@ -166,7 +170,23 @@ __attribute__((weak)) DWORD get_fattime (void)
             | (0U << 5) /* Min = 0 */  
             | (0U >> 1) /* Sec = 0 */  
     ;  
-/*   return 0; */
+#endif
+
+    STRU_HAL_UTC_CALENDAR *pst_halRtcCalendar = 
+        (STRU_HAL_UTC_CALENDAR *)malloc(sizeof(STRU_HAL_UTC_CALENDAR) * sizeof(uint8_t));
+    DWORD fatfs_time;
+
+    HAL_UTC_Get(pst_halRtcCalendar);
+    fatfs_time = (pst_halRtcCalendar->u16_year-1980) << 25 |
+                 pst_halRtcCalendar->u8_month << 21 |
+                 pst_halRtcCalendar->u8_day << 16 |
+                 pst_halRtcCalendar->u8_hour << 11 |
+                 pst_halRtcCalendar->u8_minute << 5 |
+                 pst_halRtcCalendar->u8_second >> 1;
+
+    free(pst_halRtcCalendar);
+
+    return fatfs_time;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

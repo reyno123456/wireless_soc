@@ -7,6 +7,7 @@
 #include "hal_sd.h"
 #include "common_func.h"
 #include "hal_dma.h"
+#include "hal_rtc.h"
 
 void CONSOLE_Init(void)
 {    
@@ -27,6 +28,7 @@ int main(void)
     CONSOLE_Init();
     HAL_SD_Init();
     HAL_SD_Fatfs_Init();
+    HAL_RTC_INIT();
 /*     HAL_Delay(1000); */
     DLOG_Critical("cpu1 start!!!, time = %s", __TIME__);
 

@@ -18,6 +18,8 @@ extern "C"
 {
 #endif
 
+#include "hal.h"
+
 typedef struct
 {
     uint16_t  u16_year;
