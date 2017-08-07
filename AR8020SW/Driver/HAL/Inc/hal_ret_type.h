@@ -14,9 +14,6 @@ typedef uint8_t HAL_BOOL_T;
 
 #define HAL_OK                                      (0)
 
-#define HAL_TRUE                                    (1)
-#define HAL_FALSE                                   (0)
-
 #define HAL_TIME_OUT                                (0xFF)
 #define HAL_BUSY                                    (0xFE)
 #define HAL_OCCUPIED                                (0xFD)

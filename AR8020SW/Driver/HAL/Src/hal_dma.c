@@ -23,7 +23,7 @@ HAL_RET_T HAL_DMA_init(void)
 {
 	DMA_initIRQ();
 	
-	return HAL_TRUE;
+	return HAL_OK;
 }
 
 /** 

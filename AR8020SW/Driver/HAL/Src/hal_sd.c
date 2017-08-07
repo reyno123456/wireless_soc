@@ -470,19 +470,19 @@ HAL_RET_T HAL_SD_Fatfs_Init(void)
     if( sdhandle.inited == 0 )
     {
         dlog_error("SD card not initilized");
-        return HAL_FALSE;
+        return HAL_SD_ERR_ERROR;
     }
     
 	if (FATFS_LinkDriver(&SD_Driver, path) != 0)
 	{
 		dlog_error("Link error!");
-		return HAL_FALSE;
+		return HAL_SD_ERR_ERROR;
 	}
 	
 	if ((res = f_mount(&fatfs, (TCHAR const*)path, 1)) != FR_OK)
 	{
 		dlog_error("f_mount = %d", res);
-		return HAL_FALSE;
+		return HAL_SD_ERR_ERROR;
 	}
 	else
 	{
@@ -521,7 +521,7 @@ static uint32_t addrConvert(uint32_t addr)
     }
     else
     {
-        return HAL_FALSE;
+        return HAL_SD_ERR_ERROR;
     }
 }
 
@@ -586,7 +586,7 @@ HAL_RET_T HAL_SD_GetPresent(void)
     if (getCardPresence != CARD_IN)
     {
         // dlog_error("card not pressent");
-        return HAL_FALSE;
+        return HAL_SD_ERR_ERROR;
     }
 
     return HAL_OK;
