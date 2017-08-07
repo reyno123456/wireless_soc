@@ -139,28 +139,28 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     /* error command */
     else if (memcmp(cmdArray[0], "help", strlen("help")) == 0)
     {
-        dlog_error("Please use the commands like:");
-        dlog_error("read <address>");
-        dlog_error("write <address> <data>");
-        dlog_error("upgrade <filename>");
-        dlog_error("testhal_Testpwm <PWM Num> <PWM low> <PWM high>");
-        dlog_error("test_hal_uart_init <ch> <baudr>");
-        dlog_error("test_hal_uart_set_int <ch> <flag>");
-        dlog_error("test_hal_uart_tx <ch> <len>");
-        dlog_error("test_hal_uart_rx <ch>");
-        dlog_error("testhal_TestGpioNormal <gpionum> <highorlow>");
-        dlog_error("testhal_TestGpioInterrupt <gpionum> <inttype> <polarity>");
-        dlog_error("startbypassvideo");
-        dlog_error("stopbypassvideo");
-        dlog_error("sky_auto_search_rc_id");
-        dlog_error("NvResetBbRcId");
-        dlog_error("NvSetBbRcId <id1> <id2> <id3> <id4> <id5>");
-        dlog_error("viewuvc");
-        dlog_error("top");
-        dlog_error("startuvc <width> <height>");
-        dlog_error("saveuvc");
-        dlog_error("stopsaveuvc");
-        dlog_error("set_loglevel <cpuid> <loglevel>");
+        dlog_critical("Please use the commands like:");
+        dlog_critical("read <address>");
+        dlog_critical("write <address> <data>");
+        dlog_critical("upgrade <filename>");
+        dlog_critical("testhal_Testpwm <PWM Num> <PWM low> <PWM high>");
+        dlog_critical("test_hal_uart_init <ch> <baudr>");
+        dlog_critical("test_hal_uart_set_int <ch> <flag>");
+        dlog_critical("test_hal_uart_tx <ch> <len>");
+        dlog_critical("test_hal_uart_rx <ch>");
+        dlog_critical("testhal_TestGpioNormal <gpionum> <highorlow>");
+        dlog_critical("testhal_TestGpioInterrupt <gpionum> <inttype> <polarity>");
+        dlog_critical("startbypassvideo");
+        dlog_critical("stopbypassvideo");
+        dlog_critical("sky_auto_search_rc_id");
+        dlog_critical("NvResetBbRcId");
+        dlog_critical("NvSetBbRcId <id1> <id2> <id3> <id4> <id5>");
+        dlog_critical("viewuvc");
+        dlog_critical("top");
+        dlog_critical("startuvc <width> <height>");
+        dlog_critical("saveuvc");
+        dlog_critical("stopsaveuvc");
+        dlog_critical("set_loglevel <cpuid> <loglevel>");
         dlog_output(1000);
     }
 }
@@ -181,7 +181,7 @@ void command_readMemory(char *addr)
     if (readAddress == 0xFFFFFFFF)
     {
 
-        dlog_error("read address is illegal\n");
+        dlog_warning("read address is illegal\n");
 
         return;
     }
@@ -218,7 +218,7 @@ void command_writeMemory(char *addr, char *value)
     if (writeAddress == 0xFFFFFFFF)
     {
 
-        dlog_error("write address is illegal\n");
+        dlog_warning("write address is illegal\n");
 
         return;
     }

@@ -349,7 +349,7 @@ static int32_t SPI_SetIntData(ENUM_SPI_COMPONENT en_id,
             }
             else
             {
-                dlog_info("fail");
+                dlog_error("fail");
             }
 /*
             dlog_info("line = %d, en_id = %d, s_st_spiIntData[en_id].txBuf = %p",

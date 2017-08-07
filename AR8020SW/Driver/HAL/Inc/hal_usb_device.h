@@ -102,8 +102,6 @@ HAL_RET_T HAL_USB_SendData(uint8_t *buff, uint32_t data_len, uint8_t portId, uin
 
 HAL_RET_T HAL_USB_AudioDataSend(uint8_t *buff, uint16_t audioLen, uint8_t u8_portId);
 
-void HAL_USB_RegisterEncoderBypassVideo(void (*VideoStreamRecv)(void *, uint32_t, uint8_t));
-
 #ifdef __cplusplus
 }
 #endif

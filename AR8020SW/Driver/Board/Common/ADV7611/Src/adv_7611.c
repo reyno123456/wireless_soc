@@ -247,7 +247,7 @@ void ADV_7611_DumpOutEdidData(uint8_t index)
         }
         else
         {
-            dlog_info("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", hdmi_edid_table[i][0] + slv_addr_offset, hdmi_edid_table[i][1], val, hdmi_edid_table[i][2]);
+            dlog_error("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", hdmi_edid_table[i][0] + slv_addr_offset, hdmi_edid_table[i][1], val, hdmi_edid_table[i][2]);
         }
     }
 }
@@ -279,7 +279,7 @@ void ADV_7611_DumpOutDefaultSettings(uint8_t index)
         }
         else
         {
-            dlog_info("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", adv_i2c_addr_table[i][0] + slv_addr_offset, adv_i2c_addr_table[i][1], val, adv_i2c_addr_table[i][2] + slv_addr_offset);            
+            dlog_error("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", adv_i2c_addr_table[i][0] + slv_addr_offset, adv_i2c_addr_table[i][1], val, adv_i2c_addr_table[i][2] + slv_addr_offset);            
         }
     }
  
@@ -304,7 +304,7 @@ void ADV_7611_DumpOutDefaultSettings(uint8_t index)
         }
         else
         {
-            dlog_info("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", hdmi_default_settings[i][0] + slv_addr_offset, hdmi_default_settings[i][1], val, hdmi_default_settings[i][2]);
+            dlog_error("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", hdmi_default_settings[i][0] + slv_addr_offset, hdmi_default_settings[i][1], val, hdmi_default_settings[i][2]);
         }
     }
 }

@@ -7,7 +7,6 @@
 #include "hal_sys_ctl.h"
 #include "hal.h"
 #include "test_bb.h"
-#include "hal_dma.h"
 
 void console_init(uint32_t uart_num, uint32_t baut_rate)
 {
@@ -26,9 +25,9 @@ int main(void)
 
     /* initialize the uart */
     console_init(2, 115200);   
+    dlog_set_output_level(LOG_LEVEL_WARNING);
     dlog_critical("cpu2 start, time = %s\n", __TIME__);
 
-/*
     STRU_HAL_H264_CONFIG st_h264Cfg;
     st_h264Cfg.u8_view0En = 1;
     st_h264Cfg.u8_view0Gop = 10;
@@ -40,14 +39,9 @@ int main(void)
     st_h264Cfg.u8_view1BrEn = 1;
     HAL_H264_Init(st_h264Cfg);
 
-    BB_ledGpioInit();
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_skyEventHandler);
     
     HAL_BB_InitSky(NULL);
-*/
-    HAL_DMA_init();
-
-	dlog_set_output_level(LOG_LEVEL_WARNING);
 
     for( ;; )
     {

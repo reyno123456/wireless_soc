@@ -206,7 +206,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_CfgDesc[USB_HID_CONFIG_DESC_SIZ]  __ALIGN_
   USB_DESC_TYPE_INTERFACE,/*bDescriptorType: Interface descriptor type*/
   0x01,         /*bInterfaceNumber: Number of Interface*/
   0x00,         /*bAlternateSetting: Alternate setting*/
-  0x02,         /*bNumEndpoints*/
+  0x01,         /*bNumEndpoints*/
   0x03,         /*bInterfaceClass: HID*/
   0x00,         /*bInterfaceSubClass : 1=BOOT, 0=no boot*/
   0x00,         /*nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse*/
@@ -229,14 +229,6 @@ __ALIGN_BEGIN static uint8_t USBD_HID_CfgDesc[USB_HID_CONFIG_DESC_SIZ]  __ALIGN_
   LOBYTE(HID_EPIN_VIDEO_SIZE), /*wMaxPacketSize: 4 Byte max */
   HIBYTE(HID_EPIN_VIDEO_SIZE),
   HID_HS_BINTERVAL,          /*bInterval: Polling Interval (10 ms)*/
-
-  0x07,
-  USB_DESC_TYPE_ENDPOINT,
-  HID_EPOUT_VIDEO_ADDR,
-  USBD_EP_TYPE_INTR,
-  LOBYTE(HID_EPOUT_VIDEO_SIZE),
-  HIBYTE(HID_EPOUT_VIDEO_SIZE),
-  HID_HS_BINTERVAL,
 
   0x09,         /*bLength: Interface Descriptor size*/
   USB_DESC_TYPE_INTERFACE,/*bDescriptorType: Interface descriptor type*/
@@ -374,7 +366,6 @@ USBD_HID_HandleTypeDef        g_usbdHidData;
 uint8_t                       g_u32USBDeviceRecv[HID_EPOUT_SIZE];
 uint8_t                       g_u8CustomerOut[HID_CUSTOMER_OUT_SIZE];
 uint32_t                      g_u32CustomerOutSize;
-uint8_t                       g_u8UsbBypassEncoderBuff[HID_EPOUT_VIDEO_SIZE];
 
 /*
   * @}
@@ -402,11 +393,6 @@ static uint8_t  USBD_HID_Init (USBD_HandleTypeDef *pdev,
                  HID_EPIN_VIDEO_ADDR,
                  USBD_EP_TYPE_INTR,
                  HID_EPIN_VIDEO_SIZE);
-
-    USBD_LL_OpenEP(pdev,
-                 HID_EPOUT_VIDEO_ADDR,
-                 USBD_EP_TYPE_INTR,
-                 HID_EPOUT_VIDEO_SIZE);
 
     USBD_LL_OpenEP(pdev,
                  HID_EPIN_AUDIO_ADDR,
@@ -449,8 +435,6 @@ static uint8_t  USBD_HID_Init (USBD_HandleTypeDef *pdev,
         USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR, g_u32USBDeviceRecv, HID_EPOUT_SIZE);
 
         USBD_LL_PrepareReceive(pdev, HID_CUSTOMER_OUT_ADDR, g_u8CustomerOut, HID_CUSTOMER_OUT_SIZE);
-
-        USBD_LL_PrepareReceive(pdev, HID_EPOUT_VIDEO_ADDR, g_u8UsbBypassEncoderBuff, HID_EPOUT_VIDEO_SIZE);
     }
 
     pdev->u8_connState  = 1;    //connect
@@ -812,23 +796,6 @@ static uint8_t USBD_HID_DataOut (USBD_HandleTypeDef *pdev,
         }
 
         USBD_LL_PrepareReceive(pdev, HID_CUSTOMER_OUT_ADDR, g_u8CustomerOut, HID_CUSTOMER_OUT_SIZE);
-    }
-    else if (HID_EPOUT_VIDEO_ADDR == epnum)
-    {
-        if (USB_OTG_IsBigEndian(pdev))
-        {
-            USB_LL_ConvertEndian(g_u8UsbBypassEncoderBuff, g_u8UsbBypassEncoderBuff, (uint32_t)sizeof(g_u8UsbBypassEncoderBuff));
-        }
-
-        if (pdev->pUserData)
-        {
-            if (((USBD_HID_ItfTypeDef *)pdev->pUserData)->recvVideoStream)
-            {
-                ((USBD_HID_ItfTypeDef *)pdev->pUserData)->recvVideoStream(g_u8UsbBypassEncoderBuff, USBD_LL_GetRxDataSize(pdev, epnum), pdev->id);
-            }
-        }
-
-        USBD_LL_PrepareReceive(pdev, HID_EPOUT_VIDEO_ADDR, g_u8UsbBypassEncoderBuff, HID_EPOUT_VIDEO_SIZE);
     }
 
     return USBD_OK;

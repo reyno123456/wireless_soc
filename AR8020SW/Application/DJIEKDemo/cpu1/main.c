@@ -22,7 +22,7 @@ int main(void)
 
     /* initialize the uart */
     CONSOLE_Init();
-    dlog_info("cpu1 start!!! \n");
+    dlog_critical("cpu1 start!!! \n");
 
     /* We should never get here as control is now taken by the scheduler */
     for( ;; )

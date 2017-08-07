@@ -39,10 +39,10 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     }
     else if (memcmp(cmdArray[0], "help", strlen("help")) == 0) 
     {
-        dlog_error("Please use commands like:");
-        dlog_error("BB_uart10_spi_sel <value>");
-        dlog_error("BB_add_cmds <type> <param0> <param1> <param2>");
-        dlog_error("set_loglevel <cpuid> <loglevel>");
+        dlog_critical("Please use commands like:");
+        dlog_critical("BB_uart10_spi_sel <value>");
+        dlog_critical("BB_add_cmds <type> <param0> <param1> <param2>");
+        dlog_critical("set_loglevel <cpuid> <loglevel>");
     }
 }
 

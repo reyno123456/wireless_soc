@@ -151,7 +151,7 @@ uint8_t RTC_Set(STRU_RTC_CALENDAR *pst_rtcCalendar)
 
 uint8_t RTC_Get(STRU_RTC_CALENDAR *pst_rtcCalendar)
 {
-    static uint16_t u32_daycnt=0;
+    uint16_t u32_daycnt=0;
     uint32_t u32_timecount=0;
     uint32_t temp=0;
     uint16_t temp1=0;

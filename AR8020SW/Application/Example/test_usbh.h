@@ -1,6 +1,12 @@
 #ifndef __TEST__USBH__H
 #define __TEST__USBH__H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
 #include <stdio.h>
 #include "cmsis_os.h"
 #include "ff.h"
@@ -58,6 +64,10 @@ void command_stopBypassVideo(void);
 extern USBH_AppCtrl             g_usbhAppCtrl;
 extern USBH_BypassVideoCtrl     g_usbhBypassVideoCtrl;
 
+
+#ifdef __cplusplus
+}
+#endif 
 
 #endif
 

@@ -195,14 +195,14 @@ void Common_AVFORMATSysEventGroundInit(void)
     st_ARCastStatus.st_avCapability.u8_AudioAidList[1] = 0x02;*/
 
     st_ARCastStatus.u8_ARStatus &= (~(1 << ARCAST_COMMAND_GND_CAPABILITY));
-    dlog_error("send capability");
+    dlog_info("send capability");
     HAL_BB_UartComSendMsg(BB_UART_COM_SESSION_3, (uint8_t *)(&st_ARCastStatus.st_avCapability), sizeof(STRU_ARCAST_AVCAPABILITY));    
 }
 
 static void ATM_ACKStatus(uint8_t u8_status)
 {
     st_ARCastStatus.u8_ATMStatus |= (1 << u8_status);
-    dlog_warning("ack command %x %x", u8_status, st_ARCastStatus.u8_ATMStatus);
+    dlog_info("ack command %x %x", u8_status, st_ARCastStatus.u8_ATMStatus);
 }
 
 
@@ -239,7 +239,7 @@ static void ATM_EDIDHandle(uint8_t *pu8_EDIDInfo, uint8_t u8_Len)
         memcpy(&st_ARCastStatus.st_avCapability.u8_VideoVidList, &pu8_EDIDInfo[i+1], u8_videoCount);        
     }
     
-    dlog_warning("support video %d audio %d",st_ARCastStatus.st_avCapability.u8_VideoVidCount, st_ARCastStatus.st_avCapability.u8_AudioAidCount);
+    dlog_info("support video %d audio %d",st_ARCastStatus.st_avCapability.u8_VideoVidCount, st_ARCastStatus.st_avCapability.u8_AudioAidCount);
 }
 
 static void AR8020_SendFormatCommand(void)

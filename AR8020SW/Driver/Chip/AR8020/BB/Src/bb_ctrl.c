@@ -119,7 +119,7 @@ int BB_softReset(ENUM_BB_MODE en_mode)
 
     if (count >= 5)
     {
-        dlog_error("Reset Error");
+        dlog_warning("Reset Error");
     }
     en_curPage = PAGE2;
     return 0;
@@ -151,6 +151,9 @@ STRU_CUSTOMER_CFG stru_defualtCfg =
     .enum_chBandWidth = BW_10M,
     .flag_useCfgId    = 0,
     .pstru_boardCfg   = NULL,
+    .itHopMode        = AUTO,
+    .rcHopMode        = AUTO,
+    .qam_skip_mode    = AUTO,
 };
 
 void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg, STRU_CUSTOMER_CFG *pstru_customerCfg)
@@ -168,10 +171,12 @@ void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg, STRU_CUSTOMER_
     BB_sky_regs   = &(cfg_addr->bb_sky_configure[0][0]);
     BB_grd_regs   = &(cfg_addr->bb_grd_configure[0][0]);
 
-    context.pcustomer_cfg  = pstru_customerCfg;
-    context.pstru_boardCfg = pstru_boardCfg;
+    context.itHopMode = pstru_customerCfg->itHopMode;
+    context.rcHopMode = pstru_customerCfg->rcHopMode;
+    context.qam_skip_mode = pstru_customerCfg->qam_skip_mode;
+    context.e_bandwidth  = pstru_customerCfg->enum_chBandWidth;
 
-    context.e_bandwidth = pstru_customerCfg->enum_chBandWidth;
+    context.e_bandsupport = pstru_boardCfg->e_bandsupport;
 
     //get rc id from  1) user cfg
     //                2) saved rc id
@@ -207,7 +212,7 @@ void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg, STRU_CUSTOMER_
     }
     else
     {
-        dlog_warning("RF band: 600MHz");
+        dlog_info("RF band: 600MHz");
         context.e_curBand = RF_600M;
     }
 
@@ -216,7 +221,7 @@ void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg, STRU_CUSTOMER_
     BB_softReset(en_mode);
 
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_USER_CFG_CHANGE, BB_HandleEventsCallback);
-    dlog_warning("use board cfg: %s %d %d", pstru_boardCfg->name, context.e_bandwidth, context.e_curBand);
+    dlog_info("use board cfg: %s %d %d", pstru_boardCfg->name, context.e_bandwidth, context.e_curBand);
 }
 
 
@@ -490,7 +495,7 @@ int BB_InsertCmd(STRU_WIRELESS_CONFIG_CHANGE *p)
 
     if(!found)
     {
-        dlog_error("ERROR:Insert Event");
+        dlog_warning("ERROR:Insert Event");
     }
 
     return (found? TRUE:FALSE);
@@ -705,6 +710,22 @@ int BB_add_cmds(uint8_t type, uint32_t param0, uint32_t param1, uint32_t param2,
             cmd.u32_configValue  = (param0);
             break;
         }
+
+        case 25:
+        {
+            cmd.u8_configClass  = WIRELESS_MCS_CHANGE;
+            cmd.u8_configItem   = MCS_CHG_RC_RATE;
+            cmd.u32_configValue  = (param0);
+            break;
+        }
+        
+        case 26:
+        {
+            dlog_info("rc rate:%d",BB_GetRcRate(param0));
+            ret = 0;
+            break;
+        }
+        
         default:
         {
             ret = 0;
@@ -1008,7 +1029,7 @@ int BB_SetEncoderBitrateCh2(uint8_t bitrate_Mbps)
 
 static void BB_GetRcIdFromFlash(uint8_t *pu8_rcid)
 {
-    uint8_t loop = 0;
+    uint32_t loop = 0;
     uint8_t flag_found = 0;
     STRU_NV *pst_nv = (STRU_NV *)SRAM_NV_MEMORY_ST_ADDR;
 
@@ -1016,7 +1037,7 @@ static void BB_GetRcIdFromFlash(uint8_t *pu8_rcid)
     {
         if ( 0x23178546 != pst_nv->st_nvMng.u32_nvInitFlag)
         {
-            SysTicks_DelayMS(1);
+            SysTicks_DelayMS(20);
         }
         else
         {
@@ -1035,7 +1056,7 @@ static void BB_GetRcIdFromFlash(uint8_t *pu8_rcid)
             }
             else
             {
-                dlog_error("ERROR: Not Find rcid");
+                dlog_warning("ERROR: Not Find rcid");
             }
         }
     }
@@ -1197,5 +1218,48 @@ int BB_GetRcId(uint8_t *pu8_rcId, uint8_t bufsize)
 
     return 0;
 
+}
+
+/** 
+ * @brief       get rc rate
+ * @param       none
+ * @retval      1: BPSK 1/2, uart max 32bytes
+ *              2: QPSK 2/3, uart max 208bytes
+ *              0: unknow qam/code_rate
+ * @note        None
+ */
+uint32_t BB_GetRcRate(ENUM_BB_MODE en_mode)
+{
+    uint32_t ret = 0;
+    uint8_t rate = 0;
+    
+    if (BB_SKY_MODE == en_mode)
+    {
+        rate = BB_ReadReg(PAGE2, 0x09) & 0x05;
+
+        if (0 == rate)
+        {
+            ret = 1; // BPSK 1/2
+        }
+        else if(0x05 == rate)
+        {
+            ret = 2; // QPSK 2/3
+        }
+    }
+    else if (BB_GRD_MODE == en_mode)
+    {
+        rate = BB_ReadReg(PAGE2, 0x04) & 0x41;
+
+        if (0 == rate)
+        {
+            ret = 1; // BPSK 1/2
+        }
+        else if(0x41 == rate)
+        {
+            ret = 2; // QPSK 2/3
+        }
+    }
+
+    return ret;
 }
 

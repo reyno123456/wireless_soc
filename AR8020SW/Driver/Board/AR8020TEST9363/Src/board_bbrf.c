@@ -59,7 +59,7 @@ const STRU_BB_REG AR8020TEST9363_bb_skyregs[] =
 const STRU_BB_REG AR8020TEST9363_bb_groundregs[] = 
 {
     {0, 0x90, 0x38},
-    {0, 0x91, 0x44},
+    {0, 0x91, 0x40},
     {0, 0x92, 0x20},
     {0, 0x93, 0x20},
     {0, 0x97, 0x08},

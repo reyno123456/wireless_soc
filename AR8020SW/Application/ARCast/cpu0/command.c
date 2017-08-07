@@ -106,20 +106,20 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     }
     else if (memcmp(cmdArray[0], "help", strlen("help")) == 0)
     {
-        dlog_error("Please use the commands like:");
-        dlog_error("read <address>");
-        dlog_error("write <address> <data>");
-        dlog_error("sky_auto_search_rc_id");
-        dlog_error("NvResetBbRcId");
-        dlog_error("NvSetBbRcId <id1> <id2> <id3> <id4> <id5>");
-        dlog_error("test_dma_cpu0 <src> <dst> <byte_num>");
-        dlog_error("test_dma_loop <src> <dst> <byte_num>");
-        dlog_error("hal_i2c_init <ch> <i2c_addr> <speed>");
-        dlog_error("hal_i2c_read <ch> <subAddr> <subAddrLen> <dataLen>");
-        dlog_error("hal_i2c_write <ch> <subAddr> <subAddrLen> <data> <dataLen>");
-        dlog_error("bb_uart");
-        dlog_error("hdmi <index>");
-        dlog_error("set_loglevel <cpuid> <loglevel>");
+        dlog_critical("Please use the commands like:");
+        dlog_critical("read <address>");
+        dlog_critical("write <address> <data>");
+        dlog_critical("sky_auto_search_rc_id");
+        dlog_critical("NvResetBbRcId");
+        dlog_critical("NvSetBbRcId <id1> <id2> <id3> <id4> <id5>");
+        dlog_critical("test_dma_cpu0 <src> <dst> <byte_num>");
+        dlog_critical("test_dma_loop <src> <dst> <byte_num>");
+        dlog_critical("hal_i2c_init <ch> <i2c_addr> <speed>");
+        dlog_critical("hal_i2c_read <ch> <subAddr> <subAddrLen> <dataLen>");
+        dlog_critical("hal_i2c_write <ch> <subAddr> <subAddrLen> <data> <dataLen>");
+        dlog_critical("bb_uart");
+        dlog_critical("hdmi <index>");
+        dlog_critical("set_loglevel <cpuid> <loglevel>");
         dlog_output(1000);
     }
 }
@@ -140,7 +140,7 @@ void command_readMemory(char *addr)
     if (readAddress == 0xFFFFFFFF)
     {
 
-        dlog_error("read address is illegal\n");
+        dlog_warning("read address is illegal\n");
 
         return;
     }
@@ -177,7 +177,7 @@ void command_writeMemory(char *addr, char *value)
     if (writeAddress == 0xFFFFFFFF)
     {
 
-        dlog_error("write address is illegal\n");
+        dlog_warning("write address is illegal\n");
 
         return;
     }

@@ -111,6 +111,8 @@ static void sky_handle_all_spi_cmds(void);
 static void sky_setRcId(uint8_t *idptr);
 static void sky_set_McsByIndex(ENUM_CH_BW bw, uint8_t idx);
 
+static void sky_ChgRcRate(uint8_t rate);
+
 
 void BB_SKY_start(void)
 {
@@ -164,7 +166,7 @@ static uint8_t sky_checkRcLock(uint8_t u8_lockStatus)
 
 static void sky_checkRcCrcUnlockTimeOut(uint8_t u8_lockStatus)
 {
-    uint8_t max_ch_size = (context.e_curBand == RF_2G) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
+	uint8_t max_ch_size = ((context.e_curBand == RF_2G) || (context.e_curBand == RF_600M)) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
     static uint16_t rc_unlock_cnt = 0;
 
     if (SKY_CRC_OK(u8_lockStatus))
@@ -518,14 +520,14 @@ static void Sky_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
                 context.dev_state  = LOCK;
                 u32_contiousUnlock = 0;
 
-                dlog_warning("CHECK_LOCK->LOCK");
+                dlog_info("CHECK_LOCK->LOCK");
             }
             else if(stru_skystatus.flag_followGroundInSearching && u32_contiousUnlock ++ >= 80)
             {
                 u32_contiousUnlock = 0;
                 context.dev_state  = SEARCH_ID;
 
-                dlog_warning("CHECK_LOCK-> SEARCH_ID");
+                dlog_info("CHECK_LOCK-> SEARCH_ID");
             }
             break;
 
@@ -602,7 +604,7 @@ static void Sky_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
 
 static void sky_rc_hopfreq(void)
 {
-    uint8_t max_ch_size = (context.e_curBand == RF_2G) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
+	uint8_t max_ch_size = ((context.e_curBand == RF_2G) || (context.e_curBand == RF_600M)) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
 
     context.sky_rc_channel++;
     if(context.sky_rc_channel >= max_ch_size)
@@ -632,7 +634,7 @@ static void sky_setRcId(uint8_t *pu8_rcId)
     uint8_t i;
     uint8_t addr[] = {FEC_7, FEC_8, FEC_9, FEC_10, FEC_11};
 
-    dlog_info("RCid:%02x%02x%02x%02x%02x\r\n", pu8_rcId[0], pu8_rcId[1], pu8_rcId[2], pu8_rcId[3], pu8_rcId[4]);                
+    dlog_critical("RCid:%02x%02x%02x%02x%02x\r\n", pu8_rcId[0], pu8_rcId[1], pu8_rcId[2], pu8_rcId[3], pu8_rcId[4]);                
     for(i=0; i < sizeof(addr); i++)
     {
         BB_WriteReg(PAGE2, addr[i], pu8_rcId[i]);
@@ -671,7 +673,7 @@ static uint8_t get_rc_status(void)
 
     if(total_count > 1000)
     {   
-        dlog_info("-L:%d-%d-%d", lock_count, nr_lock, total_count);
+        dlog_warning("-L:%d-%d-%d", lock_count, nr_lock, total_count);
         pre_nrlockcnt = nr_lock;
         pre_lockcnt   = lock_count;
         total_count   = 0;
@@ -762,22 +764,44 @@ static void sky_handle_RC_cmd(void)
     }
 }
 
+static void sky_handle_RC_Rate_cmd(void)
+{
+    static uint8_t rate = 0;
+    uint8_t data0 = BB_ReadReg(PAGE2, RC_RATE);
+
+    if( rate != data0)
+    {
+        rate = data0;
+        sky_ChgRcRate(rate);
+        dlog_info("rc rate:%d", rate);
+    }
+}
+
 
 static void sky_handle_IT_cmd(void)
 {
-    uint8_t data0, data1, data2, data3;
+    uint8_t data[5];
 
-    data0 = BB_ReadReg(PAGE2, IT_FRQ_0);
-    data1 = BB_ReadReg(PAGE2, IT_FRQ_1);
-    data2 = BB_ReadReg(PAGE2, IT_FRQ_2);
-    data3 = BB_ReadReg(PAGE2, IT_FRQ_3);
+    data[0] = BB_ReadReg(PAGE2, IT_FRQ_0);
+    data[1] = BB_ReadReg(PAGE2, IT_FRQ_1);
+    data[2] = BB_ReadReg(PAGE2, IT_FRQ_2);
+    data[3] = BB_ReadReg(PAGE2, IT_FRQ_3);
+    data[4] = BB_ReadReg(PAGE2, IT_FRQ_4);
 
-    if ( context.stru_itRegs.frq1 != data0 || context.stru_itRegs.frq2 != data1 || 
-         context.stru_itRegs.frq3 != data2 || context.stru_itRegs.frq4 != data3 )
+    if ( context.stru_itRegs.frq1 != data[0] || context.stru_itRegs.frq2 != data[1] || 
+         context.stru_itRegs.frq3 != data[2] || context.stru_itRegs.frq4 != data[3] ||
+         context.stru_itRegs.frq5 != data[4])
     {
-        uint32_t u32_rc = ( data0 << 24 ) | ( data1 << 16 ) | ( data2 << 8 ) | ( data3 );
-        BB_write_ItRegs( u32_rc );
-        dlog_info("--write IT frq: 0x%08x", u32_rc);
+        uint32_t u32_rc = ( data[0] << 24 ) | ( data[1] << 16 ) | ( data[2] << 8 ) | ( data[3] );
+        if ( RF_600M == (context.e_curBand))
+        {
+            BB_write_ItRegsByArr( data );
+        }
+        else
+        {
+            BB_write_ItRegs( u32_rc );
+            dlog_info("--write IT frq: 0x%08x", u32_rc);
+        } 
     }
 }
 
@@ -1009,7 +1033,7 @@ static void sky_handle_rc_rcv_grd_mask_code_cmd(void)
 static void sky_handle_rc_channel_sync_cmd(void)
 {
     uint8_t data0 = BB_ReadReg(PAGE2, GRD_RC_CHANNEL);
-    uint8_t max_ch_size = (context.e_curBand == RF_2G) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
+    uint8_t max_ch_size = ((context.e_curBand == RF_2G) || (context.e_curBand == RF_600M)) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
     
     if (data0 != context.sky_rc_channel)
     {
@@ -1118,7 +1142,7 @@ void sky_handleRcIdAutoSearchCmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 break;
 
             default:
-                dlog_error("Error: id %x %x", class, item);
+                dlog_warning("Error: id %x %x", class, item);
                 break;
         }
     }
@@ -1155,6 +1179,8 @@ static void sky_handle_rcIdSync(void)
 static void sky_handle_all_spi_cmds(void)
 {
     sky_handle_RC_cmd();
+
+    sky_handle_RC_Rate_cmd();
 
     sky_handle_IT_cmd();
 
@@ -1248,7 +1274,7 @@ static void sky_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
 
             default:
             {
-                dlog_error("%s\r\n", "unknown WIRELESS_FREQ_CHANGE command");
+                dlog_warning("%s\r\n", "unknown WIRELESS_FREQ_CHANGE command");
                 break;
             }
         }
@@ -1307,7 +1333,7 @@ static void sky_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 break;               
             }
             default:
-                dlog_error("%s\r\n", "unknown WIRELESS_MCS_CHANGE command");
+                dlog_warning("%s\r\n", "unknown WIRELESS_MCS_CHANGE command");
                 break;
         }        
     }
@@ -1327,7 +1353,7 @@ static void sky_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 sky_notify_encoder_brc(1, (uint8_t)value);
                 break;
             default:
-                dlog_error("%s\r\n", "unknown WIRELESS_ENCODER_CHANGE command");
+                dlog_warning("%s\r\n", "unknown WIRELESS_ENCODER_CHANGE command");
                 break;                
         }
     }
@@ -1463,7 +1489,7 @@ static uint16_t sky_get_rc_snr( void )
     if( cnt++ > 1500 )
     {
         cnt = 0;
-        dlog_info("SNR1:%0.4x\n", snr);
+        dlog_warning("SNR1:%0.4x\n", snr);
     }
 
     return snr;
@@ -1497,7 +1523,7 @@ static void sky_rcFrqStatusStatistics(void)
     uint8_t i = 0;
     uint64_t u64_mask;
     uint64_t u64_preMask = stru_skystatus.s_st_rcFrqMask.u64_mask;
-    int8_t max_ch_size = (context.e_curBand == RF_2G) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
+    int8_t max_ch_size = ((context.e_curBand == RF_2G) || (context.e_curBand == RF_600M)) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
     
     //if(context.dev_state == ID_MATCH_LOCK)
     {
@@ -1558,7 +1584,7 @@ static void sky_rcFrqStatusStatistics(void)
         if (u64_preMask != (stru_skystatus.s_st_rcFrqMask.u64_mask))
         {
             u16_txCnt = 169;
-            dlog_info("new_calc_mask_code:0x%x,0x%x", (uint32_t)((stru_skystatus.s_st_rcFrqMask.u64_mask)>>32), (uint32_t)(stru_skystatus.s_st_rcFrqMask.u64_mask));
+            //dlog_info("new_calc_mask_code:0x%x,0x%x", (uint32_t)((stru_skystatus.s_st_rcFrqMask.u64_mask)>>32), (uint32_t)(stru_skystatus.s_st_rcFrqMask.u64_mask));
         }
 
         u16_txCnt += 1;
@@ -1577,3 +1603,22 @@ static void sky_rcFrqStatusStatistics(void)
         }
     }
 }
+
+static void sky_ChgRcRate(uint8_t rate)
+{
+    if (0 == rate)
+    {
+        BB_WriteReg(PAGE2, 0x09, 0x80); // BPSK 1/2
+    }
+    else if(1 == rate)
+    {
+        BB_WriteReg(PAGE2, 0x09, 0x85); // QPSK 2/3
+    }
+    else
+    {
+        ;
+    }
+
+    BB_softReset(BB_SKY_MODE);
+}
+

@@ -33,7 +33,7 @@ ifeq ($(APPLICATION_SCENARIO), sky)
 SRC_C   := main_sky.c \
            command.c \
            upgrade.c \
-		   ../../Example/test_i2c_adv7611.c \
+           ../../Example/test_i2c_adv7611.c \
            ../../Example/test_bb.c \
            ../../Example/test_hal_spi_flash.c \
            ../../Example/test_float.c \
@@ -61,7 +61,8 @@ SRC_C   := main_sky.c \
            ../../Example/test_os_semaphore.c \
            ../../Example/test_os_signal.c \
            ../../Example/test_os_message.c \
-           ../../Example/test_os_timer.c 
+           ../../Example/test_os_timer.c \
+           ../../Example/test_bb_led_ctrl.c
 
 
 SRC_CXX :=
@@ -71,10 +72,10 @@ ifeq ($(APPLICATION_SCENARIO), ground)
 SRC_C   := main_ground.c \
            command.c \
            upgrade.c \
-		   ../../Example/test_freertos.c \
-		   ../../Example/test_hal_can.c \
-		   ../../Example/test_hal_camera.c \
-		   ../../Example/test_i2c_adv7611.c \
+           ../../Example/test_freertos.c \
+           ../../Example/test_hal_can.c \
+           ../../Example/test_hal_camera.c \
+           ../../Example/test_i2c_adv7611.c \
            ../../Example/test_usbh.c \
            ../../Example/test_bb.c \
            ../../Example/test_hal_spi_flash.c \
@@ -98,7 +99,8 @@ SRC_C   := main_ground.c \
            ../../Example/test_os_semaphore.c \
            ../../Example/test_os_signal.c \
            ../../Example/test_os_message.c \
-           ../../Example/test_os_timer.c 
+           ../../Example/test_os_timer.c \
+           ../../Example/test_bb_led_ctrl.c
 
 SRC_CXX :=
 endif

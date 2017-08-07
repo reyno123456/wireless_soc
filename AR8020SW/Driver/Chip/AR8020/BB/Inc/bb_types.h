@@ -105,6 +105,7 @@ typedef enum
     MCS_IT_CODE_RATE_SELECT,
     MCS_RC_QAM_SELECT,
     MCS_RC_CODE_RATE_SELECT,
+    MCS_CHG_RC_RATE,
 } ENUM_WIRELESS_MCS_CHANGE_ITEM;
 
 typedef enum
@@ -236,6 +237,14 @@ typedef struct
     uint8_t         u8_startWrite;  //u8_startWrite: cpu2 start update the flag
     uint8_t         u8_endWrite;    //u8_endWrite:   cpu2 end update the flag
 } STRU_DEVICE_INFO;
+
+typedef struct
+{
+     uint8_t flag;
+     uint32_t par;
+     uint32_t cnt;
+} STRU_DELAY_CMD;
+
 
 // CPU0 and CPU2 share memory for osd status info, offset in SRAM: 16K + 512Byte
 // last 16 bytes is for DEVICE INFO

@@ -94,7 +94,7 @@ HAL_RET_T HAL_SD_Init(void)
     
     if ( FALSE == SYS_EVENT_RegisterHandler(SYS_EVENT_ID_SD_CARD_CHANGE, SD_init_deInit_Callback))
     {
-        dlog_info("SYS_EVENT_Register fail");
+        dlog_error("SYS_EVENT_Register fail");
 		return HAL_SD_ERR_ERROR;            
     }
     else
@@ -144,7 +144,7 @@ HAL_RET_T HAL_SD_Write(uint32_t u32_dstBlkAddr, uint32_t u32_srcStartAddr, uint3
 	}
 	
 	if (e_errorState != SD_OK) {
-		dlog_info("Write SD Failed!\n");
+		dlog_error("Write SD Failed!\n");
 		return HAL_SD_ERR_ERROR;
 	}
 	// dlog_info("Write SD %d Sectors Done. From Sector %d to Sector %d\n", 
@@ -187,7 +187,7 @@ HAL_RET_T HAL_SD_Read(uint32_t u32_dstStartAddr, uint32_t u32_srcBlkAddr, uint32
 	}
 	
 	if (e_errorState != SD_OK) {
-		dlog_info("Read SD Failed!");
+		dlog_error("Read SD Failed!");
 		return HAL_SD_ERR_ERROR;
 	}
 	// dlog_info("Read SD %d Sectors Done. From Sector %d to Sector %d\n", 
@@ -213,7 +213,7 @@ HAL_RET_T HAL_SD_Erase(uint32_t u32_startBlkAddr, uint32_t u32_sectorNum)
 	EMU_SD_RTN e_errorState = SD_OK;
 	e_errorState = Card_SD_Erase(&sdhandle, u32_startBlkAddr, u32_sectorNum);  /* [block units] */
 	if (e_errorState != SD_OK) {
-		dlog_info("Erase SD failed!\n");
+		dlog_error("Erase SD failed!\n");
 		return HAL_SD_ERR_ERROR;
 	}
 	// dlog_info("Erase %d Sectors Done. From Sector %d to Sector %d\n", 
@@ -233,7 +233,7 @@ HAL_RET_T HAL_SD_Deinit()
 	EMU_SD_RTN e_errorState = SD_OK;
 	e_errorState = Card_SD_DeInit(&sdhandle);
 	if (e_errorState != SD_OK) {
-		dlog_info("Deinit SD Failed!\n");
+		dlog_error("Deinit SD Failed!\n");
 		return HAL_SD_ERR_ERROR;
 	}
 	dlog_info("Remove SD Success!\n");
@@ -543,7 +543,7 @@ HAL_RET_T HAL_SD_Write_test(uint32_t u32_dstBlkAddr, uint32_t u32_srcStartAddr, 
     e_errorState = Card_SD_WriteMultiBlocks_DMA_test(&sdhandle, &st_dma);
 	
 	if (e_errorState != SD_OK) {
-		dlog_info("Write SD Failed!\n");
+		dlog_error("Write SD Failed!\n");
 		return HAL_SD_ERR_ERROR;
 	}
 
@@ -575,7 +575,7 @@ HAL_RET_T HAL_SD_Read_test(uint32_t u32_dstStartAddr, uint32_t u32_srcBlkAddr, u
 	}
 	
 	if (e_errorState != SD_OK) {
-		dlog_info("Read SD Failed!");
+		dlog_error("Read SD Failed!");
 		return HAL_SD_ERR_ERROR;
 	}
 	return HAL_OK;

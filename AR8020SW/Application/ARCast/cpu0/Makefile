@@ -38,7 +38,8 @@ SRC_C   := main_sky.c \
            ../../Example/test_hal_nv.c \
            ../../Example/test_hal_i2c.c \
            ../../Example/test_hdmi.c \
-           ../../Example/test_bb.c
+           ../../Example/test_bb.c \
+           ../../Example/test_bb_led_ctrl.c
 endif
 
 ifeq ($(APPLICATION_SCENARIO), ground)
@@ -51,7 +52,8 @@ SRC_C   := main_ground.c \
            ../../Example/test_usbh.c \
            ../../Example/test_hal_i2c.c \
            ../../Example/test_hdmi.c \
-           ../../Example/test_bb.c
+           ../../Example/test_bb.c \
+           ../../Example/test_bb_led_ctrl.c
 endif
 
 SRC_CXX :=

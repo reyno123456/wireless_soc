@@ -25,6 +25,8 @@
 #include "arcast_appcommon.h"
 #include "hal_pmu.h"
 #include "hal_timer.h"
+#include "test_bb_led_ctrl.h"
+
 
 void TIMER_avsyncInterruptHandle(uint32_t u32_vectorNum)
 {
@@ -64,6 +66,9 @@ int main(void)
     dlog_set_output_level(LOG_LEVEL_INFO);
     CONSOLE_Init();
     dlog_critical("cpu0 start!!! \n");
+
+    BB_ledGpioInit();
+    SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_EventHandler);
     
     //HAL_PMU_Init();
     

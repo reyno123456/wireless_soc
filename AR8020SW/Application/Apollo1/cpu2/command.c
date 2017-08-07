@@ -28,7 +28,7 @@ void command_readMemory(char *addr)
     if (readAddress == 0xFFFFFFFF)
     {
 
-        dlog_error("read address is illegal\n");
+        dlog_warning("read address is illegal\n");
 
         return;
     }
@@ -65,7 +65,7 @@ void command_writeMemory(char *addr, char *value)
     if (writeAddress == 0xFFFFFFFF)
     {
 
-        dlog_error("write address is illegal\n");
+        dlog_warning("write address is illegal\n");
 
         return;
     }
@@ -98,11 +98,11 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     }
     else if (memcmp(cmdArray[0], "help", strlen("help")) == 0) 
     {
-        dlog_error("Please use commands like:");
-        dlog_error("BB_uart10_spi_sel <value>");
-        dlog_error("read <address>");
-        dlog_error("write <address> <data>");
-        dlog_error("set_loglevel <cpuid> <loglevel>");
+        dlog_critical("Please use commands like:");
+        dlog_critical("BB_uart10_spi_sel <value>");
+        dlog_critical("read <address>");
+        dlog_critical("write <address> <data>");
+        dlog_critical("set_loglevel <cpuid> <loglevel>");
         dlog_output(1000);
     }
 }

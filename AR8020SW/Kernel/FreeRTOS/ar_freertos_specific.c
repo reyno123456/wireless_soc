@@ -56,7 +56,7 @@ void ar_top(void)
 	
 	if(uxArraySize>LOCAL_MAX_TASK_NUM)  
 	{  
-		dlog_info("too many tasks\n");
+		dlog_warning("too many tasks\n");
 		return;
 	}
 	/* require each task struct information */

@@ -138,30 +138,30 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     }
     else if (memcmp(cmdArray[0], "help", strlen("help")) == 0)
     {
-        dlog_error("Please use the commands like:");
-        dlog_error("read <address>");
-        dlog_error("write <address> <data>");
-        dlog_error("hdmiinit <index>");
-        dlog_error("hdmidump <index>");
-        dlog_error("hdmigetvideoformat <index>");
-        dlog_error("hdmiread <slv address> <reg address>");
-        dlog_error("hdmiwrite <slv address> <reg address> <reg value>");
-        dlog_error("upgrade <filename>");
-        dlog_error("test_camera_init <rate 0~1> <mode 0~8> <toEncoderCh 0~1>");
-        dlog_error("test_write_camera <subAddr(hex)> <value>(hex)");
-        dlog_error("test_read_camera <subAddr(hex)>");
-        dlog_error("test_hal_mipi_init <toEncoderCh 0~1>");
-        dlog_error("startbypassvideo");
-        dlog_error("stopbypassvideo");
-        dlog_error("sky_auto_search_rc_id");
-        dlog_error("NvResetBbRcId");
-        dlog_error("NvSetBbRcId <id1> <id2> <id3> <id4> <id5>");
-        dlog_error("command_test_BB_uart <param>");
-		dlog_error("initsd");
-        dlog_error("test_sd <choise>");
-        dlog_error("malloc <size>");
-        dlog_error("top");
-        dlog_error("set_loglevel <cpuid> <loglevel>");
+        dlog_critical("Please use the commands like:");
+        dlog_critical("read <address>");
+        dlog_critical("write <address> <data>");
+        dlog_critical("hdmiinit <index>");
+        dlog_critical("hdmidump <index>");
+        dlog_critical("hdmigetvideoformat <index>");
+        dlog_critical("hdmiread <slv address> <reg address>");
+        dlog_critical("hdmiwrite <slv address> <reg address> <reg value>");
+        dlog_critical("upgrade <filename>");
+        dlog_critical("test_camera_init <rate 0~1> <mode 0~8> <toEncoderCh 0~1>");
+        dlog_critical("test_write_camera <subAddr(hex)> <value>(hex)");
+        dlog_critical("test_read_camera <subAddr(hex)>");
+        dlog_critical("test_hal_mipi_init <toEncoderCh 0~1>");
+        dlog_critical("startbypassvideo");
+        dlog_critical("stopbypassvideo");
+        dlog_critical("sky_auto_search_rc_id");
+        dlog_critical("NvResetBbRcId");
+        dlog_critical("NvSetBbRcId <id1> <id2> <id3> <id4> <id5>");
+        dlog_critical("command_test_BB_uart <param>");
+		dlog_critical("initsd");
+        dlog_critical("test_sd <choise>");
+        dlog_critical("malloc <size>");
+        dlog_critical("top");
+        dlog_critical("set_loglevel <cpuid> <loglevel>");
     }
 }
 
@@ -181,7 +181,7 @@ void command_readMemory(char *addr)
     if (readAddress == 0xFFFFFFFF)
     {
 
-        dlog_error("read address is illegal\n");
+        dlog_warning("read address is illegal\n");
 
         return;
     }
@@ -218,7 +218,7 @@ void command_writeMemory(char *addr, char *value)
     if (writeAddress == 0xFFFFFFFF)
     {
 
-        dlog_error("write address is illegal\n");
+        dlog_warning("write address is illegal\n");
 
         return;
     }

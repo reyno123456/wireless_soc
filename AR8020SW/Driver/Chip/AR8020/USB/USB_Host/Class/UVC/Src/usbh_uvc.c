@@ -74,7 +74,7 @@ static USBH_StatusTypeDef USBH_UVC_InterfaceInit (USBH_HandleTypeDef *phost)
 
     if(interface == 0xFF) /* Not Valid Interface */
     {
-        dlog_info("Cannot Find the interface for %s class.", phost->pActiveClass->Name);
+        dlog_warning("Cannot Find the interface for %s class.", phost->pActiveClass->Name);
 
         status = USBH_FAIL;
     }

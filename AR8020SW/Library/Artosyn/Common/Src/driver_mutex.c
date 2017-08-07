@@ -216,7 +216,7 @@ int8_t driver_mutex_get(emu_driver_mutex driver, uint32_t channel)
             {
                 cpu_id_mask = 0;
                 cpu_id_mask |= (3 << (((channel-16)*3)+1));
-                dlog_info("line = %d, cpu_id_mask = 0x%08x", __LINE__, cpu_id_mask);
+                // dlog_info("line = %d, cpu_id_mask = 0x%08x", __LINE__, cpu_id_mask);
                 if( g_s_periMutex->s_timer.timer16to23 & (1 << ((channel-16)*3) ) )
                 {
                     dlog_info("line = %d", __LINE__);                        

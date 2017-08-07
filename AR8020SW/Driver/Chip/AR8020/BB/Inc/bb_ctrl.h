@@ -144,4 +144,15 @@ int BB_ChkSpiFlag(void);
 
 int BB_GetRcId(uint8_t *pu8_rcId, uint8_t bufsize);
 
+/** 
+ * @brief       get rc rate
+ * @param       none
+ * @retval      1: BPSK 1/2, uart max 32bytes
+ *              2: QPSK 2/3, uart max 208bytes
+ *              0: unknow qam/code_rate
+ * @note        None
+ */
+uint32_t BB_GetRcRate(ENUM_BB_MODE en_mode);
+
+
 #endif

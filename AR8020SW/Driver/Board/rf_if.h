@@ -18,6 +18,7 @@ void BB_grd_notify_it_skip_freq(ENUM_RF_BAND band, uint8_t u8_ch);
 
 
 void BB_write_ItRegs(uint32_t u32_it);
+uint8_t BB_write_ItRegsByArr(uint8_t *pu8_it);
 
 
 uint8_t BB_set_ItFrqByCh(ENUM_RF_BAND band, uint8_t ch);

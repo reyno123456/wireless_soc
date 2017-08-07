@@ -1,6 +1,10 @@
 #ifndef _TEST_HAL_SPI_FLASH_
 #define _TEST_HAL_SPI_FLASH_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 
 //#define W25Q64_ID   0xEF16 
@@ -38,5 +42,9 @@ void command_TestWbFlashRead(char *spi_base, char *addr, char *len);
 void command_TestSetWbFlashClk(char *clk);
 void command_TestWbFlashWrite_loop(char *spi_base, char *addr, char *len);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

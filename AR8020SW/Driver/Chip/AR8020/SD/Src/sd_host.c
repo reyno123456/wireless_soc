@@ -79,7 +79,7 @@ EMU_SD_RTN Card_SD_Init(SD_HandleTypeDef *hsd, SD_CardInfoTypedef *SDCardInfo)
   errorstate = PowerOnCard(hsd);
   if (errorstate != SD_OK)
   {
-    dlog_info("Power on Card Error!\n");
+    dlog_error("Power on Card Error!\n");
     return errorstate;
   }
 
@@ -93,7 +93,7 @@ EMU_SD_RTN Card_SD_Init(SD_HandleTypeDef *hsd, SD_CardInfoTypedef *SDCardInfo)
     }
     else
     {
-      dlog_info("Initialize Card Error!\n");  
+      dlog_error("Initialize Card Error!\n");  
     }
     return errorstate;
   }
@@ -728,7 +728,7 @@ EMU_SD_RTN Card_SD_WriteBlock_DMA(SD_HandleTypeDef *hsd, SDMMC_DMATransTypeDef *
   Core_SDMMC_SetDBADDR(hsd->Instance, peripheralAddrConvert((uint32_t)&desc));
   Core_SDMMC_SetBYCTNT(hsd->Instance, dma->BlockSize);
   if (errorstate != SD_OK) {
-    dlog_info("SD_DMAConfig Fail\n");
+    dlog_error("SD_DMAConfig Fail\n");
     return errorstate;
   }
 
@@ -785,7 +785,7 @@ EMU_SD_RTN Card_SD_WriteMultiBlocks_DMA(SD_HandleTypeDef *hsd, SDMMC_DMATransTyp
 
   IDMAC_DescTypeDef *desc = (IDMAC_DescTypeDef *)malloc(sizeof(IDMAC_DescTypeDef) * (SectorDivid + SectorRmd));
   if (!desc){
-    dlog_info("malloc failed! Exit writing\n");
+    dlog_error("malloc failed! Exit writing\n");
     errorstate = SD_ERROR;
     return errorstate;
   }
@@ -809,7 +809,7 @@ EMU_SD_RTN Card_SD_WriteMultiBlocks_DMA(SD_HandleTypeDef *hsd, SDMMC_DMATransTyp
   errorstate = SD_DMAConfig(hsd, dma);
   Core_SDMMC_SetDBADDR(hsd->Instance, peripheralAddrConvert((uint32_t)&desc[0]));
   if (errorstate != SD_OK) {
-    dlog_info("SD_DMAConfig Fail\n");
+    dlog_error("SD_DMAConfig Fail\n");
     free(desc);
     return errorstate;
   }
@@ -904,7 +904,7 @@ EMU_SD_RTN Card_SD_WriteMultiBlocks_DMA(SD_HandleTypeDef *hsd, SDMMC_DMATransTyp
         Core_SDMMC_SetDBADDR(hsd->Instance, peripheralAddrConvert((uint32_t)&desc[0]));
         errorstate = SD_DMAConfig(hsd, dma);
         if (errorstate != SD_OK) {
-            dlog_info("SD_DMAConfig Fail\n");
+            dlog_error("SD_DMAConfig Fail\n");
             free(desc);
             return errorstate;
         }
@@ -2460,7 +2460,7 @@ SD_TRANSFER_STATUS SD_CardStatus(SD_STATUS *e_cardStatus)
   errorstate = SD_GetState(&sdhandle, (uint32_t *)&RespState);
   if (errorstate != SD_OK)
   {
-    dlog_info("Get SD Status Failed!\n");
+    dlog_error("Get SD Status Failed!\n");
     return SD_CARD_ERROR;
   }
 
@@ -2531,7 +2531,7 @@ void SD_init_deInit_Callback(void *p)
             }
             else
             {
-                dlog_info("Remove SD fail!\n");
+                dlog_warning("Remove SD fail!\n");
             }
         }
     }
@@ -2800,7 +2800,7 @@ EMU_SD_RTN Card_SD_ReadMultiBlocks_DMA_test(SD_HandleTypeDef *hsd, SDMMC_DMATran
     uint32_t total_SectorDivid = SectorDivid*loop_times;
     IDMAC_DescTypeDef *desc = (IDMAC_DescTypeDef *)malloc(sizeof(IDMAC_DescTypeDef) * (total_SectorDivid));
     if (!desc){
-        dlog_info("Malloc Failed! Exit Read\n");
+        dlog_error("Malloc Failed! Exit Read\n");
         errorstate = SD_ERROR;
         return errorstate;
     }
@@ -3123,7 +3123,7 @@ EMU_SD_RTN Card_SD_WriteMultiBlocks_DMA_test(SD_HandleTypeDef *hsd, SDMMC_DMATra
     IDMAC_DescTypeDef *desc = (IDMAC_DescTypeDef *)malloc(sizeof(IDMAC_DescTypeDef) * (total_SectorDivid));
 
     if (!desc){
-        dlog_info("malloc failed! Exit writing\n");
+        dlog_error("malloc failed! Exit writing\n");
         errorstate = SD_ERROR;
         return errorstate;
     }
@@ -3144,7 +3144,7 @@ EMU_SD_RTN Card_SD_WriteMultiBlocks_DMA_test(SD_HandleTypeDef *hsd, SDMMC_DMATra
   errorstate = SD_DMAConfig(hsd, dma);
   Core_SDMMC_SetDBADDR(hsd->Instance, peripheralAddrConvert((uint32_t)&desc[0]));
   if (errorstate != SD_OK) {
-    dlog_info("SD_DMAConfig Fail\n");
+    dlog_error("SD_DMAConfig Fail\n");
     free(desc);
     return errorstate;
   }

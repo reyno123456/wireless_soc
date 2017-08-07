@@ -21,8 +21,8 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     }
     else if (memcmp(cmdArray[0], "help", strlen("help")) == 0)
     {
-        dlog_error("Please use the commands like:");
-        dlog_error("set_loglevel <cpuid> <loglevel>");
+        dlog_critical("Please use the commands like:");
+        dlog_critical("set_loglevel <cpuid> <loglevel>");
     }
 }
 

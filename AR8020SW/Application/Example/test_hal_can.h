@@ -1,6 +1,11 @@
 #ifndef __TEST_HAL_CAN_H__
 #define __TEST_HAL_CAN_H__
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 
 void command_TestCanInit(unsigned char *ch, unsigned char *br, unsigned char *acode,unsigned char *amask, unsigned char *format);
 
@@ -10,5 +15,9 @@ void command_TestCanTx(unsigned char *ch, unsigned char *id, unsigned char *len,
 
 void command_TestCanRx(void);
 
+
+#ifdef __cplusplus
+}
+#endif 
 
 #endif

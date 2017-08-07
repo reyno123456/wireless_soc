@@ -33,8 +33,8 @@ LDFLAGS += -L$(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER) $(LD_LIBS)
 SRC_S   :=  Src/upgrade_start.s 
 SRC_C   :=  Src/upgrade_main.c \
             Src/upgrade_command.c \
-            Src/upgrade_uart.c \
-            Src/upgrade_core.c 
+            Src/upgrade_uart.c
+#            Src/upgrade_core.c 
 
 CFLAGS += -I./Inc \
           -I$(OUTPUT_HEADER_STAGING_DIR) \

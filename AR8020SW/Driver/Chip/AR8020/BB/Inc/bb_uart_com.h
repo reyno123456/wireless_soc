@@ -8,8 +8,8 @@
 #define BBCOM_UART_BAUDRATE                 256000
 #define BBCOM_UART_RX_BUF_SIZE              1024
 #define BBCOM_UART_TX_FIFO_SIZE             1024
-#define BB_UART_GROUND_TX_FIFO_MAX_SIZE     32
-#define BB_UART_SKY_TX_FIFO_MAX_SIZE        200
+#define BB_UART_TX_FIFO_BPSK_SIZE           32
+#define BB_UART_TX_FIFO_QPSK_SIZE           208
 
 
 #define BBCOM_UART_SESSION_DATA_HEADER_SIZE 8
@@ -92,7 +92,7 @@ typedef struct
 
 typedef struct
 {
-    uint8_t          tx_fifo_data[BBCOM_UART_RX_BUF_SIZE];
+    uint8_t          tx_fifo_data[BBCOM_UART_TX_FIFO_SIZE];
     uint16_t         tx_fifo_rd_pos;
     uint16_t         tx_fifo_wr_pos;
 } STRU_BBUartComTxFIFO;
@@ -115,6 +115,8 @@ uint32_t BB_UARTComGetTxQueueCurrentLength(ENUM_BB_UART_SESSION_PRIORITY e_sessi
 void BB_UARTComCycleMsgProcess(void);
 void BB_UARTComCycleSendMsg(void);
 uint16_t BB_UARTComGetBBFIFOGap(void);
+uint32_t BB_UART_GetTxFifoMaxSize(ENUM_BB_MODE e_bb_mode);
+
 #if 0
 void BB_UARTComTestSend(void);
 #endif

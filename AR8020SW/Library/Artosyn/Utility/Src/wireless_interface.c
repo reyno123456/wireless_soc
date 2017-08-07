@@ -1416,7 +1416,7 @@ void WIRELESS_ParseParamConfig(void *param, uint8_t id)
 
     if (g_stWirelessParamConfig.u8_buffTail == g_stWirelessParamConfig.u8_buffHead)
     {
-        dlog_error("wireless buff is full");
+        dlog_warning("wireless buff is full");
     }
 
     return;
@@ -1496,7 +1496,7 @@ void Wireless_MessageProcess(void)
             }
             else
             {
-                dlog_error("no this message handler,%d", messageId);
+                dlog_warning("no this message handler,%d", messageId);
             }
         }
     
@@ -1571,7 +1571,7 @@ static void Wireless_InsertMsgIntoReplyBuff(STRU_WIRELESS_PARAM_CONFIG_MESSAGE *
 
     if (g_stWirelessReply.u8_buffTail == g_stWirelessReply.u8_buffHead)
     {
-        dlog_error("reply buff is full");
+        dlog_warning("reply buff is full");
         g_stWirelessReply.u8_buffHead = 0;
         g_stWirelessReply.u8_buffTail = 0;
     }

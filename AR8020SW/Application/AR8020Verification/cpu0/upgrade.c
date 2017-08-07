@@ -50,7 +50,7 @@ static uint8_t UPGRADE_MD5SUM(void)
     {
         if(md5_value[i] != g_u8Amd5Sum[i])
         {
-            dlog_info("nor flash checksum .........fail\n");
+            dlog_error("nor flash checksum .........fail\n");
             return 1;
         }
     }
@@ -135,7 +135,7 @@ void UPGRADE_Upgrade(void const *argument)
     fileResult = f_open(&MyFile,argument , FA_READ);
     if (FR_OK != fileResult)
     {
-        dlog_info("open or create file error: %d\n", fileResult);
+        dlog_error("open or create file error: %d\n", fileResult);
         
         vTaskDelete(NULL);
     }          
@@ -145,7 +145,7 @@ void UPGRADE_Upgrade(void const *argument)
         fileResult = f_read(&MyFile, (void *)g_u8arrayRecData, RDWR_SECTOR_SIZE, (void *)&u32_bytesRead);
         if((fileResult != FR_OK))
         {
-            dlog_info("Cannot Read from the file \n");
+            dlog_error("Cannot Read from the file \n");
             f_close(&MyFile);
             vTaskDelete(NULL);
         }
@@ -176,7 +176,7 @@ void UPGRADE_Upgrade(void const *argument)
         
         if(md5_value[i] != g_u8Amd5Sum[i])
         {
-            dlog_info("checksum .........fail\n");
+            dlog_error("checksum .........fail\n");
             vTaskDelete(NULL);
         }
     }
@@ -188,7 +188,7 @@ void UPGRADE_Upgrade(void const *argument)
     fileResult = f_open(&MyFile,argument , FA_READ);
     if (FR_OK != fileResult)
     {
-        dlog_info("open or create file error: %d\n", fileResult);
+        dlog_error("open or create file error: %d\n", fileResult);
         vTaskDelete(NULL);
     }          
     while(RDWR_SECTOR_SIZE == u32_bytesRead)
@@ -197,7 +197,7 @@ void UPGRADE_Upgrade(void const *argument)
         fileResult = f_read(&MyFile, (void *)g_u8arrayRecData, RDWR_SECTOR_SIZE, (void *)&u32_bytesRead);
         if((fileResult != FR_OK))
         {
-            dlog_info("Cannot Read from the file \n");
+            dlog_error("Cannot Read from the file \n");
             f_close(&MyFile);
         }
         dlog_info("fread %d\n",u32_bytesRead);

@@ -253,7 +253,7 @@ uint8_t QUAD_SPI_SetSpeed(ENUM_QUAD_SPI_SPEED speed)
         break;
     default:
         ret = FALSE;
-        dlog_error("The quad spi speed is not supported!\n");
+        dlog_warning("The quad spi speed is not supported!\n");
         break;
      }
 

@@ -168,7 +168,7 @@ static int BB_SPI_DataCheck(BB_SPI_Opr *p_stCheck,BB_SPI_Opr *p_stBuff)
 		else
 		{
 			s32_result = -1;
-			dlog_info("check error");
+			dlog_error("check error");
 		}
 	}
 	else

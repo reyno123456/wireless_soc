@@ -13,6 +13,8 @@
 #include "hal_sys_ctl.h"
 #include "wireless_interface.h"
 #include "hal_nv.h"
+#include "test_bb_led_ctrl.h"
+
 
 void console_init(uint32_t uart_num, uint32_t baut_rate)
 {
@@ -44,7 +46,10 @@ int main(void)
 
     /* initialize the uart */
     console_init(0,115200);
-    dlog_info("cpu0 start!!! \n");
+    dlog_critical("cpu0 start!!! \n");
+
+    BB_ledGpioInit();    
+    SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_EventHandler);
 
     HAL_USB_ConfigPHY();
 

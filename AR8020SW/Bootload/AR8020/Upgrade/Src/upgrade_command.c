@@ -29,11 +29,11 @@ void UPGRADE_CommandRun(char *cmdArray[], uint32_t cmdNum)
     }
     else
     {
-        dlog_error("%s Command not found. Please use the commands like:",cmdArray[0]);
-        //dlog_error("sd_upgradeapp");
-        //dlog_error("sd_boot");
-        dlog_error("uart_upgradeapp");
-        dlog_error("uart_boot");
+        dlog_critical("%s Command not found. Please use the commands like:",cmdArray[0]);
+        //dlog_critical("sd_upgradeapp");
+        //dlog_critical("sd_boot");
+        dlog_critical("uart_upgradeapp");
+        dlog_critical("uart_boot");
     }
 }
 

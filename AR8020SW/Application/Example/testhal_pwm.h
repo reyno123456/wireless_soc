@@ -12,8 +12,19 @@ History:
 #ifndef __HAL_TEST_PWM_H__
 #define __HAL_TEST_PWM_H__
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
 void commandhal_TestPwm(uint8_t *pu8_pwmNum, uint8_t *pu8_lowus, uint8_t *pu8_highus);
                                                               
 void commandhal_TestPwmAll(void);
+
+
+#ifdef __cplusplus
+}
+#endif 
 
 #endif

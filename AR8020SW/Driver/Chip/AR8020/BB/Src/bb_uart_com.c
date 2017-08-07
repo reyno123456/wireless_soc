@@ -92,7 +92,7 @@ static void BB_UARTComWriteSessionRxBuffer(ENUM_BBUARTCOMSESSIONID session_id, u
 
         if (wr_pos == rd_pos)
         {
-            dlog_error("FIFO is full!");
+            dlog_warning("FIFO is full!");
         }
 
         g_BBUARTComSessionArray[session_id].rx_buf->header.rx_buf_wr_pos = wr_pos;
@@ -241,8 +241,8 @@ uint8_t BB_UARTComFindHeader(uint8_t u8_data,
 
 uint32_t BB_UARTComPacketDataAnalyze(uint8_t *u8_uartRxBuf, uint8_t u8_uartRxLen)
 {
-    uint8_t             i = 0;
-    uint8_t             j = 0;
+    uint16_t            i = 0;
+    uint16_t            j = 0;
     uint8_t             chData = '\0';
     static uint8_t      find_header = 0;
     static uint8_t      receiving_data = 0;
@@ -927,12 +927,12 @@ void BB_UARTComCycleMsgProcess(void)
 
 void BB_UARTComCycleSendMsg(void)
 {
-    uint8_t             send_buff[BB_UART_SKY_TX_FIFO_MAX_SIZE];
+    uint8_t             send_buff[BB_UART_TX_FIFO_QPSK_SIZE];
     uint16_t            send_size = 0;
     uint16_t            i;
     uint16_t            read_pos;
     uint16_t            write_pos;
-    uint16_t            sky_fifo_gap;
+    uint32_t            max_tx_size;
     uint16_t            size_align;
 
     if (0 != uart_checkoutFifoStatus(BBCOM_UART_INDEX))
@@ -944,46 +944,31 @@ void BB_UARTComCycleSendMsg(void)
     read_pos        = g_BBUartTxFIFO.tx_fifo_rd_pos;
     write_pos       = g_BBUartTxFIFO.tx_fifo_wr_pos;
 
-    if (BB_SKY_MODE == context.en_bbmode)
+    /* in sky, no need to consider RC rate */
+    if (context.en_bbmode == BB_SKY_MODE)
     {
-        sky_fifo_gap    = BB_UARTComGetBBFIFOGap();
-
-        for (i = 0; i < BB_UART_SKY_TX_FIFO_MAX_SIZE; i++)
-        {
-            if ((read_pos == write_pos)||
-                (send_size == sky_fifo_gap))
-            {
-                break;
-            }
-
-            send_buff[i] = g_BBUartTxFIFO.tx_fifo_data[read_pos++];
-
-            if (read_pos >= BBCOM_UART_TX_FIFO_SIZE)
-            {
-                read_pos = 0;
-            }
-
-            send_size++;
-        }
+        max_tx_size = BB_UART_TX_FIFO_QPSK_SIZE;
     }
     else
     {
-        for (i = 0; i < BB_UART_GROUND_TX_FIFO_MAX_SIZE; i++)
+        max_tx_size = BB_UART_GetTxFifoMaxSize(BB_GRD_MODE);
+    }
+
+    for (i = 0; i < max_tx_size; i++)
+    {
+        if ((read_pos == write_pos))
         {
-            if (read_pos == write_pos)
-            {
-                break;
-            }
-
-            send_buff[i] = g_BBUartTxFIFO.tx_fifo_data[read_pos++];
-
-            if (read_pos >= BBCOM_UART_TX_FIFO_SIZE)
-            {
-                read_pos = 0;
-            }
-
-            send_size++;
+            break;
         }
+
+        send_buff[i] = g_BBUartTxFIFO.tx_fifo_data[read_pos++];
+
+        if (read_pos >= BBCOM_UART_TX_FIFO_SIZE)
+        {
+            read_pos = 0;
+        }
+
+        send_size++;
     }
 
     g_BBUartTxFIFO.tx_fifo_rd_pos   = read_pos;
@@ -1031,6 +1016,27 @@ uint16_t BB_UARTComGetBBFIFOGap(void)
     fifo_gap                = 2048 - fifo_gap;
 
     return fifo_gap;
+}
+
+
+uint32_t BB_UART_GetTxFifoMaxSize(ENUM_BB_MODE e_bb_mode)
+{
+    uint32_t      rc_rate = 0;
+
+    rc_rate = BB_GetRcRate(e_bb_mode);
+
+    if (rc_rate == 1)
+    {
+        return BB_UART_TX_FIFO_BPSK_SIZE;
+    }
+    else if (rc_rate == 2)
+    {
+        return BB_UART_TX_FIFO_QPSK_SIZE;
+    }
+    else
+    {
+        return BB_UART_TX_FIFO_BPSK_SIZE;
+    }
 }
 
 

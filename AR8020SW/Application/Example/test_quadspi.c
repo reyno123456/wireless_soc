@@ -77,7 +77,7 @@ void command_testQuadSPISpeedData(void)
         }
         else
         {
-            dlog_info("50M quad spi flash read fail!");
+            dlog_error("50M quad spi flash read fail!");
         }
 /*
         QUAD_SPI_SetSpeed(QUAD_SPI_SPEED_100M);
@@ -93,7 +93,7 @@ void command_testQuadSPISpeedData(void)
         }
         else
         {
-            dlog_info("100M quad spi flash read fail!");
+            dlog_error("100M quad spi flash read fail!");
         }
 */
     }

@@ -152,7 +152,7 @@ static int H264_Encoder_UpdateVideoInfo(unsigned char view, unsigned int resW, u
             }
         }
         
-        dlog_info("Video format change: %d, %d, %d, %d\n", view, resW, resH, framerate);
+        dlog_critical("Video format change: %d, %d, %d, %d\n", view, resW, resH, framerate);
     }
 
     osdptr->video_width[view] = resW;

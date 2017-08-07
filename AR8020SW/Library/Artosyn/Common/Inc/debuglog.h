@@ -44,7 +44,6 @@ do \
     {if (dlog_get_output_level() >= LOG_LEVEL_INFO) \
     printf("CPU%d: %s\t" fmt "\n", *((int*)0x0000018C), __FUNCTION__, ##arg);} \
 }while(0)
-/* #define DLOG_Info(fmt, arg...) do { }while(0) */
 
 #define DEBUG_LOG_USE_SRAM_OUTPUT_BUFFER
 #define DEBUG_LOG_OUTPUT_CPU_AFTER_CPU

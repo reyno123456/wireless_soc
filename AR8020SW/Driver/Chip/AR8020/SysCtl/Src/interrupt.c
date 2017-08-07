@@ -194,16 +194,16 @@ void hard_fault_monitor(unsigned int * hardfault_args)
     stacked_lr = ((unsigned long)hardfault_args[5]);
     stacked_pc = ((unsigned long)hardfault_args[6]);
     stacked_psr = ((unsigned long) hardfault_args[7]);
-    DLOG_Error("Hardfault happens!");
-    DLOG_Error("R0 = %x",stacked_r0);
-    DLOG_Error("R1 = %x\n",stacked_r1);
-    DLOG_Error("R2 = %x\n",stacked_r2);
-    DLOG_Error("R3 = %x\n",stacked_r3);
-    DLOG_Error("R12 = %x\n",stacked_r12);
-    DLOG_Error("LR [R14] = %x  subroutine call return address\n",stacked_lr);
-    DLOG_Error("PC [R15] = %x  program counter\n", stacked_pc);
-    DLOG_Error("PSR = %x\n",stacked_psr);
-    DLOG_Output(3000);
+    dlog_error("Hardfault happens!");
+    dlog_error("R0 = %x",stacked_r0);
+    dlog_error("R1 = %x\n",stacked_r1);
+    dlog_error("R2 = %x\n",stacked_r2);
+    dlog_error("R3 = %x\n",stacked_r3);
+    dlog_error("R12 = %x\n",stacked_r12);
+    dlog_error("LR [R14] = %x  subroutine call return address\n",stacked_lr);
+    dlog_error("PC [R15] = %x  program counter\n", stacked_pc);
+    dlog_error("PSR = %x\n",stacked_psr);
+    dlog_output(3000);
 
     while(1) ;
 }

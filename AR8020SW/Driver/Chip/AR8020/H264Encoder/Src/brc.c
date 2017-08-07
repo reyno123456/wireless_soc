@@ -93,7 +93,7 @@ RC_DATA rca[VIEW_NUM];
 #define CHECK_VIEW_IDX( view_idx ) \
     if( view_idx >= VIEW_NUM ) \
     { \
-        dlog_info( "view_idx %d is wrong.\n", view_idx ); \
+        dlog_error( "view_idx %d is wrong.\n", view_idx ); \
         return 0; \
     }
      

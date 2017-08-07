@@ -1,6 +1,12 @@
 #ifndef __TEST__SD__H
 #define __TEST__SD__H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
 #include "ff.h"
 #include "ff_gen_drv.h"
 #include "hal_sd.h"
@@ -20,5 +26,10 @@ void OS_TestSD_Erase();
 void Test_hal_read();
 void TestFatFs_with_usb();
 void command_sd_release();
+
+
+#ifdef __cplusplus
+}
+#endif 
 
 #endif

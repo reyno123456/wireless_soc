@@ -60,7 +60,7 @@ void GPIO_ModeListVal(uint32_t *pList, uint32_t size, uint32_t mode)
 	    ++pList;
     }
 }
-#endif
+
 
 void GPIO_ModeListList(uint32_t *pList, uint32_t size, uint32_t *mode)
 {
@@ -75,6 +75,7 @@ void GPIO_ModeListList(uint32_t *pList, uint32_t size, uint32_t *mode)
 	    ++mode;
     }
 }
+#endif
 
 void GPIO_SetPin(uint32_t gpioNum, uint32_t value)
 {

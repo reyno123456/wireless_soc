@@ -26,10 +26,9 @@ int main(void)
     HAL_SYS_CTL_Init(pst_cfg);
    
     console_init(2, 115200);
-    BB_ledGpioInit();
-    dlog_info("main ground function start \n");
+    dlog_set_output_level(LOG_LEVEL_WARNING);
+    dlog_critical("main ground function start \n");
 
-    BB_ledGpioInit();    
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_grdEventHandler);
 
     HAL_BB_InitGround(NULL);

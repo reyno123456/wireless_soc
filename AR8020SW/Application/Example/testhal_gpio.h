@@ -10,9 +10,21 @@ History: test gpio
 #ifndef __HAL_TEST_GPIO_H__
 #define __HAL_TEST_GPIO_H__
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
 void commandhal_TestGpioNormal(uint8_t *gpionum, uint8_t *highorlow);
 
 void commandhal_TestGpioInterrupt(uint8_t *gpionum, uint8_t *inttype, uint8_t *polarity);
 
 void commandhal_TestGetGpio(uint8_t *gpionum);
+
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

@@ -241,7 +241,7 @@ static int32_t NV_Get(void)
     }
     else
     {
-        dlog_info("flash1 chk error");
+        dlog_error("flash1 chk error");
     }
     
     if (0 != result)
@@ -258,7 +258,7 @@ static int32_t NV_Get(void)
         }
         else
         {
-            dlog_info("flash2 chk error");
+            dlog_error("flash2 chk error");
         }
     }
 

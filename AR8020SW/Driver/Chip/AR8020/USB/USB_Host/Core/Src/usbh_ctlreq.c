@@ -849,7 +849,7 @@ static USBH_StatusTypeDef USBH_HandleControl (USBH_HandleTypeDef *phost)
     {
       phost->pUser(phost, HOST_USER_UNRECOVERED_ERROR);
       phost->Control.errorcount = 0;
-      dlog_info("Control error");
+      dlog_warning("Control error");
       status = USBH_FAIL;
     }
     break;

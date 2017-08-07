@@ -15,7 +15,7 @@
 
 static void CONSOLE_Init(void)
 {
-/*     HAL_UART_Init(DEBUG_LOG_UART_PORT, HAL_UART_BAUDR_115200, NULL); */
+    HAL_UART_Init(DEBUG_LOG_UART_PORT, HAL_UART_BAUDR_115200, NULL);
     DLOG_Init(UPGRADE_CommandRun, NULL, DLOG_SERVER_PROCESSOR);
 }
 
@@ -33,7 +33,7 @@ int main(void)
     HAL_NVIC_SetPriorityGrouping(HAL_NVIC_PRIORITYGROUP_5);
     /* initialize the uart */
     CONSOLE_Init(); //115200 in 200M CPU clock
-    dlog_info("upgrade start!!!\n");
+    dlog_critical("upgrade start!!!\n");
     
     // Default system tick: 1ms.
     HAL_SYS_CTL_SysTickInit(CPU0_CPU1_CORE_PLL_CLK * 1000);

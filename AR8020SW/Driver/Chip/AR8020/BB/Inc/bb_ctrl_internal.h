@@ -50,6 +50,7 @@ typedef struct _STRU_FRQ_CHANNEL           //  Remote Controller Freq Channnel
     uint8_t frq2;
     uint8_t frq3;
     uint8_t frq4;
+    uint8_t frq5;
 }STRU_FRQ_CHANNEL;
 
 
@@ -152,7 +153,6 @@ typedef struct
     uint8_t             locked;
     uint8_t             rc_status;
     
-    uint16_t            qam_threshold_range[QAM_CHANGE_THRESHOLD_COUNT][2];
     uint16_t            mosaic;
     uint8_t             default_fac_setting;
     uint8_t             search_id_enable;

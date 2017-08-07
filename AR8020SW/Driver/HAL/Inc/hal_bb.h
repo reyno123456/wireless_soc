@@ -212,20 +212,6 @@ HAL_RET_T HAL_BB_UartComUnRegisterSession(ENUM_BBUARTCOMSESSIONID e_sessionId, S
  * @return  HAL_OK:                         means unrequest session OK 
  *          HAL_BB_ERR_UNREGISTER_SESSION:  means some error happens in unregister session 
  */
-HAL_RET_T HAL_BB_UartComSendMsgFromIsr(ENUM_BBUARTCOMSESSIONID e_sessionId,
-                                       uint8_t  *pu8_dataBuf, 
-                                       uint32_t u32_length);
-
-
-/** 
- * @brief   send out messages from uart session
- * @param   e_sessionId:                    the session id has already requested.
- *          pu8_dataBuf:                    buffer pointer to the data to be sent
- *          u32_length:                     data size to be sent
- *
- * @return  HAL_OK:                         means unrequest session OK 
- *          HAL_BB_ERR_UNREGISTER_SESSION:  means some error happens in unregister session 
- */
 HAL_RET_T HAL_BB_UartComSendMsg(ENUM_BBUARTCOMSESSIONID e_sessionId, 
                                 uint8_t  *pu8_dataBuf, 
                                 uint32_t u32_length);

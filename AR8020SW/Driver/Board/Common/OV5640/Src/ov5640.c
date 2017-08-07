@@ -797,7 +797,7 @@ int32_t OV5640_WriteReg(uint16_t u16_ov5640Reg, uint8_t u8_ov5640Val)
     s32_result = I2C_Master_WaitTillIdle(OV5640_COMPONENT, OV5640_I2C_MAX_DELAY);
     if(0 != s32_result)
     {
-        dlog_info("write reg error:reg=%x,val=%x", u16_ov5640Reg, u8_ov5640Val);
+        dlog_error("write reg error:reg=%x,val=%x", u16_ov5640Reg, u8_ov5640Val);
         s32_result = -1;
     }
     else
@@ -828,7 +828,7 @@ int32_t OV5640_ReadReg(uint16_t u16_ov5640Reg, uint8_t *pu8_ov5640Val)
     s32_result = I2C_Master_WaitTillIdle(OV5640_COMPONENT, OV5640_I2C_MAX_DELAY);
     if(0 != s32_result) 
     {
-        dlog_info("read reg error:reg=%x", u16_ov5640Reg);
+        dlog_error("read reg error:reg=%x", u16_ov5640Reg);
         s32_result = -1;
     }
     else
@@ -1173,7 +1173,7 @@ static int32_t OV5640_GetCfgInfoByIndex(ENUM_OV5640_MODE e_ov5640Mode,
     {
         *ppst_ov5640ModeSetting = NULL;
         *u32_ov5640ArySize = 0;
-        dlog_info("parameter error.");
+        dlog_error("parameter error.");
     }
     else
     {

@@ -128,7 +128,7 @@ void command_TestWbFlash(char *spi_base)
     }
     else 
     {
-        dlog_info("Scan WB_Flash Error! \n:");
+        dlog_error("Scan WB_Flash Error! \n:");
     }
  
     //Winbond_SPI_FLASH Setting 
@@ -248,7 +248,7 @@ void command_TestWbFlashWrite(char *spi_base, char *addr, char *len)
     }
     else 
     {
-        dlog_info("Scan WB_Flash Error! \n:");
+        dlog_error("Scan WB_Flash Error! \n:");
     }
  
     //Winbond_SPI_FLASH Setting 
@@ -407,7 +407,7 @@ void command_TestWbFlashRead(char *spi_base, char *addr, char *len)
     }
     else 
     {
-        dlog_info("Scan WB_Flash Error! \n:");
+        dlog_error("Scan WB_Flash Error! \n:");
     }
  
     //Winbond_SPI_FLASH Setting 
@@ -515,7 +515,7 @@ void command_TestWbFlashWrite_loop(char *spi_base, char *addr, char *len)
     }
     else 
     {
-        dlog_info("Scan WB_Flash Error! \n:");
+        dlog_error("Scan WB_Flash Error! \n:");
     }
  
     //Winbond_SPI_FLASH Setting 

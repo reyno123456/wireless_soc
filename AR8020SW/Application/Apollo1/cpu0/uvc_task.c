@@ -350,37 +350,37 @@ void command_uvchelp(void)
 
     uvc_supported_attr_bitmap = HAL_USB_GetUVCProcUnitControls();
 
-    dlog_error("UVC Attribution Usage: setuvcattr <index> <value>");
-    dlog_error("UVC Attribution Usage: getuvcattr <index> <type>");
+    dlog_critical("UVC Attribution Usage: setuvcattr <index> <value>");
+    dlog_critical("UVC Attribution Usage: getuvcattr <index> <type>");
 
-    dlog_error("supported Attribution Bitmap: 0x%08x", uvc_supported_attr_bitmap);
+    dlog_critical("supported Attribution Bitmap: 0x%08x", uvc_supported_attr_bitmap);
 
-    dlog_error("UVC Attribution Index");
-    dlog_error("%d:    BRIGHTNESS", ENUM_HAL_UVC_BRIGHTNESS);
-    dlog_error("%d:    CONTRAST", ENUM_HAL_UVC_CONTRAST);
-    dlog_error("%d:    HUE", ENUM_HAL_UVC_HUE);
-    dlog_error("%d:    SATURATION", ENUM_HAL_UVC_SATURATION);
-    dlog_error("%d:    SHARPNESS", ENUM_HAL_UVC_SHARPNESS);
-    dlog_error("%d:    GAMMA", ENUM_HAL_UVC_GAMMA);
-    dlog_error("%d:    WHITE_BALANCE_TEMP", ENUM_HAL_UVC_WHITE_BALANCE_TEMP);
-    dlog_error("%d:    WHITE_BALANCE_COMP", ENUM_HAL_UVC_WHITE_BALANCE_COMP);
-    dlog_error("%d:    BACKLIGHT_COMP", ENUM_HAL_UVC_BACKLIGHT_COMP);
-    dlog_error("%d:    GAIN", ENUM_HAL_UVC_GAIN);
-    dlog_error("%d:   PWR_LINE_FREQ", ENUM_HAL_UVC_PWR_LINE_FREQ);
-    dlog_error("%d:   HUE_AUTO", ENUM_HAL_UVC_HUE_AUTO);
-    dlog_error("%d:   WHITE_BALANCE_TEMP_AUTO", ENUM_HAL_UVC_WHITE_BALANCE_TEMP_AUTO);
-    dlog_error("%d:   WHITE_BALANCE_COMP_AUTO", ENUM_HAL_UVC_WHITE_BALANCE_COMP_AUTO);
-    dlog_error("%d:   DIGITAL_MULTI", ENUM_HAL_UVC_DIGITAL_MULTI);
-    dlog_error("%d:   DIGITAL_MULTI_LIMIT", ENUM_HAL_UVC_DIGITAL_MULTI_LIMIT);
+    dlog_critical("UVC Attribution Index");
+    dlog_critical("%d:    BRIGHTNESS", ENUM_HAL_UVC_BRIGHTNESS);
+    dlog_critical("%d:    CONTRAST", ENUM_HAL_UVC_CONTRAST);
+    dlog_critical("%d:    HUE", ENUM_HAL_UVC_HUE);
+    dlog_critical("%d:    SATURATION", ENUM_HAL_UVC_SATURATION);
+    dlog_critical("%d:    SHARPNESS", ENUM_HAL_UVC_SHARPNESS);
+    dlog_critical("%d:    GAMMA", ENUM_HAL_UVC_GAMMA);
+    dlog_critical("%d:    WHITE_BALANCE_TEMP", ENUM_HAL_UVC_WHITE_BALANCE_TEMP);
+    dlog_critical("%d:    WHITE_BALANCE_COMP", ENUM_HAL_UVC_WHITE_BALANCE_COMP);
+    dlog_critical("%d:    BACKLIGHT_COMP", ENUM_HAL_UVC_BACKLIGHT_COMP);
+    dlog_critical("%d:    GAIN", ENUM_HAL_UVC_GAIN);
+    dlog_critical("%d:   PWR_LINE_FREQ", ENUM_HAL_UVC_PWR_LINE_FREQ);
+    dlog_critical("%d:   HUE_AUTO", ENUM_HAL_UVC_HUE_AUTO);
+    dlog_critical("%d:   WHITE_BALANCE_TEMP_AUTO", ENUM_HAL_UVC_WHITE_BALANCE_TEMP_AUTO);
+    dlog_critical("%d:   WHITE_BALANCE_COMP_AUTO", ENUM_HAL_UVC_WHITE_BALANCE_COMP_AUTO);
+    dlog_critical("%d:   DIGITAL_MULTI", ENUM_HAL_UVC_DIGITAL_MULTI);
+    dlog_critical("%d:   DIGITAL_MULTI_LIMIT", ENUM_HAL_UVC_DIGITAL_MULTI_LIMIT);
 
-    dlog_error("UVC Attribution Type");
-    dlog_error("0x%02x: GET_CUR", HAL_UVC_GET_CUR);
-    dlog_error("0x%02x: GET_MIN", HAL_UVC_GET_MIN);
-    dlog_error("0x%02x: GET_MAX", HAL_UVC_GET_MAX);
-    dlog_error("0x%02x: GET_RES", HAL_UVC_GET_RES);
-    dlog_error("0x%02x: GET_LEN", HAL_UVC_GET_LEN);
-    dlog_error("0x%02x: GET_INFO", HAL_UVC_GET_INFO);
-    dlog_error("0x%02x: GET_DEF", HAL_UVC_GET_DEF);
+    dlog_critical("UVC Attribution Type");
+    dlog_critical("0x%02x: GET_CUR", HAL_UVC_GET_CUR);
+    dlog_critical("0x%02x: GET_MIN", HAL_UVC_GET_MIN);
+    dlog_critical("0x%02x: GET_MAX", HAL_UVC_GET_MAX);
+    dlog_critical("0x%02x: GET_RES", HAL_UVC_GET_RES);
+    dlog_critical("0x%02x: GET_LEN", HAL_UVC_GET_LEN);
+    dlog_critical("0x%02x: GET_INFO", HAL_UVC_GET_INFO);
+    dlog_critical("0x%02x: GET_DEF", HAL_UVC_GET_DEF);
 
     dlog_output(200);
 }

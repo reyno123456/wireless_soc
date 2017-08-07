@@ -16,7 +16,8 @@
 #include "hal_nv.h"
 #include "hal_dma.h"
 #include "hal_sd.h"
-#include "hal_rtc.h"
+#include "test_bb_led_ctrl.h"
+
 
 void console_init(uint32_t uart_num, uint32_t baut_rate)
 {
@@ -55,6 +56,9 @@ int main(void)
 
     dlog_critical("cpu0 start!!!, time = %s", __TIME__);
 
+    BB_ledGpioInit();
+    SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_EventHandler);
+
     HAL_USB_ConfigPHY();
 
     HDMI_powerOn();
@@ -80,7 +84,6 @@ int main(void)
     HAL_NV_Init();
 
 	HAL_DMA_init();
-
 /*
 	HAL_SD_Init();
 

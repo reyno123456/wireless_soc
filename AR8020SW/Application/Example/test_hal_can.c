@@ -73,7 +73,7 @@ static void printCanMsg(STRU_HAL_CAN_MSG *pst_canSengMsg)
     }   
     else    
     {   
-        dlog_info(" e_halCanType:error ");
+        dlog_warning(" e_halCanType:error ");
     }
     
 }

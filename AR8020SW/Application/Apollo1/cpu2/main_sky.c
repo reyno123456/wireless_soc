@@ -26,8 +26,9 @@ int main(void)
     HAL_SYS_CTL_Init(pst_cfg);
 
     /* initialize the uart */
-    console_init(2, 115200);   
-    dlog_info("cpu2 start!!! \n");
+    console_init(2, 115200);  
+    dlog_set_output_level(LOG_LEVEL_WARNING);
+    dlog_critical("cpu2 start!!! \n");
 
     STRU_HAL_H264_CONFIG st_h264Cfg;
     st_h264Cfg.u8_view0En = 1;
@@ -40,7 +41,6 @@ int main(void)
     st_h264Cfg.u8_view1BrEn = 1;
     HAL_H264_Init(st_h264Cfg);
 
-    BB_ledGpioInit();
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_skyEventHandler);
     
     HAL_BB_InitSky(NULL);

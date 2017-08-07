@@ -41,6 +41,9 @@ typedef struct
 
 STRU_pieceSNR stru_snr;
 
+uint16_t qam_change_threshold[QAM_CHANGE_THRESHOLD_COUNT][2] =  
+         {{0, 0x6A},      {0x54, 0x129},    {0xec, 0x388}, 
+         {0x2ce, 0xa3e}, {0x823, 0x1d94},  {0x12aa, 0xffff}};
 /*
   * return type: 1:  snr check pass
   *              0:  snr check Fail
@@ -170,7 +173,7 @@ uint16_t grd_get_it_snr( void )
     if( cnt++ > 1000 )
     {
         cnt = 0;
-        dlog_info("SNR1:%0.4x\n", snr);
+        dlog_warning("SNR1:%0.4x\n", snr);
     }
 
     return snr;
@@ -470,7 +473,7 @@ void grd_set_txmsg_mcs_change(ENUM_CH_BW bw, uint8_t index)
         BB_WriteReg(PAGE1, (addr + cnt), regdata[cnt]);
     }
 
-    dlog_info("MCS2=> 0x%x\n", index);
+    dlog_warning("MCS2=> 0x%x\n", index);
 }
 
 
@@ -602,8 +605,8 @@ void grd_judge_qam_mode(void)
     
 
     grd_get_snr();
-    snr_qamupdown = snr_static_for_qam_change( context.qam_threshold_range[context.qam_ldpc][0], 
-                                               context.qam_threshold_range[context.qam_ldpc][1]);
+    snr_qamupdown = snr_static_for_qam_change( qam_change_threshold[context.qam_ldpc][0], 
+                                               qam_change_threshold[context.qam_ldpc][1]);
     if ( context.qam_ldpc == 0)
     {
         harq_qamupdown = harq_static_for_qam_up();

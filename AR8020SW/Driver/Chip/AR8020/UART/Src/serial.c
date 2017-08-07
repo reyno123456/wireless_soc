@@ -342,7 +342,7 @@ void uart_putdata(unsigned char index,  const char *s, unsigned short dataLen)
         }
         else
         {
-            dlog_info("fail");
+            dlog_error("fail");
         }
         //dlog_info("line = %d, s_st_uartTxArray[%d].ps8_uartSendBuff = %p", __LINE__, index, 
         //            s_st_uartTxArray[index].ps8_uartSendBuff);              

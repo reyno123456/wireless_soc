@@ -25,7 +25,7 @@ volatile uint32_t g_u32_dstAddress=MPE3_ENCODER_DATA_ADDR;
 uint32_t g_u32_audioBypassAddr=0;
 
 
-HAL_BOOL_T HAL_MP3EncodePcmInit(const STRU_MP3_ENCODE_CONFIGURE_WAVE *st_mp3EncodeConfg, uint8_t dataPath)
+HAL_RET_T HAL_MP3EncodePcmInit(const STRU_MP3_ENCODE_CONFIGURE_WAVE *st_mp3EncodeConfg, uint8_t dataPath)
 {          
     shine_config_t st_config; 
     pu32_newPcmDataFlagAddr=(uint32_t *)(st_mp3EncodeConfg->u32_newPcmDataFlagAddr);
@@ -42,7 +42,7 @@ HAL_BOOL_T HAL_MP3EncodePcmInit(const STRU_MP3_ENCODE_CONFIGURE_WAVE *st_mp3Enco
     st_s = shine_initialise(&st_config);
     if (NULL == st_s)
     {
-        return HAL_FALSE;
+        return HAL_MP3ENCODER_ERR_INIT;
     }
 
     s32_samples_per_pass = shine_samples_per_pass(st_s);
@@ -60,10 +60,10 @@ HAL_BOOL_T HAL_MP3EncodePcmInit(const STRU_MP3_ENCODE_CONFIGURE_WAVE *st_mp3Enco
     }
 
     dlog_info("encode mp3 init  %x %x %x %d\n", u32_rawDataLenght,u32_rawDataAddr,u32_encodeDataAddr,u32_frameSize);
-    return  HAL_TRUE;
+    return  HAL_OK;
 }
 
-HAL_BOOL_T HAL_MP3EncodePcmUnInit(void)
+HAL_RET_T HAL_MP3EncodePcmUnInit(void)
 {
     shine_close(st_s);
     dlog_info("encode mp3 uninit");

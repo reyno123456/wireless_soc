@@ -1,6 +1,12 @@
 #ifndef __TEST_HAL_CAMERA_H__
 #define	__TEST_HAL_CAMERA_H__
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
 #include <stdlib.h>
 #include <string.h>
 #include "debuglog.h"
@@ -12,5 +18,9 @@ void command_TestCameraWrite(unsigned char *subAddr, unsigned char *value);
 
 void command_TestCameraRead(unsigned char *subAddr);
 
+
+#ifdef __cplusplus
+}
+#endif 
 
 #endif

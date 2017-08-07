@@ -5,7 +5,7 @@
 #ifndef _GPIO_H
 #define _GPIO_H
 #define GPIO_NUM_PINS      				(128)
-#define MULTIPLE           				(1)   
+#define MULTIPLE           				(0)   
 
 #define GPIO_MODE_0     				(0x0)
 #define GPIO_MODE_1                     (0x1)

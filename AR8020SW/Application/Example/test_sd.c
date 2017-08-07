@@ -43,37 +43,37 @@ void TestWR()
 	ENUM_HAL_SD_CTRL cmd = HAL_SD_GET_SECTOR_COUNT;
 	if (HAL_SD_Ioctl(cmd, &info) != HAL_OK)
 	{
-		dlog_info("ioctl failed\n");
+		dlog_error("ioctl failed\n");
 	}
 
 	cmd = HAL_SD_GET_SECTOR_SIZE;
 	if (HAL_SD_Ioctl(cmd, &info) != HAL_OK)
 	{
-		dlog_info("ioctl failed\n");
+		dlog_error("ioctl failed\n");
 	}
 
 	cmd = HAL_SD_GET_CSD_VERSION;
 	if (HAL_SD_Ioctl(cmd, &info) != HAL_OK)
 	{
-		dlog_info("ioctl failed\n");
+		dlog_error("ioctl failed\n");
 	}
 
 	cmd = HAL_SD_GET_MANUID;
 	if (HAL_SD_Ioctl(cmd, &info) != HAL_OK)
 	{
-		dlog_info("ioctl failed\n");
+		dlog_error("ioctl failed\n");
 	}
 
 	cmd = HAL_SD_GET_TRAN_SPEED;
 	if (HAL_SD_Ioctl(cmd, &info) != HAL_OK)
 	{
-		dlog_info("ioctl failed\n");
+		dlog_error("ioctl failed\n");
 	}
 
 	cmd = HAL_SD_GET_CARD_STATUS;
 	if (HAL_SD_Ioctl(cmd, &info) != HAL_OK)
 	{
-		dlog_info("ioctl failed\n");
+		dlog_error("ioctl failed\n");
 	}
 
 	int i = 0;
@@ -105,13 +105,13 @@ void TestFatFs()
     
 	if (FR_OK != f_chdrive("SD:"))
 	{
-		dlog_info("%d chdrive to SD:\\ fail", __LINE__);
+		dlog_error("%d chdrive to SD:\\ fail", __LINE__);
     }
     
     res = f_open(&MyFile, (const TCHAR*)(name), FA_OPEN_ALWAYS | FA_WRITE | FA_OPEN_APPEND);
     if (res != FR_OK) 
     {
-    	dlog_info("f_open error, res = %d", res);
+    	dlog_error("f_open error, res = %d", res);
     }
     else
     {
@@ -119,7 +119,7 @@ void TestFatFs()
     	u32_start = SysTicks_GetTickCount();
         if (FR_OK != f_chdrive("SD:"))
         {
-            dlog_info("%d chdrive to SD:\\ fail", __LINE__);
+            dlog_error("%d chdrive to SD:\\ fail", __LINE__);
         }
     	res = f_write(&MyFile, (const void*)(0x81000000), 
     				rw_size, (void *)&byteswritten);    	
@@ -131,7 +131,7 @@ void TestFatFs()
 
     	if ((byteswritten == 0) || (res != FR_OK))
     	{
-    		dlog_info("f_write error!");
+    		dlog_error("f_write error!");
     	}
     	else
     	{
@@ -143,12 +143,12 @@ void TestFatFs()
     		
             if (FR_OK != f_chdrive("SD:"))
             {
-                dlog_info("%d chdrive to SD:\\ fail", __LINE__);
+                dlog_error("%d chdrive to SD:\\ fail", __LINE__);
             }
 /*     		if (f_open(&MyFile, (const TCHAR*)name, FA_READ) != FR_OK) */
             if(FR_OK != f_open(&MyFile, (const TCHAR*)(name), FA_OPEN_EXISTING | FA_READ))
     		{
-    			dlog_info("f_open error!");
+    			dlog_error("f_open error!");
     		}
     		else
     		{
@@ -156,7 +156,7 @@ void TestFatFs()
     			u32_start = SysTicks_GetTickCount();
                 if (FR_OK != f_chdrive("SD:"))
                 {
-                    dlog_info("%d chdrive to SD:\\ fail", __LINE__);
+                    dlog_error("%d chdrive to SD:\\ fail", __LINE__);
                 }
     			res = f_read(&MyFile, (void*)(0x81000000), 
     						bytesread, (UINT*)&bytesread);
@@ -167,7 +167,7 @@ void TestFatFs()
 
     			if ((bytesread == 0) || (res != FR_OK))
     			{
-    				dlog_info("f_read error!");
+    				dlog_error("f_read error!");
     			}
     			else
     			{
@@ -207,8 +207,8 @@ void TestFatFs1()
 		if ((res = f_mount(&SDFatFs, (TCHAR const*)SDPath, 1)) != FR_OK)
 		{
 			/* FatFs Initialization Error */
-			dlog_info("f_mount = %d", res);
-			dlog_info("f_mount error!");
+			dlog_error("f_mount = %d", res);
+			dlog_error("f_mount error!");
 		}
 		else
 		{
@@ -220,7 +220,7 @@ void TestFatFs1()
             if (f_open(&outFile, (const TCHAR*)"a.mp3", FA_WRITE | FA_OPEN_APPEND) != FR_OK)
             // if (open_append(&outFile, "a.mp3"))
 			{
-				dlog_info("f_open out error!");
+				dlog_error("f_open out error!");
 			}
 			else
 			{
@@ -230,7 +230,7 @@ void TestFatFs1()
 
 			if (f_open(&inFile, (const TCHAR*)"a.wav", FA_READ) != FR_OK)
 			{
-				dlog_info("f_open in error!");
+				dlog_error("f_open in error!");
 			}
             else
             {
@@ -295,8 +295,8 @@ void TestFatFs2()
 		if ((res = f_mount(&SDFatFs, (TCHAR const*)SDPath, 1)) != FR_OK)
 		{
 			/* FatFs Initialization Error */
-			dlog_info("f_mount = %d\n", res);
-			dlog_info("f_mount error!\n");
+			dlog_error("f_mount = %d\n", res);
+			dlog_error("f_mount error!\n");
 		}
 		else
 		{
@@ -312,7 +312,7 @@ void TestFatFs2()
 			if (f_open(&fileIn, (const TCHAR*)("a.wav"), FA_READ) != FR_OK)
 			{
 				/* 'STM32.TXT' file Open for write Error */
-				dlog_info("f_open error!\n");
+				dlog_error("f_open error!\n");
 			}
 			else
 			{
@@ -493,7 +493,7 @@ void OS_TestSD_Erase_Handler(void const * argument)
 	}
 	else
 	{
-		dlog_info("error");
+		dlog_error("error");
 	}
 	
         for (;;)
@@ -542,7 +542,7 @@ void TestFatFs_with_usb()
     
 	if (FATFS_LinkDriver(&SD_Driver, SDPath) != 0)
 	{
-		dlog_info("Link error!");
+		dlog_error("Link error!");
 		return;
 	}
 	
@@ -550,8 +550,8 @@ void TestFatFs_with_usb()
 
 	if ((res = f_mount(&SDFatFs, (TCHAR const*)SDPath, 1)) != FR_OK)
 	{
-		dlog_info("f_mount = %d", res);
-		dlog_info("f_mount error!");
+		dlog_error("f_mount = %d", res);
+		dlog_error("f_mount error!");
 	}
 	else
 	{
@@ -656,7 +656,7 @@ void TestRawWR_SDRAM()
 		}
 		else
 		{
-			dlog_info("error");
+			dlog_error("error");
 		}
 	}
 
@@ -676,7 +676,7 @@ void TestRawWR_SDRAM()
 		}
 		else
 		{
-			dlog_info("error");
+			dlog_error("error");
 		}
 	}
 

@@ -11,6 +11,16 @@ History:
 #ifndef __HAL_TEST_SIMULATE_H__
 #define __HAL_TEST_SIMULATE_H__
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 void commandhal_TestSimulatePwm(void);
+
+
+#ifdef __cplusplus
+}
+#endif 
 
 #endif

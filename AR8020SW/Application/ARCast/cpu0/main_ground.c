@@ -24,6 +24,8 @@
 #include "hal_usb_device.h"
 #include "hal_sram.h"
 #include "hal_dma.h"
+#include "test_bb_led_ctrl.h"
+
 
 void Command_BBSendCommand(void const *argument);
 
@@ -76,7 +78,7 @@ static void Mp3Decoder(void const *argument)
 
             if ((s32_decoderBuffLen + u16_mp3BuffLen) > (MP3_BUFF_SIZE + 512))
             {
-                dlog_error("mp3 buff overflow :%d", s32_decoderBuffLen);
+                dlog_info("mp3 buff overflow :%d", s32_decoderBuffLen);
                 HAL_SRAM_GetMp3Data(MP3_BUFF_SIZE, p_mp3DataBuffTmp);            
                 s32_decoderBuffLen = MP3_BUFF_SIZE;
             }
@@ -201,7 +203,10 @@ int main(void)
     /* initialize the uart */
     CONSOLE_Init();
 	
-    dlog_info("cpu0 start!!!\n");	
+    dlog_critical("cpu0 start!!!\n");	
+
+    BB_ledGpioInit();
+    SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_EventHandler);
 
     g_p_mp3Decoder = mp3_create();
 	

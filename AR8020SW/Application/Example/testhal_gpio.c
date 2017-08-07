@@ -73,7 +73,7 @@ void commandhal_TestGpioInterrupt(uint8_t *gpionum, uint8_t *inttype, uint8_t *p
     }
     else
     {
-        dlog_info("fail %d",u8_GpioNum);
+        dlog_error("fail %d",u8_GpioNum);
     }
     dlog_output(100);
 }

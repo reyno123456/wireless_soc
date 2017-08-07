@@ -61,25 +61,32 @@
 #define     RC_FRQ_1                        (0x77)
 #define     RC_FRQ_2                        (0x78)
 #define     RC_FRQ_3                        (0x79)
+#define     RC_FRQ_4                        (0x7A)
 
-#define     IT_FRQ_0                        (0x7A)
-#define     IT_FRQ_1                        (0x7B)
-#define     IT_FRQ_2                        (0x7C)
-#define     IT_FRQ_3                        (0x7D)
 
-#define     FRE_OFFSET_0                    (0x7E)
-#define     FRE_OFFSET_1                    (0x7F)
-#define     FRE_OFFSET_2                    (0x80)
-#define     FRE_OFFSET_3                    (0x81)
-#define     FRE_OFFSET_4                    (0x82)
+#define     IT_FRQ_0                        (0x7B)
+#define     IT_FRQ_1                        (0x7C)
+#define     IT_FRQ_2                        (0x7D)
+#define     IT_FRQ_3                        (0x7E)
+#define     IT_FRQ_4                        (0x7F)
+
+#define     FRE_OFFSET_0                    (0x80)
+#define     FRE_OFFSET_1                    (0x81)
+#define     FRE_OFFSET_2                    (0x82)
+#define     FRE_OFFSET_3                    (0x83)
+#define     FRE_OFFSET_4                    (0x84)
 
 #define     GRD_SEARCHING                   (0x83)     //1: in searching mode
 
-#define     GROUND_SYNC_RC_ID_0                     (0x84)
-#define     GROUND_SYNC_RC_ID_1                     (0x85)
-#define     GROUND_SYNC_RC_ID_2                     (0x86)
-#define     GROUND_SYNC_RC_ID_3                     (0x87)
-#define     GROUND_SYNC_RC_ID_4                     (0x88)
+#define     GROUND_SYNC_RC_ID_0             (0x84)
+#define     GROUND_SYNC_RC_ID_1             (0x85)
+#define     GROUND_SYNC_RC_ID_2             (0x86)
+#define     GROUND_SYNC_RC_ID_3             (0x87)
+#define     GROUND_SYNC_RC_ID_4             (0x88)
+
+#define     RC_RATE                         (0x89)
+
+
 #define     SPI_CHK2                        (0x9F)
 /****end of ground - > sky registers Fro    m 0x60 -> 0x9F */
 

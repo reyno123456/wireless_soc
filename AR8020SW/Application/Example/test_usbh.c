@@ -284,7 +284,7 @@ void command_startBypassVideo(uint8_t *bypassChannel)
     }
     else
     {
-        dlog_error("Bypass Video Task is running\n");
+        dlog_info("Bypass Video Task is running\n");
     }
 }
 
@@ -302,7 +302,7 @@ void command_stopBypassVideo(void)
     }
     else
     {
-        dlog_error("Bypass Video Task is not running\n");
+        dlog_info("Bypass Video Task is not running\n");
     }
 }
 

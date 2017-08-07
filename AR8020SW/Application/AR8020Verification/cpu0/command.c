@@ -39,7 +39,6 @@
 #include "testhal_dma.h"
 #include "ar_freertos_specific.h"
 #include "hal.h"
-#include "hal_rtc.h"
 
 
 void command_readMemory(char *addr);
@@ -440,84 +439,84 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     }
     else if (memcmp(cmdArray[0], "help", strlen("help")) == 0)
     {
-        dlog_error("Please use the commands like:");
-        dlog_error("read <address>");
-        dlog_error("write <address> <data>");
-        dlog_error("write_array <address> <data><len>");
-        //dlog_error("initsd");
-        //dlog_error("readsd <SrcAddr:0x> <SectorNum:0x>");
-        //dlog_error("writesd <DstAddr:0x> <SectorNum:0x> <Srcaddr:0x>");
-        //dlog_error("erasesd <startSector> <SectorNum>");
-        //dlog_error("test_sd <choise>");
-        //dlog_error("mount_sd");
-        dlog_error("hdmiinit <index>");
-        dlog_error("hdmidump <index>");
-        dlog_error("hdmigetvideoformat <index>");
-        dlog_error("hdmiread <slv address> <reg address>");
-        dlog_error("hdmiwrite <slv address> <reg address> <reg value>");
-        dlog_error("test_os <choise>");
-        dlog_error("freertos_taskquit");
-        dlog_error("test_hal_spi_flash_id <spi_port>");
-        dlog_error("test_hal_spi_flash_write_read <spi_port>");
-        dlog_error("test_hal_spi_flash_erase <spi_port>");
-        dlog_error("test_hal_spi_flash_write <spi_port> <start_addr> <data_len>");
-        dlog_error("test_hal_spi_flash_read <spi_port> <start_addr> <data_len>");
-        dlog_error("test_hal_spi_set_flash_clk <clk Mhz>");
-        dlog_error("test_quadspi_speed <speed enum>");
-        dlog_error("test_quadspi_data"); 
-        dlog_error("test_init_flash");
-        dlog_error("test_erase_flash <erase type> <flash start address>");
-        dlog_error("test_write_flash <flash start address> <size> <value>");
-        dlog_error("test_read_flash <flash start address> <size>");
-        dlog_error("test_nor_flash_all <flash start address> <size> <value>");
+        dlog_critical("Please use the commands like:");
+        dlog_critical("read <address>");
+        dlog_critical("write <address> <data>");
+        dlog_critical("write_array <address> <data><len>");
+        //dlog_critical("initsd");
+        //dlog_critical("readsd <SrcAddr:0x> <SectorNum:0x>");
+        //dlog_critical("writesd <DstAddr:0x> <SectorNum:0x> <Srcaddr:0x>");
+        //dlog_critical("erasesd <startSector> <SectorNum>");
+        //dlog_critical("test_sd <choise>");
+        //dlog_critical("mount_sd");
+        dlog_critical("hdmiinit <index>");
+        dlog_critical("hdmidump <index>");
+        dlog_critical("hdmigetvideoformat <index>");
+        dlog_critical("hdmiread <slv address> <reg address>");
+        dlog_critical("hdmiwrite <slv address> <reg address> <reg value>");
+        dlog_critical("test_os <choise>");
+        dlog_critical("freertos_taskquit");
+        dlog_critical("test_hal_spi_flash_id <spi_port>");
+        dlog_critical("test_hal_spi_flash_write_read <spi_port>");
+        dlog_critical("test_hal_spi_flash_erase <spi_port>");
+        dlog_critical("test_hal_spi_flash_write <spi_port> <start_addr> <data_len>");
+        dlog_critical("test_hal_spi_flash_read <spi_port> <start_addr> <data_len>");
+        dlog_critical("test_hal_spi_set_flash_clk <clk Mhz>");
+        dlog_critical("test_quadspi_speed <speed enum>");
+        dlog_critical("test_quadspi_data"); 
+        dlog_critical("test_init_flash");
+        dlog_critical("test_erase_flash <erase type> <flash start address>");
+        dlog_critical("test_write_flash <flash start address> <size> <value>");
+        dlog_critical("test_read_flash <flash start address> <size>");
+        dlog_critical("test_nor_flash_all <flash start address> <size> <value>");
         dlog_output(1000);
         HAL_Delay(100);
-        dlog_error("startbypassvideo");
-        dlog_error("stopbypassvideo");
-        dlog_error("test_float_calculate_pi");
-        dlog_error("command_test_BB_uart <option>");
-        dlog_error("upgrade <filename>");
-        dlog_error("test_can_init <ch> <br> <acode> <amsk> <format>");
-        dlog_error("test_can_set_int <ch> <flag>");
-        dlog_error("test_can_tx <ch> <id> <len> <format> <type>");
-        dlog_error("test_can_rx");
-        dlog_error("testhal_TestGpioNormal <gpionum> <highorlow>");
-        dlog_error("testhal_TestGetGpio <gpionum>");
-        dlog_error("testhal_TestGpioInterrupt <gpionum> <inttype> <polarity>");        
-        dlog_error("testhal_Testtimer <TIM Num> <TIM Count>");
-        dlog_error("testhal_Testtiemrall");
-        dlog_error("testhal_Testpwm <PWM Num> <PWM low> <PWM high>");
-        dlog_error("testhal_pwmall");
-        dlog_error("testhal_simulatepwm");
-        dlog_error("testhal24c256 <i2c port> <i2c_value>");
-        dlog_error("test_hal_i2c_init <ch> <i2c_addr> <speed>");
-        dlog_error("test_hal_i2c_write <ch> <subAddr> <subAddrLen> <data> <dataLen>");
-        dlog_error("test_hal_i2c_read <ch> <subAddr> <subAddrLen> <dataLen>");
-        dlog_error("test_hal_uart_init <ch> <baudr>");
-        dlog_error("test_hal_uart_set_int <ch> <flag>");
-        dlog_error("test_hal_uart_tx <ch> <len>");
-        dlog_error("test_hal_uart_rx <ch>");
-        dlog_error("test_hal_spi_init <ch> <baudr> <polarity> <phase>");
-        dlog_error("test_hal_spi_write <ch> <addr> <wdata>");
-        dlog_error("test_hal_spi_read <ch> <addr>");
-        dlog_error("configure");
-        dlog_error("test_adc <channel>");
-        dlog_error("test_dma_cpu0 <src> <dst> <byte_num>");
-        dlog_error("test_dma_loop <src> <dst> <byte_num>");
-        dlog_error("test_dma_driver <src> <dst> <byte_num><mode><ms>");        
-        dlog_error("test_dma_user <src> <dst> <byte_num><ms>");
-        dlog_error("test_camera_init <rate 0~1> <mode 0~8> <toEncoderCh 0~1>");
-        dlog_error("test_write_camera <subAddr(hex)> <value>(hex)");
-        dlog_error("test_read_camera <subAddr(hex)>");
-        dlog_error("test_hal_mipi_init <toEncoderCh 0~1>");
-        dlog_error("test_mp3_encoder <0(PCM):1(WAV)>");
-        dlog_error("sky_auto_search_rc_id");
-        dlog_error("NvResetBbRcId");
-        dlog_error("NvSetBbRcId <id1> <id2> <id3> <id4> <id5>");
-        dlog_error("test_local_irq");
-        dlog_error("malloc <size>");
-        dlog_error("set_loglevel <cpuid> <loglevel>");
-        dlog_error("top");
+        dlog_critical("startbypassvideo");
+        dlog_critical("stopbypassvideo");
+        dlog_critical("test_float_calculate_pi");
+        dlog_critical("command_test_BB_uart <option>");
+        dlog_critical("upgrade <filename>");
+        dlog_critical("test_can_init <ch> <br> <acode> <amsk> <format>");
+        dlog_critical("test_can_set_int <ch> <flag>");
+        dlog_critical("test_can_tx <ch> <id> <len> <format> <type>");
+        dlog_critical("test_can_rx");
+        dlog_critical("testhal_TestGpioNormal <gpionum> <highorlow>");
+        dlog_critical("testhal_TestGetGpio <gpionum>");
+        dlog_critical("testhal_TestGpioInterrupt <gpionum> <inttype> <polarity>");        
+        dlog_critical("testhal_Testtimer <TIM Num> <TIM Count>");
+        dlog_critical("testhal_Testtiemrall");
+        dlog_critical("testhal_Testpwm <PWM Num> <PWM low> <PWM high>");
+        dlog_critical("testhal_pwmall");
+        dlog_critical("testhal_simulatepwm");
+        dlog_critical("testhal24c256 <i2c port> <i2c_value>");
+        dlog_critical("test_hal_i2c_init <ch> <i2c_addr> <speed>");
+        dlog_critical("test_hal_i2c_write <ch> <subAddr> <subAddrLen> <data> <dataLen>");
+        dlog_critical("test_hal_i2c_read <ch> <subAddr> <subAddrLen> <dataLen>");
+        dlog_critical("test_hal_uart_init <ch> <baudr>");
+        dlog_critical("test_hal_uart_set_int <ch> <flag>");
+        dlog_critical("test_hal_uart_tx <ch> <len>");
+        dlog_critical("test_hal_uart_rx <ch>");
+        dlog_critical("test_hal_spi_init <ch> <baudr> <polarity> <phase>");
+        dlog_critical("test_hal_spi_write <ch> <addr> <wdata>");
+        dlog_critical("test_hal_spi_read <ch> <addr>");
+        dlog_critical("configure");
+        dlog_critical("test_adc <channel>");
+        dlog_critical("test_dma_cpu0 <src> <dst> <byte_num>");
+        dlog_critical("test_dma_loop <src> <dst> <byte_num>");
+        dlog_critical("test_dma_driver <src> <dst> <byte_num><mode><ms>");        
+        dlog_critical("test_dma_user <src> <dst> <byte_num><ms>");
+        dlog_critical("test_camera_init <rate 0~1> <mode 0~8> <toEncoderCh 0~1>");
+        dlog_critical("test_write_camera <subAddr(hex)> <value>(hex)");
+        dlog_critical("test_read_camera <subAddr(hex)>");
+        dlog_critical("test_hal_mipi_init <toEncoderCh 0~1>");
+        dlog_critical("test_mp3_encoder <0(PCM):1(WAV)>");
+        dlog_critical("sky_auto_search_rc_id");
+        dlog_critical("NvResetBbRcId");
+        dlog_critical("NvSetBbRcId <id1> <id2> <id3> <id4> <id5>");
+        dlog_critical("test_local_irq");
+        dlog_critical("malloc <size>");
+        dlog_critical("set_loglevel <cpuid> <loglevel>");
+        dlog_critical("top");
         dlog_output(1000);
         HAL_Delay(100);
     }
@@ -539,7 +538,7 @@ void command_readMemory(char *addr)
     if (readAddress == 0xFFFFFFFF)
     {
 
-        dlog_error("read address is illegal\n");
+        dlog_warning("read address is illegal\n");
 
         return;
     }
@@ -576,7 +575,7 @@ void command_writeMemory(char *addr, char *value)
     if (writeAddress == 0xFFFFFFFF)
     {
 
-        dlog_error("write address is illegal\n");
+        dlog_warning("write address is illegal\n");
 
         return;
     }
@@ -599,7 +598,7 @@ void command_writeMemory_array(char *addr, char *value, char *len)
     if (writeAddress == 0xFFFFFFFF)
     {
 
-        dlog_error("write address is illegal\n");
+        dlog_warning("write address is illegal\n");
 
         return;
     }
@@ -633,7 +632,7 @@ void command_readSdcard(char *DstBlkaddr, char *BlockNum)
     readSdcardBuff = malloc(iBlockNum * 512);
     if (readSdcardBuff == 0)
     {
-        dlog_info("malloc error");
+        dlog_error("malloc error");
         return;
     }
     memset(readSdcardBuff, 0, iBlockNum * 512);
@@ -750,33 +749,6 @@ void command_malloc(char *size)
     dlog_info("MINTSTS = 0x%08x", read_reg32((uint32_t *)(0x42000000 + 0x40)));
     dlog_info("RINTSTS = 0x%08x", read_reg32((uint32_t *)(0x42000000 + 0x44)));
     dlog_info("cdetect = 0x%08x", read_reg32((uint32_t *)(0x42000000 + 0x50)));
-
-    typedef struct
-    {
-        uint32_t timer0to7;
-        uint32_t timer8to15;
-        uint32_t timer16to23;
-    }TIMER_MUTEX_DATA;
-
-    typedef struct
-    {
-        uint32_t uart;
-        uint32_t spi;
-        uint32_t can;
-        uint32_t i2c;
-        uint32_t pwm;
-        TIMER_MUTEX_DATA s_timer;
-        uint32_t nor_flash;
-    }DRIVER_MUTEX_DATA;
-
-    extern DRIVER_MUTEX_DATA *g_s_periMutex;
-    dlog_info("addr of g_s_periMutex = %p", g_s_periMutex);
-    dlog_info("addr of g_s_periMutex->uart = 0x%08x", g_s_periMutex->uart);
-    dlog_info("addr of g_s_periMutex->spi = 0x%08x", g_s_periMutex->spi);
-    dlog_info("addr of g_s_periMutex->can = 0x%08x", g_s_periMutex->can);
-    dlog_info("addr of g_s_periMutex->timer0to7 = 0x%08x", g_s_periMutex->s_timer.timer0to7);
-    dlog_info("addr of g_s_periMutex->timer8to15 = 0x%08x", g_s_periMutex->s_timer.timer8to15);
-    dlog_info("addr of g_s_periMutex->timer16to23 = 0x%08x", g_s_periMutex->s_timer.timer16to23);
 
 	return;
 }

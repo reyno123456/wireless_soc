@@ -46,7 +46,7 @@ static void os_mail_send_thread (void const *argument)
         Thread1_mail = osMailAlloc( thread1_mail, osWaitForever );
         if (NULL == Thread1_mail)
         {
-            dlog_info("error");
+            dlog_error("error");
         }
 
         if ( Thread1_mail )
@@ -60,7 +60,7 @@ static void os_mail_send_thread (void const *argument)
             }
             else
             {
-                dlog_info("send error");
+                dlog_error("send error");
             }
             
             event = osMailGet( thread1_mail, osWaitForever );

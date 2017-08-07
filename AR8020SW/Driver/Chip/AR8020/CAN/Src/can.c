@@ -136,7 +136,7 @@ int32_t CAN_InitHw(ENUM_CAN_COMPONENT e_canComponent,
         default:
         {
             pst_canReg->u32_reg6 |= 0x7;          // S_PRESC = 7 
-            dlog_error("baud rate error,set default baud rate 500K.\n");
+            dlog_warning("baud rate error,set default baud rate 500K.\n");
             break;
         }
     }

@@ -39,7 +39,8 @@ SRC_C   := main_sky.c \
            ../../Example/test_usbh.c \
            ../../Example/test_bb.c \
            ../../Example/test_hal_nv.c \
-           ../../Example/test_sd.c
+           ../../Example/test_sd.c \
+           ../../Example/test_bb_led_ctrl.c
 SRC_CXX :=
 endif
 
@@ -52,8 +53,9 @@ SRC_C   := main_ground.c \
            ../../Example/test_hal_mipi.c \
            ../../Example/test_usbh.c \
            ../../Example/test_bb.c \
-		   ../../Example/test_hal_nv.c \
-		   ../../Example/test_sd.c
+           ../../Example/test_hal_nv.c \
+           ../../Example/test_sd.c \
+           ../../Example/test_bb_led_ctrl.c
 SRC_CXX :=
 endif
 

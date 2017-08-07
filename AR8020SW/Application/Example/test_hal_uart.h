@@ -1,6 +1,12 @@
 #ifndef __TEST_HAL_UART_H__
 #define __TEST_HAL_UART_H__
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
 #include "hal_uart.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -16,5 +22,10 @@ void command_TestHalUartTx(unsigned char *ch, unsigned char *len);
 void command_TestHalUartRx(unsigned char *ch);
 
 void test_uart_with_os();
+
+
+#ifdef __cplusplus
+}
+#endif 
 
 #endif

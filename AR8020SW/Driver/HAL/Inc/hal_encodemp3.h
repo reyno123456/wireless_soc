@@ -39,19 +39,19 @@ typedef struct
 /**
 * @brief    mp3 encoder initialization
 * @param    STRU_MP3_ENCODE_CONFIGURE_WAVE: I2S initialization.
-* @retval   HAL_TRUE    means the initialization is well done.
-* @retval   HAL_FALSE   paramenter error.
+* @retval   HAL_OK    means the initialization is well done.
+* @retval   HAL_MP3ENCODER_ERR_INIT   paramenter error.
 * @note     none
 */
-HAL_BOOL_T HAL_MP3EncodePcmInit(const STRU_MP3_ENCODE_CONFIGURE_WAVE *st_mp3EncodeConfg, uint8_t dataPath);
+HAL_RET_T HAL_MP3EncodePcmInit(const STRU_MP3_ENCODE_CONFIGURE_WAVE *st_mp3EncodeConfg, uint8_t dataPath);
 
 /**
 * @brief    mp3 encoder un-initialization
 * @param    none
-* @retval   HAL_TRUE    means the un-initialization is well done.
+* @retval   HAL_OK    means the un-initialization is well done.
 * @note     none
 */
-HAL_BOOL_T HAL_MP3EncodePcmUnInit(void);
+HAL_RET_T HAL_MP3EncodePcmUnInit(void);
 
 /**
 * @brief    mp3 encoder

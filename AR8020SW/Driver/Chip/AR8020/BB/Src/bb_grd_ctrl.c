@@ -30,6 +30,8 @@ static uint8_t  flag_itFreqskip = 0;
 static uint8_t  flag_snrPostCheck;
 static uint64_t s_u64_rcMask = 0;
 static uint8_t  s_u8_rcMaskEnable = 0;
+static STRU_DELAY_CMD grd_RcChgRate = {0, 0, 0};
+
 
 static STRU_SkyStatus g_stru_skyStatus;
 
@@ -47,10 +49,6 @@ STRU_CALC_DIST_DATA s_st_calcDistData =
     .u32_cnt = 0,
     .u32_lockCnt = 0
 };
-
-uint16_t qam_change_threshold[QAM_CHANGE_THRESHOLD_COUNT][2] =  
-         {{0, 0x6A},      {0x54, 0x129},    {0xec, 0x388}, 
-         {0x2ce, 0xa3e}, {0x823, 0x1d94},  {0x12aa, 0xffff}};
 
 static void BB_grd_uartDataHandler(void *p);
 
@@ -102,6 +100,7 @@ static void wimax_vsoc_tx_isr(uint32_t u32_vectorNum);
 
 static void grd_set_calc_dist_zero_point(uint32_t value);
 
+static void grd_ChgRcRate(uint8_t rate);
 
 void BB_GRD_start(void)
 {
@@ -211,7 +210,7 @@ static void BB_grd_uartDataHandler(void *p)
             grd_write_mask_code_to_sky(s_u8_rcMaskEnable, &s_u64_rcMask);
             if (tmpMaskCode != s_u64_rcMask)
             {
-                dlog_warning("rcv_sky_calc_mask_code:0x%x,0x%x", (uint32_t)((s_u64_rcMask)>>32), (uint32_t)(s_u64_rcMask));
+                dlog_info("rcv_sky_calc_mask_code:0x%x,0x%x", (uint32_t)((s_u64_rcMask)>>32), (uint32_t)(s_u64_rcMask));
             }
         }
         else if (SKY_AGC_STATUS == skyStatus.pid)
@@ -247,7 +246,7 @@ void grd_SetRCId(uint8_t *pu8_id)
     BB_WriteReg(PAGE2, GRD_RC_ID_BIT15_08_REG, pu8_id[3]);
     BB_WriteReg(PAGE2, GRD_RC_ID_BIT07_00_REG, pu8_id[4]);
 
-    dlog_info("id[0~4]:0x%x 0x%x 0x%x 0x%x 0x%x", pu8_id[0], pu8_id[1], pu8_id[2], pu8_id[3], pu8_id[4]);
+    dlog_critical("id[0~4]:0x%x 0x%x 0x%x 0x%x 0x%x", pu8_id[0], pu8_id[1], pu8_id[2], pu8_id[3], pu8_id[4]);
 }
 
 
@@ -748,7 +747,7 @@ void Grd_Timer2_6_Init(void)
 //=====================================Grd RC funcions =====
 void grd_rc_hopfreq(void)
 {
-    uint8_t max_ch_size = (context.e_curBand == RF_2G) ? MAX_2G_RC_FRQ_SIZE : MAX_5G_RC_FRQ_SIZE;
+	uint8_t max_ch_size = ((context.e_curBand == RF_2G) || (context.e_curBand == RF_600M)) ? MAX_2G_RC_FRQ_SIZE : MAX_5G_RC_FRQ_SIZE;
 
     grd_rc_channel++;
     if(grd_rc_channel >= max_ch_size)
@@ -999,7 +998,7 @@ void BB_grd_handleRcSearchCmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                         (value1&0xff)
                       };
 
-    dlog_warning("%d %0.8x %0.2x", item, value, value1);
+    dlog_info("%d %0.8x %0.2x", item, value, value1);
 
     if (WIRELESS_AUTO_SEARCH_ID == class)
     {
@@ -1106,7 +1105,7 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 
             default:
             {
-                dlog_error("%s", "unknown WIRELESS_FREQ_CHANGE command");
+                dlog_warning("%s", "unknown WIRELESS_FREQ_CHANGE command");
                 break;
             }
         }
@@ -1177,8 +1176,17 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 dlog_info("MCS_RC_CODE_RATE_SELECT %x", value); 
                 break;               
             }
+            case MCS_CHG_RC_RATE:
+            {
+                grd_RcChgRate.cnt = 20;
+                grd_RcChgRate.flag = 1;
+                grd_RcChgRate.par = value;
+                BB_WriteReg(PAGE2, RC_RATE, value);
+                dlog_info("MCS_CHG_RC_RATE %d", value); 
+                break;               
+            }
             default:
-                //dlog_error("%s", "unknown WIRELESS_MCS_CHANGE command");
+                //dlog_warning("%s", "unknown WIRELESS_MCS_CHANGE command");
                 break;
         }        
     }
@@ -1202,7 +1210,7 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 break;
 
             default:
-                //dlog_error("%s", "unknown WIRELESS_ENCODER_CHANGE command");
+                //dlog_warning("%s", "unknown WIRELESS_ENCODER_CHANGE command");
                 break;                
         }
     }
@@ -1275,6 +1283,17 @@ static void grd_handle_all_cmds(void)
     while( (cnt++ < 5) && (1 == BB_GetCmd(&cfg)))
     {
         grd_handle_one_cmd( &cfg );
+    }
+
+    if (grd_RcChgRate.cnt > 0)
+    {
+        grd_RcChgRate.cnt -= 1;
+    }
+
+    if ((1 == grd_RcChgRate.flag) && (0 == grd_RcChgRate.cnt))
+    {
+        grd_ChgRcRate((uint8_t)grd_RcChgRate.par);
+        memset((uint8_t *)(&grd_RcChgRate), 0x00, sizeof(STRU_DELAY_CMD));
     }
 }
 
@@ -1537,3 +1556,23 @@ int grd_GetDistAverage(int *pDist)
     }
     return 0;
 }
+
+static void grd_ChgRcRate(uint8_t rate)
+{
+    if (0 == rate)
+    {
+        BB_WriteReg(PAGE2, 0x04, 0x38); // BPSK 1/2
+    }
+    else if(1 == rate)
+    {
+        BB_WriteReg(PAGE2, 0x04, 0x79); // QPSK 2/3
+    }
+    else
+    {
+        ;
+    }
+
+    BB_softReset(BB_GRD_MODE);
+}
+
+

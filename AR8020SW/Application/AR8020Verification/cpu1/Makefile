@@ -34,10 +34,7 @@ SRC_C   := main.c \
 		   ../share/common_func.c \
 		   ../../Example/test_i2c_adv7611.c \
 		   ../../Example/testhal_dma.c \
-		   ../../Example/test_sd.c \
-		   ../../Example/testhal_timer.c \
-		   ../../Example/testhal_pwm.c
-		   
+		   ../../Example/test_sd.c
 
 SRC_CXX :=
 

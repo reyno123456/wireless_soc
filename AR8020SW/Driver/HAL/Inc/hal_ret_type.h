@@ -14,6 +14,9 @@ typedef uint8_t HAL_BOOL_T;
 
 #define HAL_OK                                      (0)
 
+#define HAL_TRUE                                    (1)
+#define HAL_FALSE                                   (0)
+
 #define HAL_TIME_OUT                                (0xFF)
 #define HAL_BUSY                                    (0xFE)
 #define HAL_OCCUPIED                                (0xFD)
@@ -41,6 +44,7 @@ typedef uint8_t HAL_BOOL_T;
 #define HAL_HDMI_RX_ERR_INDEX_LARGER_THAN_MAX       (HAL_HDMI_RX_ERR_MASK | 0x6)
 #define HAL_HDMI_GET_ERR_GORMAT_METHOD              (HAL_HDMI_RX_ERR_MASK | 0x7)
 #define HAL_HDMI_INPUT_COUNT                        (HAL_HDMI_RX_ERR_MASK | 0x8)
+#define HAL_HDMI_RX_FALSE                           (HAL_HDMI_RX_ERR_MASK | 0x9)
 
 
 #define HAL_SRAM_ERR_MASK                           (0x20000)
@@ -132,11 +136,10 @@ typedef uint8_t HAL_BOOL_T;
 #define HAL_NORFLASH_ERR_MASK                       (0x10500)
 #define HAL_NORFLASH_ERR_ERASE                      (HAL_NORFLASH_ERR_MASK | 0x1)
 
-#define HAL_PERIPERAL_MUTEX_ERR_MASK                (0x10600)
-#define HAL_PERIPERAL_MUTEX_BUSY                    (HAL_PERIPERAL_MUTEX_ERR_MASK | 0x1)
+#define HAL_MP3ENCODER_ERR_MASK                     (0x10600)
+#define HAL_MP3ENCODER_ERR_INIT                     (HAL_MP3ENCODER_ERR_MASK | 0x1)
 
-#define HAL_TRUE                                    (1)
-#define HAL_FALSE                                   (0)
+
 #ifdef __cplusplus
 }
 #endif

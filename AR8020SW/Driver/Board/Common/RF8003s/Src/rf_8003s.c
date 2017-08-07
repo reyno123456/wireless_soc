@@ -93,7 +93,7 @@ int RF_SPI_ReadReg(uint16_t u8_addr, uint8_t *pu8_rxValue)
     }
     else
     {
-        dlog_error("pu8_rxValue == NULL");
+        dlog_warning("pu8_rxValue == NULL");
     }
 
     return 0;
@@ -521,6 +521,11 @@ void BB_write_ItRegs(uint32_t u32_itFrq)
     BB_WriteReg(PAGE2, AGC3_3, context.stru_itRegs.frq4);
 }
 
+uint8_t BB_write_ItRegsByArr(uint8_t *pu8_it)
+{
+    
+    return 0;
+}
 
 uint8_t BB_set_ItFrqByCh(ENUM_RF_BAND band, uint8_t ch)
 {

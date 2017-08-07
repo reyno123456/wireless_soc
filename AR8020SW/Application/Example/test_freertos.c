@@ -61,7 +61,7 @@ static void queueReceiveTask(void const *argument)
 	struct AMessage *p_received = malloc(sizeof(struct AMessage));
 	if ( 0 == p_received)
 	{
-		dlog_info("malloc error");
+		dlog_error("malloc error");
 	}
 
 	portBASE_TYPE xStatus;
@@ -82,7 +82,7 @@ static void queueReceiveTask(void const *argument)
 		}
 		else
 		{
-			dlog_info("Could not receive from the Queue\n");
+			dlog_warning("Could not receive from the Queue\n");
 		}
 	}
 }
@@ -209,7 +209,7 @@ static void TestMutex(void)
 	xMutex = xSemaphoreCreateMutex();
 	if (xMutex == NULL)
 	{
-		dlog_info("Create the xMutex failed!\n");
+		dlog_warning("Create the xMutex failed!\n");
 	}
 	else
 	{

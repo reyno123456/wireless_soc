@@ -91,19 +91,17 @@ static uint32_t uartRxCallBack(uint8_t *pu8_rxBuf, uint8_t u8_len)
 
 static void uart_send_hander( void const * argument)
 {
+    static uint8_t flag_inited = 0;
     uint32_t len;
     uint32_t i;
 
-    HAL_RET_T ret;
-
     uint8_t* u8_data = NULL;
 
-    ret = HAL_UART_Init(1, 4, uartRxCallBack);
-    dlog_info("line = %d, ret = %d", __LINE__, ret);
-    
-    ret = HAL_UART_Init(0, 4, uartRxCallBack);
-    dlog_info("line = %d, ret = %d", __LINE__, ret);
-
+    if (flag_inited == 0)
+    {
+        HAL_UART_Init(1, 4, uartRxCallBack);
+    }
+ 
     while(1)
     {
         for (len = 1; len < 4096; len++)
@@ -128,7 +126,7 @@ static void uart_send_hander( void const * argument)
 
             free(u8_data);
             HAL_Delay(10);
-			if (len % 100 == 0)
+			if (len % 100 ==  0)
 			{
 				dlog_info("send len = %d", len);
 			}
@@ -139,7 +137,6 @@ static void uart_send_hander( void const * argument)
 
 void test_uart_with_os()
 {
-    uint32_t ret;
 	osThreadDef(UART_SEND, uart_send_hander, osPriorityNormal, 0, 8 * configMINIMAL_STACK_SIZE);
 	osThreadCreate(osThread(UART_SEND), NULL);
 }
