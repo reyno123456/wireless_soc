@@ -35,7 +35,8 @@ SRC_C   := Src/memory.c \
            Src/printf.c \
            Src/string.c \
            Src/abs.c \
-           Src/errno.c
+           Src/errno.c \
+           Src/memory_sdram.c
 
 INCDIRS :=  -IInc \
             -I$(TOP_DIR)/Library/Artosyn/Common/Inc

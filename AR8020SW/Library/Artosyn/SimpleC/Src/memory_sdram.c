@@ -8,10 +8,9 @@
 
 /* sbrk implementation start */
 
-extern char end;
-static unsigned int mem_malloc_start = (unsigned int)(&end);
-static unsigned int mem_malloc_end;
-static unsigned int mem_malloc_brk = (unsigned int)(&end);
+static unsigned int mem_malloc_start = 0x81E00000;
+static unsigned int mem_malloc_end = 0x81FFFFFF;
+static unsigned int mem_malloc_brk = 0x81E00000;
 #define MORECORE_FAILURE (-1)
 
 #define MAX(a,b) ((a) >= (b) ? (a) : (b))
@@ -30,7 +29,7 @@ static void *sbrk(ptrdiff_t increment)
     unsigned int old = mem_malloc_brk;
     unsigned int new = old + increment;
 
-    stack_get_position();
+    // stack_get_position();
 
     /*
      * if we are giving memory back make sure we clear it out since
@@ -41,10 +40,12 @@ static void *sbrk(ptrdiff_t increment)
         memset((void *)new, 0, -increment);
     }
 
+    dlog_info("new = 0x%08x", new);
+
     if ((new < mem_malloc_start) || (new > mem_malloc_end))
     {
-        dlog_error("malloc out of boundary!");
-        return (void *)MORECORE_FAILURE;
+        dlog_error("malloc out of boundary!, new = 0x%08x", new);
+/*         return (void *)MORECORE_FAILURE; */
     }
 
     mem_malloc_brk = new;
@@ -174,7 +175,7 @@ static void* sbrk_aligned(RARG malloc_size_t s)
   *   Walk through the free list to find the first match. If fails to find
   *   one, call sbrk to allocate a new chunk.
   */
-static void * nano_malloc(RARG malloc_size_t s)
+void *malloc_sdram(RARG malloc_size_t s)
 {
     chunk *p, *r;
     char * ptr, * align_ptr;
@@ -271,7 +272,7 @@ static void * nano_malloc(RARG malloc_size_t s)
   *  insert should make sure all chunks are sorted by address from low to
   *  high.  Then merge with neighbor chunks if adjacent.
   */
-static void nano_free (RARG void * free_p)
+void free_sdram (RARG void * free_p)
 {
     chunk * p_to_free;
     chunk * p, * q;
@@ -359,47 +360,3 @@ static void nano_free (RARG void * free_p)
     }
     MALLOC_UNLOCK;
 }
-
-/* newlib nano_malloc and nano_free end */
-
-__attribute__((weak)) void *malloc(size_t size)
-{
-    return nano_malloc(size);
-}
-
-__attribute__((weak)) void free(void *ap)
-{
-    nano_free(ap);
-}
-
-__attribute__((weak)) void *realloc(void *ptr, size_t size)
-{
-    void *new;
-
-    new = malloc(size);
-    if (!new)
-    {
-        return NULL;
-    }
-	memcpy(new, ptr, size);
-    if (ptr)    
-    {
-        free(ptr);
-    }
-
-    return new;
-}
-
-__attribute__((weak)) void *calloc (size_t n, size_t elem_size)
-{
-    void *result;
-    size_t sz = n * elem_size;
-
-    result = malloc (sz);
-    if (result != NULL)
-        memset (result, 0, sz);
-
-    return result;
-}
-
-

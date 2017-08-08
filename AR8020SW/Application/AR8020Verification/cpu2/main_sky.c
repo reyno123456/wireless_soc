@@ -28,6 +28,7 @@ int main(void)
     dlog_set_output_level(LOG_LEVEL_WARNING);
     dlog_critical("cpu2 start, time = %s\n", __TIME__);
 
+/*
     STRU_HAL_H264_CONFIG st_h264Cfg;
     st_h264Cfg.u8_view0En = 1;
     st_h264Cfg.u8_view0Gop = 10;
@@ -42,6 +43,7 @@ int main(void)
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_skyEventHandler);
     
     HAL_BB_InitSky(NULL);
+*/
 
     for( ;; )
     {

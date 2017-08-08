@@ -65,10 +65,12 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     {
         command_readMemory(cmdArray[1]);
     }
+/*
     else if ((memcmp(cmdArray[0], "malloc", strlen("malloc")) == 0) && (cmdNum == 2))
     {
         command_malloc(cmdArray[1]);
     }
+*/
     /* write memory: "write $(address) $(data)" */
     else if ((memcmp(cmdArray[0], "write", 5) == 0) && (cmdNum == 3))
     {

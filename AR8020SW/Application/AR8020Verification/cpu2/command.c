@@ -16,6 +16,7 @@
 
 unsigned int command_str2uint(char *str);
 static void command_set_loglevel(char* cpu, char* loglevel);
+static void command_malloc_sdram(char *size);
 
 extern void BB_uart10_spi_sel(uint32_t sel_dat);
 
@@ -38,6 +39,10 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     else if ((memcmp(cmdArray[0], "set_loglevel", strlen("set_loglevel")) == 0))
     {
         command_set_loglevel(cmdArray[1], cmdArray[2]);
+    }
+    else if ((memcmp(cmdArray[0], "malloc_sdram", strlen("malloc_sdram")) == 0) && (cmdNum == 2))
+    {
+        command_malloc_sdram(cmdArray[1]);
     }
     else if (memcmp(cmdArray[0], "help", strlen("help")) == 0) 
     {
@@ -63,5 +68,25 @@ static void command_set_loglevel(char* cpu, char* loglevel)
     }
 
     return;
+}
+
+void *malloc_sdram(size_t s);
+void free_sdram (void * free_p);
+static void command_malloc_sdram(char *size)
+{
+    unsigned int mallocSize;
+	char *malloc_addr;
+	
+    mallocSize = command_str2uint(size);
+	malloc_addr = malloc_sdram(mallocSize);
+
+	if (malloc_addr != 0)
+	{
+		dlog_info("0x%08x\n", malloc_addr);
+	}
+
+    free_sdram(malloc_addr);
+
+	return;
 }
 
