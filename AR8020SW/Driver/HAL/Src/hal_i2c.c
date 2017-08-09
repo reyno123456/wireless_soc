@@ -82,12 +82,12 @@ HAL_RET_T HAL_I2C_MasterInit(ENUM_HAL_I2C_COMPONENT e_i2cComponent,
         return HAL_I2C_ERR_INIT;
     }
 
-    if ( -1 == driver_mutex_get(mutex_i2c, e_i2cComponent) )
+    if ( -1 == COMMON_driverMutexGet(MUTEX_I2C, e_i2cComponent) )
     {
         dlog_error("fail, channel = %d", e_i2cComponent);
         return HAL_OCCUPIED;
     }
-    driver_mutex_set(mutex_i2c, (uint32_t)e_i2cComponent);
+    COMMON_driverMutexSet(MUTEX_I2C, (uint32_t)e_i2cComponent);
 
     if (HAL_I2C_COMPONENT_5 == e_i2cComponent)
     {

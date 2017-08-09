@@ -333,30 +333,14 @@ static int32_t SPI_SetIntData(ENUM_SPI_COMPONENT en_id,
         s_st_spiIntData[en_id].txAlrLen = 0;  
         if ((ptr_wbuf != NULL) && (u32_wsize != 0))         // write
         {
-/*
-            dlog_info("line = %d, en_id = %d, s_st_spiIntData[en_id].txBuf = %p",
-                        __LINE__, en_id, s_st_spiIntData[en_id].txBuf);
-*/
-            if(0 == get_new_buffer(&s_st_spiIntData[en_id].txBuf,
-                                   ptr_wbuf,
-                                   &s_st_spiIntData[en_id].txLenLast, 
-                                   u32_wsize))
-            {
-/*
-                dlog_info("success");
-                SysTicks_DelayMS(10);
-*/
-            }
-            else
+            if(0 != COMMON_getNewBuffer(&s_st_spiIntData[en_id].txBuf,
+                                        ptr_wbuf,
+                                        &s_st_spiIntData[en_id].txLenLast, 
+                                        u32_wsize))
             {
                 dlog_error("fail");
             }
-/*
-            dlog_info("line = %d, en_id = %d, s_st_spiIntData[en_id].txBuf = %p",
-                        __LINE__, en_id, s_st_spiIntData[en_id].txBuf);
-*/
         }
-/*         s_st_spiIntData[en_id].txBuf = ptr_wbuf;      */
         s_st_spiIntData[en_id].rxLen = u32_rsize;     
         s_st_spiIntData[en_id].rxAlrLen = 0;  
         s_st_spiIntData[en_id].rxBuf = ptr_rbuf;  

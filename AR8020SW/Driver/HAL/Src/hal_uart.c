@@ -89,12 +89,12 @@ HAL_RET_T HAL_UART_Init(ENUM_HAL_UART_COMPONENT e_uartComponent,
         return HAL_UART_ERR_INIT;
     }
 
-    if ( -1 == driver_mutex_get(mutex_uart, e_uartComponent) )
+    if ( -1 == COMMON_driverMutexGet(MUTEX_UART, e_uartComponent) )
     {
         dlog_error("fail, e_uartComponent = %d", e_uartComponent);
         return HAL_OCCUPIED;
     }
-    driver_mutex_set(mutex_uart, (uint32_t)e_uartComponent);
+    COMMON_driverMutexSet(MUTEX_UART, (uint32_t)e_uartComponent);
     
     u8_uartCh = (uint8_t)(e_uartComponent);
     u8_uartVecNum = u8_uartCh + HAL_NVIC_UART_INTR0_VECTOR_NUM;

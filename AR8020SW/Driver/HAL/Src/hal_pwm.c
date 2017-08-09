@@ -36,12 +36,12 @@ HAL_RET_T HAL_PWM_RegisterPwm(ENUM_HAL_PWM_NUM e_pwmNum, uint32_t u32_lowus, uin
         return HAL_PWM_ERR_UNKNOWN;
     }
 
-    if ( -1 == driver_mutex_get(mutex_timer, e_pwmNum) )
+    if ( -1 == COMMON_driverMutexGet(MUTEX_TIMER, e_pwmNum) )
     {
         dlog_error("fail, timer for pwm channel = %d", e_pwmNum);
         return HAL_OCCUPIED;
     }
-    driver_mutex_set(mutex_timer, (uint32_t)e_pwmNum);
+    COMMON_driverMutexSet(MUTEX_TIMER, (uint32_t)e_pwmNum);
 
     init_timer_st st_pwm;
     memset(&st_pwm,0,sizeof(init_timer_st));

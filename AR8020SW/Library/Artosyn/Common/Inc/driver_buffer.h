@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
-int8_t get_new_buffer(uint8_t **drv_buf, uint8_t *usr_buf, uint32_t *txLenLast, uint32_t u32_size);
+int8_t COMMON_getNewBuffer(uint8_t **ppu8_drvBuf, 
+                                 uint8_t *pu8_usrBuf, 
+                                 uint32_t *pu32_txLenLast, 
+                                 uint32_t u32_size);
 
 #endif

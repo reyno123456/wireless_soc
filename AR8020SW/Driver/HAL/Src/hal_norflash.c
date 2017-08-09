@@ -18,12 +18,12 @@ History:
 
 HAL_RET_T HAL_NORFLASH_Init(void)
 {
-    if ( -1 == driver_mutex_get(mutex_nor_flash, 0) )
+    if ( -1 == COMMON_driverMutexGet(MUTEX_NOR_FLASH, 0) )
     {
         dlog_error("fail");
         return HAL_OCCUPIED;
     }
-    driver_mutex_set(mutex_nor_flash, 0);
+    COMMON_driverMutexSet(MUTEX_NOR_FLASH, 0);
 
     NOR_FLASH_Init();
 }

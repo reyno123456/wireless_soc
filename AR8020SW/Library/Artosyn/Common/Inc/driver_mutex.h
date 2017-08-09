@@ -30,18 +30,18 @@ typedef struct
 
 typedef enum _emu_driver_mutex
 {
-    mutex_uart = 0,
-    mutex_spi,
-    mutex_can,
-    mutex_i2c,
-    mutex_timer,
-    mutex_nor_flash
+    MUTEX_UART = 0,
+    MUTEX_SPI,
+    MUTEX_CAN,
+    MUTEX_I2C,
+    MUTEX_TIMER,
+    MUTEX_NOR_FLASH
 }emu_driver_mutex;
 
-extern DRIVER_MUTEX_DATA *g_s_periMutex;
+extern DRIVER_MUTEX_DATA *g_ps_periMutex;
 
-void driver_mutex_free(emu_driver_mutex driver, uint32_t channel);
-void driver_mutex_set(emu_driver_mutex driver, uint32_t channel);
-int8_t driver_mutex_get(emu_driver_mutex driver, uint32_t channel);
+void COMMON_driverMutexFree(emu_driver_mutex driver, uint32_t channel);
+void COMMON_driverMutexSet(emu_driver_mutex driver, uint32_t channel);
+int8_t COMMON_driverMutexGet(emu_driver_mutex driver, uint32_t channel);
 
 #endif

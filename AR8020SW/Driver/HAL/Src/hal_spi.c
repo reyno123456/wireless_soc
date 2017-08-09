@@ -55,12 +55,12 @@ HAL_RET_T HAL_SPI_MasterInit(ENUM_HAL_SPI_COMPONENT e_spiComponent,
         return HAL_SPI_ERR_INIT;
     }
 
-    if ( -1 == driver_mutex_get(mutex_spi, e_spiComponent) )
+    if ( -1 == COMMON_driverMutexGet(MUTEX_SPI, e_spiComponent) )
     {
         dlog_error("fail, e_spiComponent = %d", e_spiComponent);
         return HAL_OCCUPIED;
     }
-    driver_mutex_set(mutex_spi, (uint32_t)e_spiComponent);
+    COMMON_driverMutexSet(MUTEX_SPI, (uint32_t)e_spiComponent);
    
     // BAUDR
     st_spiInit.clk_Mhz = pst_spiInitInfo->u16_halSpiBaudr;

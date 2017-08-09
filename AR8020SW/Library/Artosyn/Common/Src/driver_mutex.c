@@ -16,226 +16,223 @@ History:
 #include "memory_config.h"
 #include "cpu_info.h"
 
-DRIVER_MUTEX_DATA *g_s_periMutex = (DRIVER_MUTEX_DATA*)(SRAM_PERIPERIAL_MUTEX_ADDR);
+DRIVER_MUTEX_DATA *g_ps_periMutex = (DRIVER_MUTEX_DATA*)(SRAM_PERIPERIAL_MUTEX_ADDR);
 
-void driver_mutex_free(emu_driver_mutex driver, uint32_t channel)
+void COMMON_driverMutexFree(emu_driver_mutex e_driver, uint32_t u32_channel)
 {
-    switch (driver)
+    switch (e_driver)
     {
-        case mutex_uart:
-            g_s_periMutex->uart &=~ (1 << (channel*3));
-            g_s_periMutex->uart &=~ (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        case MUTEX_UART:
+            g_ps_periMutex->uart &=~ (1 << (u32_channel*3));
+            g_ps_periMutex->uart &=~ (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
         break;
 
-        case mutex_spi:
-            g_s_periMutex->spi &=~ (1 << (channel*3));
-            g_s_periMutex->spi &=~ (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        case MUTEX_SPI:
+            g_ps_periMutex->spi &=~ (1 << (u32_channel*3));
+            g_ps_periMutex->spi &=~ (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
         break;
 
-        case mutex_can:
-            g_s_periMutex->can &=~ (1 << (channel*3));
-            g_s_periMutex->can &=~ (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        case MUTEX_CAN:
+            g_ps_periMutex->can &=~ (1 << (u32_channel*3));
+            g_ps_periMutex->can &=~ (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
         break;
 
-        case mutex_i2c:
-            g_s_periMutex->i2c &=~ (1 << (channel*3));
-            g_s_periMutex->i2c &=~ (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        case MUTEX_I2C:
+            g_ps_periMutex->i2c &=~ (1 << (u32_channel*3));
+            g_ps_periMutex->i2c &=~ (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
         break;
         
-        case mutex_timer:
-            if (channel < 8)
+        case MUTEX_TIMER:
+            if (u32_channel < 8)
             {
-                g_s_periMutex->s_timer.timer0to7 &=~ (1 << (channel*3));
-                g_s_periMutex->s_timer.timer0to7 &=~ (CPUINFO_GetLocalCpuId() << (channel*3+1));
+                g_ps_periMutex->s_timer.timer0to7 &=~ (1 << (u32_channel*3));
+                g_ps_periMutex->s_timer.timer0to7 &=~ (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
             }
-            else if (channel < 16)
+            else if (u32_channel < 16)
             {
-                g_s_periMutex->s_timer.timer8to15 &=~ (1 << ((channel-8)*3));
-                g_s_periMutex->s_timer.timer8to15 &=~ (CPUINFO_GetLocalCpuId() << ((channel-8)*3+1));
+                g_ps_periMutex->s_timer.timer8to15 &=~ (1 << ((u32_channel-8)*3));
+                g_ps_periMutex->s_timer.timer8to15 &=~ (CPUINFO_GetLocalCpuId() << ((u32_channel-8)*3+1));
             }
             else
             {
-                g_s_periMutex->s_timer.timer16to23 &=~ (1 << ((channel-16)*3));
-                g_s_periMutex->s_timer.timer16to23 &=~ (CPUINFO_GetLocalCpuId() << ((channel-16)*3+1));
+                g_ps_periMutex->s_timer.timer16to23 &=~ (1 << ((u32_channel-16)*3));
+                g_ps_periMutex->s_timer.timer16to23 &=~ (CPUINFO_GetLocalCpuId() << ((u32_channel-16)*3+1));
             }
         break;
 
-        case mutex_nor_flash:
-            g_s_periMutex->nor_flash &=~ (1 << (channel*3));
-            g_s_periMutex->nor_flash &=~ (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        case MUTEX_NOR_FLASH:
+            g_ps_periMutex->nor_flash &=~ (1 << (u32_channel*3));
+            g_ps_periMutex->nor_flash &=~ (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
         break;
 
         default:break;
     }
 }
 
-void driver_mutex_set(emu_driver_mutex driver, uint32_t channel)
+void COMMON_driverMutexSet(emu_driver_mutex e_driver, uint32_t u32_channel)
 {
-    switch (driver)
+    switch (e_driver)
     {
-        case mutex_uart:
-            g_s_periMutex->uart |= (1 << (channel*3));
-            g_s_periMutex->uart |= (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        case MUTEX_UART:
+            g_ps_periMutex->uart |= (1 << (u32_channel*3));
+            g_ps_periMutex->uart |= (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
         break;
 
-        case mutex_spi:
-            g_s_periMutex->spi |= (1 << (channel*3));
-            g_s_periMutex->spi |= (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        case MUTEX_SPI:
+            g_ps_periMutex->spi |= (1 << (u32_channel*3));
+            g_ps_periMutex->spi |= (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
         break;
 
-        case mutex_can:
-            g_s_periMutex->can |= (1 << (channel*3));
-            g_s_periMutex->can |= (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        case MUTEX_CAN:
+            g_ps_periMutex->can |= (1 << (u32_channel*3));
+            g_ps_periMutex->can |= (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
         break;
 
-        case mutex_i2c:
-            g_s_periMutex->i2c |= (1 << (channel*3));
-            g_s_periMutex->i2c |= (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        case MUTEX_I2C:
+            g_ps_periMutex->i2c |= (1 << (u32_channel*3));
+            g_ps_periMutex->i2c |= (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
         break;
 
-        case mutex_timer:
-            if (channel < 8)
+        case MUTEX_TIMER:
+            if (u32_channel < 8)
             {
-                g_s_periMutex->s_timer.timer0to7 |= (1 << (channel*3));
-                g_s_periMutex->s_timer.timer0to7 |= (CPUINFO_GetLocalCpuId() << (channel*3+1));
+                g_ps_periMutex->s_timer.timer0to7 |= (1 << (u32_channel*3));
+                g_ps_periMutex->s_timer.timer0to7 |= (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
             }
-            else if (channel < 16)
+            else if (u32_channel < 16)
             {
-                g_s_periMutex->s_timer.timer8to15 |= (1 << ((channel-8)*3));
-                g_s_periMutex->s_timer.timer8to15 |= (CPUINFO_GetLocalCpuId() << ((channel-8)*3+1));
+                g_ps_periMutex->s_timer.timer8to15 |= (1 << ((u32_channel-8)*3));
+                g_ps_periMutex->s_timer.timer8to15 |= (CPUINFO_GetLocalCpuId() << ((u32_channel-8)*3+1));
             }
             else
             {
-                g_s_periMutex->s_timer.timer16to23 |= (1 << ((channel-16)*3));
-                g_s_periMutex->s_timer.timer16to23 |= (CPUINFO_GetLocalCpuId() << ((channel-16)*3+1));
+                g_ps_periMutex->s_timer.timer16to23 |= (1 << ((u32_channel-16)*3));
+                g_ps_periMutex->s_timer.timer16to23 |= (CPUINFO_GetLocalCpuId() << ((u32_channel-16)*3+1));
             }
         break;
 
-        case mutex_nor_flash:
-            g_s_periMutex->nor_flash |= (1 << (channel*3));
-            g_s_periMutex->nor_flash |= (CPUINFO_GetLocalCpuId() << (channel*3+1));
+        case MUTEX_NOR_FLASH:
+            g_ps_periMutex->nor_flash |= (1 << (u32_channel*3));
+            g_ps_periMutex->nor_flash |= (CPUINFO_GetLocalCpuId() << (u32_channel*3+1));
         break;
 
         default:break;
     }
 }
 
-int8_t driver_mutex_get(emu_driver_mutex driver, uint32_t channel)
+int8_t COMMON_driverMutexGet(emu_driver_mutex e_driver, uint32_t u32_channel)
 {
-    uint32_t cpu_id;
-    uint32_t cpu_id_mask = 0;
+    uint32_t u32_cpu_id;
+    uint32_t u32_cpu_id_mask = 0;
 
 /*
-    dlog_info("addr of g_s_periMutex = %p", g_s_periMutex);
-    dlog_info("addr of g_s_periMutex->uart = 0x%08x", g_s_periMutex->uart);
-    dlog_info("addr of g_s_periMutex->spi = 0x%08x", g_s_periMutex->spi);
-    dlog_info("addr of g_s_periMutex->can = 0x%08x", g_s_periMutex->can);
+    dlog_info("addr of g_ps_periMutex = %p", g_ps_periMutex);
+    dlog_info("addr of g_ps_periMutex->uart = 0x%08x", g_ps_periMutex->uart);
+    dlog_info("addr of g_ps_periMutex->spi = 0x%08x", g_ps_periMutex->spi);
+    dlog_info("addr of g_ps_periMutex->can = 0x%08x", g_ps_periMutex->can);
 */
-    cpu_id_mask |= (3 << ((channel*3)+1));
+    u32_cpu_id_mask |= (3 << ((u32_channel*3)+1));
     
-    switch (driver)
+    switch (e_driver)
     {
-        case mutex_uart:
-            if( g_s_periMutex->uart & (1 << (channel*3)) )
+        case MUTEX_UART:
+            if( g_ps_periMutex->uart & (1 << (u32_channel*3)) )
             {
-                cpu_id = ( (g_s_periMutex->uart & cpu_id_mask) >> (channel*3 + 1) );
-                if (cpu_id != CPUINFO_GetLocalCpuId())
+                u32_cpu_id = ( (g_ps_periMutex->uart & u32_cpu_id_mask) >> (u32_channel*3 + 1) );
+                if (u32_cpu_id != CPUINFO_GetLocalCpuId())
                 {
-                    dlog_error("uart channel:%d occupied", channel);
+                    dlog_error("uart u32_channel:%d occupied", u32_channel);
                     return -1;
                 }
             }
         break;
 
-        case mutex_spi:
-            if( g_s_periMutex->spi & (1 << (channel*3)) )
+        case MUTEX_SPI:
+            if( g_ps_periMutex->spi & (1 << (u32_channel*3)) )
             {
-                cpu_id = ( (g_s_periMutex->spi & cpu_id_mask) >> (channel*3 + 1) );
-                if (cpu_id != CPUINFO_GetLocalCpuId())
+                u32_cpu_id = ( (g_ps_periMutex->spi & u32_cpu_id_mask) >> (u32_channel*3 + 1) );
+                if (u32_cpu_id != CPUINFO_GetLocalCpuId())
                 {
-                    dlog_error("spi channel:%d occupied", channel);
-                    return -1;
-                }
-            }
-
-        break;
-
-        case mutex_can:
-            if( g_s_periMutex->can & (1 << (channel*3)) )
-            {
-                cpu_id = ( (g_s_periMutex->can & cpu_id_mask) >> (channel*3 + 1) );
-                if (cpu_id != CPUINFO_GetLocalCpuId())
-                {
-                    dlog_error("can channel:%d occupied", channel);
+                    dlog_error("spi channel:%d occupied", u32_channel);
                     return -1;
                 }
             }
 
         break;
 
-        case mutex_i2c:
-            if( g_s_periMutex->i2c & (1 << (channel*3)) )
+        case MUTEX_CAN:
+            if( g_ps_periMutex->can & (1 << (u32_channel*3)) )
             {
-                cpu_id = ( (g_s_periMutex->i2c & cpu_id_mask) >> (channel*3 + 1) );
-                if (cpu_id != CPUINFO_GetLocalCpuId())
+                u32_cpu_id = ( (g_ps_periMutex->can & u32_cpu_id_mask) >> (u32_channel*3 + 1) );
+                if (u32_cpu_id != CPUINFO_GetLocalCpuId())
                 {
-                    dlog_error("i2c channel:%d occupied", channel);
+                    dlog_error("can channel:%d occupied", u32_channel);
+                    return -1;
+                }
+            }
+
+        break;
+
+        case MUTEX_I2C:
+            if( g_ps_periMutex->i2c & (1 << (u32_channel*3)) )
+            {
+                u32_cpu_id = ( (g_ps_periMutex->i2c & u32_cpu_id_mask) >> (u32_channel*3 + 1) );
+                if (u32_cpu_id != CPUINFO_GetLocalCpuId())
+                {
+                    dlog_error("i2c channel:%d occupied", u32_channel);
                     return -1;
                 }
             }
         break;
 
-        case mutex_timer:
-            if (channel < 8)
+        case MUTEX_TIMER:
+            if (u32_channel < 8)
             {
-                if( g_s_periMutex->s_timer.timer0to7 & (1 << (channel*3) ) )
+                if( g_ps_periMutex->s_timer.timer0to7 & (1 << (u32_channel*3) ) )
                 {
-                    cpu_id = ( (g_s_periMutex->s_timer.timer0to7 & cpu_id_mask) >> (channel*3 + 1) );
-                    if (cpu_id != CPUINFO_GetLocalCpuId())
+                    u32_cpu_id = ( (g_ps_periMutex->s_timer.timer0to7 & u32_cpu_id_mask) >> (u32_channel*3 + 1) );
+                    if (u32_cpu_id != CPUINFO_GetLocalCpuId())
                     {
-                        dlog_error("timer channel:%d occupied", channel);
+                        dlog_error("timer channel:%d occupied", u32_channel);
                         return -1;
                     }
                 }
             }
-            else if (channel < 16)
+            else if (u32_channel < 16)
             {
-                cpu_id_mask = 0;
-                cpu_id_mask |= (3 << (((channel-8)*3)+1));
-                if( g_s_periMutex->s_timer.timer8to15 & (1 << ((channel-8)*3) ) )
+                u32_cpu_id_mask = 0;
+                u32_cpu_id_mask |= (3 << (((u32_channel-8)*3)+1));
+                if( g_ps_periMutex->s_timer.timer8to15 & (1 << ((u32_channel-8)*3) ) )
                 {
-                    cpu_id = ( (g_s_periMutex->s_timer.timer8to15 & cpu_id_mask) >> ((channel-8)*3 + 1) );
-                    if (cpu_id != CPUINFO_GetLocalCpuId())
+                    u32_cpu_id = ( (g_ps_periMutex->s_timer.timer8to15 & u32_cpu_id_mask) >> ((u32_channel-8)*3 + 1) );
+                    if (u32_cpu_id != CPUINFO_GetLocalCpuId())
                     {
-                        dlog_error("timer channel:%d occupied", channel);
+                        dlog_error("timer channel:%d occupied", u32_channel);
                         return -1;
                     }
                 }
             }
             else
             {
-                cpu_id_mask = 0;
-                cpu_id_mask |= (3 << (((channel-16)*3)+1));
-                // dlog_info("line = %d, cpu_id_mask = 0x%08x", __LINE__, cpu_id_mask);
-                if( g_s_periMutex->s_timer.timer16to23 & (1 << ((channel-16)*3) ) )
+                u32_cpu_id_mask = 0;
+                u32_cpu_id_mask |= (3 << (((u32_channel-16)*3)+1));
+                if( g_ps_periMutex->s_timer.timer16to23 & (1 << ((u32_channel-16)*3) ) )
                 {
-                    dlog_info("line = %d", __LINE__);                        
-                    cpu_id = ( (g_s_periMutex->s_timer.timer16to23 & cpu_id_mask) >> ((channel-16)*3 + 1) );
-                    dlog_info("line = %d, cpu_id = %d", __LINE__, cpu_id);                        
-                    if (cpu_id != CPUINFO_GetLocalCpuId())
+                    u32_cpu_id = ( (g_ps_periMutex->s_timer.timer16to23 & u32_cpu_id_mask) >> ((u32_channel-16)*3 + 1) );
+                    if (u32_cpu_id != CPUINFO_GetLocalCpuId())
                     {
-                        dlog_error("timer channel:%d occupied", channel);
+                        dlog_error("timer channel:%d occupied", u32_channel);
                         return -1;
                     }
                 }
             }
         break;
 
-        case mutex_nor_flash:
-            if( g_s_periMutex->nor_flash & (1 << (channel*3)) )
+        case MUTEX_NOR_FLASH:
+            if( g_ps_periMutex->nor_flash & (1 << (u32_channel*3)) )
             {
-                cpu_id = ( (g_s_periMutex->nor_flash & cpu_id_mask) >> (channel*3 + 1) );
-                if (cpu_id != CPUINFO_GetLocalCpuId())
+                u32_cpu_id = ( (g_ps_periMutex->nor_flash & u32_cpu_id_mask) >> (u32_channel*3 + 1) );
+                if (u32_cpu_id != CPUINFO_GetLocalCpuId())
                 {
                     dlog_error("nor flash occupied");
                     return -1;
