@@ -25,7 +25,6 @@ static STRU_CUSTOMER_CFG stru_user_cfg =
     .flag_useCfgId    =  0, //use rcid from config
 
     .enum_chBandWidth = BW_10M,
-    .pstru_boardCfg   =  NULL,
 };
 /**
   * @brief  Main program

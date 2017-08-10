@@ -13,21 +13,28 @@ History:
 #include "rf_if.h"
 #include "systicks.h"
 #include "bb_ctrl_internal.h"
-
+#include "cfg_parser.h"
+#include "boardParameters.h"
 
 #define  RF9363_RF_CLOCKRATE    (9)    //1MHz clockrate
 
-STRU_FRQ_CHANNEL *Rc_frq    = NULL;
-STRU_FRQ_CHANNEL *Sweep_frq = NULL;
-STRU_FRQ_CHANNEL *It_frq    = NULL;
+static uint8_t *RF9363_common_regs;
+static uint32_t u32_common_regscnt;
 
+static uint8_t *RF9363_sky_regs;
+static uint32_t u32_sky_regscnt;
 
-typedef struct _STRU_RF9363_REG
-{
-    uint8_t addr_h;
-    uint8_t addr_l;
-    uint8_t value;
-}STRU_RF9363_REG;
+static uint8_t *RF9363_grd_regs;
+static uint32_t u32_grd_regscnt;
+
+static STRU_FRQ_CHANNEL *pstru_rcFreq;
+static uint32_t u32_rcFreq;
+
+static STRU_FRQ_CHANNEL *pstru_sweepFreq_10M;
+static uint32_t u32_sweepFreqCnt;
+
+static STRU_FRQ_CHANNEL *pstru_itFreq;
+static uint32_t u32_itFreq;
 
 
 static int RF9363_SPI_WriteReg_internal(uint8_t u8_data[3])
@@ -98,7 +105,7 @@ int RF_SPI_ReadReg(uint16_t u16_addr, uint8_t *pu8_rxValue)
 }
 
 
-void config_9363_regs(STRU_RF9363_REG *RF1_9363_regs, uint16_t idx)
+void config_9363_regs(STRU_RF_REG *RF1_9363_regs, uint16_t idx)
 {
     uint8_t data[3];
     uint16_t addr;    
@@ -139,7 +146,6 @@ void config_9363_regs(STRU_RF9363_REG *RF1_9363_regs, uint16_t idx)
             {
                 //RF1_9363_regs->value |= (reg_0xa3 & 0xC0); //update bit[7:6]
                 RF_SPI_WriteReg(0xa3, RF1_9363_regs->value);
-                dlog_info("write: 0xa3 %02x!!!", RF1_9363_regs->value);
             }
             else
             {
@@ -162,10 +168,7 @@ void config_9363_regs(STRU_RF9363_REG *RF1_9363_regs, uint16_t idx)
 
 void checkSramconfig(void)
 {
-    STRU_SettingConfigure* cfg_addr = NULL;
-    GET_CONFIGURE_FROM_FLASH(cfg_addr);
-
-    STRU_RF9363_REG *RF1_9363_regs = (STRU_RF9363_REG *)(&cfg_addr->RF9363_common_regs[0][0]);
+    STRU_RF_REG *RF1_9363_regs = (STRU_RF_REG *)RF9363_common_regs;
     if( RF1_9363_regs->addr_h != 0x83 || RF1_9363_regs->addr_l != 0xdf || RF1_9363_regs->value !=0x01)
     {
         dlog_error("1:%x %x %x", RF1_9363_regs->addr_h, RF1_9363_regs->addr_l, RF1_9363_regs->value);        
@@ -176,7 +179,7 @@ void checkSramconfig(void)
         dlog_error("2:%x %x %x", RF1_9363_regs[2570].addr_h, RF1_9363_regs[2570].addr_l, RF1_9363_regs[2570].value);        
     }                          
 
-    RF1_9363_regs = (STRU_RF9363_REG *)(&cfg_addr->RF9363_ground_regs[0][0]);
+    RF1_9363_regs = (STRU_RF_REG *)RF9363_grd_regs;
     if( RF1_9363_regs->addr_h != 0x80 || RF1_9363_regs->addr_l != 0x02 || RF1_9363_regs->value !=0xce)
     {
         dlog_error("3:%x %x %x", RF1_9363_regs->addr_h, RF1_9363_regs->addr_l, RF1_9363_regs->value);
@@ -187,7 +190,7 @@ void checkSramconfig(void)
         dlog_error("4:%x %x %x", RF1_9363_regs[51].addr_h, RF1_9363_regs[51].addr_l, RF1_9363_regs[51].value);        
     }     
 
-    RF1_9363_regs = (STRU_RF9363_REG *)cfg_addr->RF9363_sky_regs;
+    RF1_9363_regs = (STRU_RF_REG *)RF9363_sky_regs;
     if( RF1_9363_regs->addr_h != 0x80 || RF1_9363_regs->addr_l != 0x02 || RF1_9363_regs->value !=0xce)
     {
         dlog_error("5:%x %x %x", RF1_9363_regs->addr_h, RF1_9363_regs->addr_l, RF1_9363_regs->value);        
@@ -210,35 +213,73 @@ void rf9363_checkDeviceId(void)
     }
 }
 
+
+static void RF9363_getCfgData(ENUM_BB_MODE en_mode, STRU_cfgBin *cfg)
+{
+    STRU_cfgNode *pcfg_node;
+
+    pcfg_node = CFGBIN_GetNode(cfg, RF_INIT_REG_NODE_ID_0);
+    if (NULL!=pcfg_node)
+    {
+        RF9363_common_regs = (uint8_t *)(pcfg_node + 1);
+        u32_common_regscnt  = pcfg_node->nodeElemCnt;
+    }
+
+    pcfg_node = CFGBIN_GetNode(cfg, RF_SKY_INIT_REG_ID_0);
+    if (NULL!=pcfg_node)
+    {
+        RF9363_sky_regs = (uint8_t *)(pcfg_node +1); 
+        u32_sky_regscnt  = pcfg_node->nodeElemCnt;
+    }
+
+    pcfg_node = CFGBIN_GetNode(cfg, RF_GRD_INIT_REG_ID_0);
+    if (NULL!=pcfg_node)
+    {
+        RF9363_grd_regs = (uint8_t *)(pcfg_node +1); 
+        u32_grd_regscnt  = pcfg_node->nodeElemCnt;
+    }
+
+    pcfg_node  = CFGBIN_GetNode(cfg, RF9363_RC_VHF_10M_FRQ_ID);
+    if (NULL!=pcfg_node)
+    {
+        pstru_rcFreq = (STRU_FRQ_CHANNEL *)(pcfg_node + 1);
+        u32_rcFreq = pcfg_node->nodeElemCnt;
+    }
+
+    pcfg_node  = CFGBIN_GetNode(cfg, RF9363_IT_VHF_10M_FRQ_ID);
+    if (NULL!=pcfg_node)
+    {
+        pstru_sweepFreq_10M  = (STRU_FRQ_CHANNEL *)(pcfg_node + 1);
+        u32_sweepFreqCnt = pcfg_node->nodeElemCnt;
+
+        pstru_itFreq    = pstru_sweepFreq_10M;
+        u32_itFreq       = pcfg_node->nodeElemCnt;
+    }
+}
+
+
 /**
   * @brief : init RF9363 register
   * @param : addr: 9363 SPI address
   * @retval  None
   */
-void RF_init(STRU_BoardCfg *boardCfg, ENUM_BB_MODE en_mode)
+void RF_init(ENUM_BB_MODE en_mode)
 {
     uint16_t idx;
     uint16_t cnt;
-
-    STRU_SettingConfigure* cfg_addr = NULL;
-    GET_CONFIGURE_FROM_FLASH(cfg_addr);
-
-    dlog_info("9363 init start");
+    
+    RF9363_getCfgData(en_mode, (STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR);
     checkSramconfig();
 
-    Rc_frq    = (STRU_FRQ_CHANNEL *)(cfg_addr->RC_2_4G_frq);
-    Sweep_frq = (STRU_FRQ_CHANNEL *)(cfg_addr->IT_2_4G_frq);
-    It_frq    = (STRU_FRQ_CHANNEL *)(cfg_addr->IT_2_4G_frq);
-
-    STRU_RF9363_REG *RF1_9363_regs = (STRU_RF9363_REG *)(&cfg_addr->RF9363_common_regs[0][0]);
+    STRU_RF_REG *RF1_9363_regs = (STRU_RF_REG *)RF9363_common_regs;
 
     BB_WriteRegMask(PAGE2, 0x00, 0x01, 0x01);        //hold BB sw reset
 
     BB_SPI_curPageWriteByte(0x01, 0x01);             //bypass: SPI change into 9363
     rf9363_checkDeviceId();
 
-    cnt = sizeof(cfg_addr->RF9363_common_regs)/sizeof(cfg_addr->RF9363_common_regs[0]);
-    RF1_9363_regs = (STRU_RF9363_REG *)cfg_addr->RF9363_common_regs;
+    cnt = u32_common_regscnt;
+    RF1_9363_regs = (STRU_RF_REG *)RF9363_common_regs;
     for(idx = 0; idx < cnt-1; idx++)
     {
         config_9363_regs(RF1_9363_regs+idx, idx);
@@ -246,22 +287,18 @@ void RF_init(STRU_BoardCfg *boardCfg, ENUM_BB_MODE en_mode)
 
     if (en_mode == BB_GRD_MODE)
     {
-        cnt = sizeof(cfg_addr->RF9363_ground_regs)/sizeof(cfg_addr->RF9363_ground_regs[0]);
-        RF1_9363_regs = (STRU_RF9363_REG *)(&cfg_addr->RF9363_ground_regs[1][0]);
-        for(idx = 0; idx < cnt ; idx++)
-        {
-            config_9363_regs(RF1_9363_regs+idx, idx);
-        }
+        cnt = u32_grd_regscnt;
+        RF1_9363_regs = (STRU_RF_REG *)RF9363_grd_regs;
     }
     else
     {
-        cnt = sizeof(cfg_addr->RF9363_sky_regs)/sizeof(cfg_addr->RF9363_sky_regs[0]);
-        RF1_9363_regs = (STRU_RF9363_REG *)(cfg_addr->RF9363_sky_regs);
+        cnt = u32_sky_regscnt;
+        RF1_9363_regs = (STRU_RF_REG *)RF9363_sky_regs;
+    }
 
-        for(idx = 0; idx < cnt ; idx++)
-        {
-            config_9363_regs(RF1_9363_regs+idx, idx);
-        }
+    for(idx = 0; idx < cnt ; idx++)
+    {
+        config_9363_regs(RF1_9363_regs+idx, idx);
     }
 
     RF_SPI_WriteReg(0x14, 0x09);
@@ -269,8 +306,6 @@ void RF_init(STRU_BoardCfg *boardCfg, ENUM_BB_MODE en_mode)
 
     BB_SPI_curPageWriteByte(0x01,0x02);             //SPI change into 8020
     BB_WriteRegMask(PAGE2, 0x00, 0x01, 0x00);       //release BB sw reset
-
-    dlog_info("9363 init end");   
 }
 
 
@@ -280,7 +315,7 @@ void BB_RF_band_switch(ENUM_RF_BAND rf_band)
 }
 
 
-void RF_CaliProcess(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
+void RF_CaliProcess(ENUM_BB_MODE en_mode)
 {
     return;
 }
@@ -288,7 +323,7 @@ void RF_CaliProcess(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
 
 void BB_grd_NotifyItFreqByCh(ENUM_RF_BAND band, uint8_t u8_ch)
 {
-    STRU_FRQ_CHANNEL *pstru_frq = It_frq;
+    STRU_FRQ_CHANNEL *pstru_frq = pstru_itFreq;
 
     BB_WriteReg(PAGE2, IT_FRQ_0, pstru_frq[u8_ch].frq1);
     BB_WriteReg(PAGE2, IT_FRQ_1, pstru_frq[u8_ch].frq2);
@@ -333,7 +368,7 @@ void BB_write_ItRegs(uint32_t u32_it)
 
 uint8_t BB_set_ItFrqByCh(ENUM_RF_BAND band, uint8_t ch)
 {
-    STRU_FRQ_CHANNEL *it_ch_ptr = It_frq;
+    STRU_FRQ_CHANNEL *it_ch_ptr = pstru_itFreq;
 
     context.stru_itRegs.frq1 = it_ch_ptr[ch].frq1;
     context.stru_itRegs.frq2 = it_ch_ptr[ch].frq2;
@@ -357,7 +392,7 @@ uint8_t BB_write_RcRegs(uint32_t u32_rc)
 
 uint8_t BB_set_Rcfrq(ENUM_RF_BAND band, uint8_t ch)
 {
-    STRU_FRQ_CHANNEL *pu8_rcRegs = Rc_frq;
+    STRU_FRQ_CHANNEL *pu8_rcRegs = pstru_rcFreq;
 
     context.stru_rcRegs.frq1 = pu8_rcRegs[ch].frq1;
     context.stru_rcRegs.frq2 = pu8_rcRegs[ch].frq2;
@@ -377,7 +412,7 @@ uint8_t BB_set_Rcfrq(ENUM_RF_BAND band, uint8_t ch)
 
 uint8_t BB_set_SweepFrq(ENUM_RF_BAND band, ENUM_CH_BW e_bw, uint8_t ch)
 {
-    STRU_FRQ_CHANNEL *ch_ptr = Sweep_frq;
+    STRU_FRQ_CHANNEL *ch_ptr = pstru_sweepFreq_10M;
 
     BB_WriteReg(PAGE2, 0x15, ch_ptr[ch].frq1);
     BB_WriteReg(PAGE2, 0x16, ch_ptr[ch].frq2);

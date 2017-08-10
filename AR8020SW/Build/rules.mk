@@ -31,3 +31,7 @@ $(obj).depend: $(BUILD_DIR)/config.mk $(SRC_C) $(SRC_CXX)
 	@echo "Compling: " $(basename $(notdir $@))
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+%.bin: %.c
+	@echo "Compling: " $(basename $(notdir $@))
+	@$(CC) $(CFLAGS) -c $< -o $*.o
+	@$(OBJCOPY) -O binary $*.o $@

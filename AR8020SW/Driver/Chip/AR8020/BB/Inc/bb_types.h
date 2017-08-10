@@ -1,7 +1,6 @@
 #ifndef __BB_TYPES_H_
 #define __BB_TYPES_H_
 
-#include "memory_config.h"
 
 typedef enum
 {
@@ -245,11 +244,5 @@ typedef struct
      uint32_t cnt;
 } STRU_DELAY_CMD;
 
-
-// CPU0 and CPU2 share memory for osd status info, offset in SRAM: 16K + 512Byte
-// last 16 bytes is for DEVICE INFO
-#define OSD_STATUS_SHM_ADDR              SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR
-#define DEVICE_INFO_SHM_SIZE             (sizeof(STRU_DEVICE_INFO))
-#define DEVICE_INFO_SHM_ADDR             ((SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR + SRAM_BB_STATUS_SHARE_MEMORY_SIZE) - DEVICE_INFO_SHM_SIZE)
 
 #endif

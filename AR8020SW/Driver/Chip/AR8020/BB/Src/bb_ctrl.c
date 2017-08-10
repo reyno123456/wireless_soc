@@ -15,6 +15,7 @@
 #include "rf_if.h"
 #include "memory_config.h"
 #include "boardParameters.h"
+#include "cfg_parser.h"
 
 #define     BB_SPI_TEST         (0)
 #define     RF_SPI_TEST         (0)
@@ -25,38 +26,78 @@
 volatile CONTEXT context;
 static volatile ENUM_REG_PAGES en_curPage;
 
-/*
-  * cali_reg: Store the calibration registers value
- */
+uint8_t *p_bbRegs = NULL;
 
-static uint8_t *BB_sky_regs = NULL;
-static uint8_t *BB_grd_regs = NULL;
+STRU_BOARD_BB_PARA *pstru_bb_boardcfg= NULL;
+
+STRU_BB_REG *p_bb_reg_beforeCali = NULL;
+STRU_BB_REG *p_bb_reg_afterCali  = NULL;
 
 
 static int BB_before_RF_cali(void);
-
 static void BB_GetRcIdFromFlash(uint8_t *pu8_rcid);
-static void BB_after_RF_cali(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg);
-
+static void BB_after_RF_cali(ENUM_BB_MODE en_mode);
 static void BB_RF_start_cali( void );
 
-static void BB_regs_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg)
+
+
+static void BB_getCfgData(ENUM_BB_MODE en_mode, STRU_cfgBin *cfg)
 {
-    uint32_t page_cnt=0;
-    uint8_t *regs = (en_mode == BB_SKY_MODE) ? BB_sky_regs : BB_grd_regs;
+    STRU_cfgNode  *p_bb_regNode;
+
+    //BB init registers
+    p_bb_regNode = CFGBIN_GetNode(cfg, (en_mode==BB_SKY_MODE) ? BB_SKY_REG_INIT_NODE_ID : BB_GRD_REG_INIT_NODE_ID);
+    if (NULL != p_bb_regNode)
+    {
+        p_bbRegs  = (uint8_t *)(p_bb_regNode + 1);
+    }
+
+    //BB board param
+    p_bb_regNode = CFGBIN_GetNode(cfg, BB_BOARDCFG_PARA_ID);
+    if (NULL != p_bb_regNode)
+    {
+        pstru_bb_boardcfg  = (STRU_BOARD_BB_PARA *)(p_bb_regNode + 1);
+    }
+
+    STRU_cfgNode *p_bb_dataNode = CFGBIN_GetNode(cfg, BB_BOARDCFG_DATA_ID);
+    if (NULL != p_bb_dataNode)
+    {
+        if (en_mode == BB_SKY_MODE)
+        {
+            p_bb_reg_beforeCali = (STRU_BB_REG *)(p_bb_dataNode + 1);
+            p_bb_reg_afterCali  = p_bb_reg_beforeCali + pstru_bb_boardcfg->u8_bbSkyRegsCnt + pstru_bb_boardcfg->u8_bbGrdRegsCnt;
+        }
+        else
+        {
+            p_bb_reg_beforeCali = (STRU_BB_REG *)(p_bb_dataNode + 1) + pstru_bb_boardcfg->u8_bbSkyRegsCnt;
+            p_bb_reg_afterCali  = p_bb_reg_beforeCali + pstru_bb_boardcfg->u8_bbGrdRegsCnt + pstru_bb_boardcfg->u8_bbSkyRegsCntAfterCali;
+        }
+    }
+
+    //DLOG_Error("%x %x ", p_bbRegs[0], p_bbRegs[1]);
+    //DLOG_Error("%x %x %x", p_bb_reg_beforeCali->page, p_bb_reg_beforeCali->addr, p_bb_reg_beforeCali->value);
+    //DLOG_Error("%x %x %x", p_bb_reg_afterCali->page, p_bb_reg_afterCali->addr, p_bb_reg_afterCali->value);
+}
+
+
+static void BB_regs_init(ENUM_BB_MODE en_mode)
+{
+    uint32_t page_cnt = 0;
+    uint8_t  regsize;
+
+    if (NULL != pstru_bb_boardcfg)
+    {
+        regsize = (en_mode == BB_SKY_MODE) ? pstru_bb_boardcfg->u8_bbSkyRegsCnt : pstru_bb_boardcfg->u8_bbGrdRegsCnt;
+    }
 
     //update the board registers
     {
         uint8_t num;
-        uint8_t cfgRegNum = ((en_mode == BB_SKY_MODE ) ? pstru_boardCfg->u8_bbSkyRegsCnt : pstru_boardCfg->u8_bbGrdRegsCnt);
-        STRU_BB_REG *bbBoardReg  = ((en_mode == BB_SKY_MODE ) ? (STRU_BB_REG *)pstru_boardCfg->pstru_bbSkyRegs : 
-                                                                (STRU_BB_REG *)pstru_boardCfg->pstru_bbGrdRegs);
-
-        for(num = 0; num < cfgRegNum; num++ )
+        for(num = 0; num < regsize; num++)
         {
-            uint16_t addr  = ((uint16_t)bbBoardReg[num].page << 8) + bbBoardReg[num].addr;
-            uint8_t  value = bbBoardReg[num].value;
-            regs[addr] = value;
+            uint16_t addr  = ((uint16_t)p_bb_reg_beforeCali[num].page << 8) + p_bb_reg_beforeCali[num].addr;
+            uint8_t  value = p_bb_reg_beforeCali[num].value;
+            p_bbRegs[addr] = value;
         }
     }
 
@@ -69,7 +110,6 @@ static void BB_regs_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg)
          */
         en_curPage = page;
 
-
         for(addr_cnt = 0; addr_cnt < 256; addr_cnt++)
         {
             //PAGE1 reg[0xa1] reg[0xa2] reg[0xa4] reg[0xa5] are PLL setting for cpu0, cpu1, cpu2, set in the sysctrl.c when system init
@@ -77,9 +117,9 @@ static void BB_regs_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg)
             {}
             else
             {
-                BB_SPI_curPageWriteByte((uint8_t)addr_cnt, *regs);
+                BB_SPI_curPageWriteByte((uint8_t)addr_cnt, *p_bbRegs);
             }
-            regs++;
+            p_bbRegs++;
         }
     }
 }
@@ -150,33 +190,27 @@ STRU_CUSTOMER_CFG stru_defualtCfg =
 {
     .enum_chBandWidth = BW_10M,
     .flag_useCfgId    = 0,
-    .pstru_boardCfg   = NULL,
     .itHopMode        = AUTO,
     .rcHopMode        = AUTO,
     .qam_skip_mode    = AUTO,
 };
 
-void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg, STRU_CUSTOMER_CFG *pstru_customerCfg)
+void BB_init(ENUM_BB_MODE en_mode, STRU_CUSTOMER_CFG *pstru_customerCfg)
 {
-    STRU_SettingConfigure* cfg_addr = NULL;
-    GET_CONFIGURE_FROM_FLASH(cfg_addr);
-
-    context.en_bbmode     = en_mode;
-    context.e_bandsupport = pstru_boardCfg->e_bandsupport;
-
     if (NULL==pstru_customerCfg)
     {
         pstru_customerCfg = &stru_defualtCfg;
     }
-    BB_sky_regs   = &(cfg_addr->bb_sky_configure[0][0]);
-    BB_grd_regs   = &(cfg_addr->bb_grd_configure[0][0]);
 
+    BB_getCfgData(en_mode, (STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR);
+
+    context.en_bbmode = en_mode;
     context.itHopMode = pstru_customerCfg->itHopMode;
     context.rcHopMode = pstru_customerCfg->rcHopMode;
     context.qam_skip_mode = pstru_customerCfg->qam_skip_mode;
-    context.e_bandwidth  = pstru_customerCfg->enum_chBandWidth;
+    context.e_bandwidth   = pstru_customerCfg->enum_chBandWidth;
 
-    context.e_bandsupport = pstru_boardCfg->e_bandsupport;
+    context.e_bandsupport = pstru_bb_boardcfg->e_bandsupport;
 
     //get rc id from  1) user cfg
     //                2) saved rc id
@@ -192,13 +226,13 @@ void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg, STRU_CUSTOMER_
     BB_uart10_spi_sel(0x00000003);
     BB_SPI_init();
 
-    context.u8_bbStartMcs = ((context.e_bandwidth == BW_20M) ? (pstru_boardCfg->u8_bbStartMcs20M) : (pstru_boardCfg->u8_bbStartMcs10M));
+    context.u8_bbStartMcs = ((context.e_bandwidth == BW_20M) ? (pstru_bb_boardcfg->u8_bbStartMcs20M) : (pstru_bb_boardcfg->u8_bbStartMcs10M));
 
-    BB_regs_init(en_mode, pstru_boardCfg);
-    RF_init(pstru_boardCfg, context.en_bbmode);
-    RF_CaliProcess(en_mode, pstru_boardCfg);
+    BB_regs_init(context.en_bbmode);
+    RF_init(en_mode);
+    RF_CaliProcess(en_mode);
 
-    BB_after_RF_cali(en_mode, pstru_boardCfg);
+    BB_after_RF_cali(en_mode);
 
     BB_softReset(en_mode);
     //choose the start band
@@ -221,7 +255,7 @@ void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg, STRU_CUSTOMER_
     BB_softReset(en_mode);
 
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_USER_CFG_CHANGE, BB_HandleEventsCallback);
-    dlog_info("use board cfg: %s %d %d", pstru_boardCfg->name, context.e_bandwidth, context.e_curBand);
+    dlog_warning("use board cfg:%d %d %d", context.e_bandwidth, context.e_curBand, context.e_bandsupport);
 }
 
 
@@ -407,38 +441,21 @@ void BB_set_RF_bandwitdh(ENUM_BB_MODE sky_ground, ENUM_CH_BW rf_bw)
 
 
 
-static void BB_after_RF_cali(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
+static void BB_after_RF_cali(ENUM_BB_MODE en_mode)
 {
     //BB_WriteRegMask(PAGE0, 0x20, 0x80, 0x80);
     // enalbe RXTX
     //BB_WriteRegMask(PAGE1, 0x94, 0x10, 0xFF);    //remove to fix usb problem
 
-    STRU_BB_REG * bb_regs;
-    uint8_t bb_regcnt;
-    uint8_t cnt;
-    
-    if( NULL == boardCfg)
-    {
-        return;
-    }
+    uint8_t bb_regcnt = (en_mode == BB_SKY_MODE) ? pstru_bb_boardcfg->u8_bbSkyRegsCntAfterCali : pstru_bb_boardcfg->u8_bbGrdRegsCntAfterCali;
 
-    if (en_mode == BB_SKY_MODE)
+    if ( bb_regcnt > 0)
     {
-        bb_regcnt = boardCfg->u8_bbSkyRegsCntAfterCali;
-        bb_regs   = (STRU_BB_REG * )boardCfg->pstru_bbSkyRegsAfterCali;
-    }
-    else
-    {
-        bb_regcnt = boardCfg->u8_bbGrdRegsCntAfterCali;
-        bb_regs   = (STRU_BB_REG * )boardCfg->pstru_bbGrdRegsAfterCali;
-    }
-
-    if ( bb_regcnt > 0 && NULL != bb_regs )
-    {
+        uint8_t cnt;
         for(cnt = 0; cnt < bb_regcnt; cnt ++)
         {
-            ENUM_REG_PAGES page = (ENUM_REG_PAGES )(bb_regs[cnt].page << 6);
-            BB_WriteReg(page, bb_regs[cnt].addr, bb_regs[cnt].value);
+            ENUM_REG_PAGES page = (ENUM_REG_PAGES )(p_bb_reg_afterCali[cnt].page << 6);
+            BB_WriteReg(page, p_bb_reg_afterCali[cnt].addr, p_bb_reg_afterCali[cnt].value);
         }
     }
 }

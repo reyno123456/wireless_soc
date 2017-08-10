@@ -31,7 +31,6 @@ ifeq ($(CPU_NUMBER), cpu2)
     CFLAGS += $(CPU2_COMPILE_FLAGS)
 endif
 
-CFG_BIN = $(HDMI_EDID_CFG_BIN_FILE_NAME)
 
 # source file(s), including c file(s)
 SRC_C := ../Common/NORFlash/Src/nor_flash.c \
@@ -40,7 +39,6 @@ SRC_C := ../Common/NORFlash/Src/nor_flash.c \
          ../Common/IT66021/Src/it_66021.c \
          ../Common/IT66021/Src/it6602.c \
          ../Common/RF8003s/Src/rf_8003s.c \
-         ./Src/board_bbrf.c \
          ./Src/pmu_rtp5903.c
 
 
@@ -68,8 +66,6 @@ all: .depend $(LIB) install
 $(LIB): $(OBJ_C)
 	@echo "Generating static library: $(CPU_NUMBER) " $(notdir $@)
 	$(AR) $(ARFLAGS) $@ $(OBJ_C)
-	$(CC) -c ../Common/IT66021/Src/it_66021_edid.c -o it_66021_edid.o
-	$(OBJCOPY) -O binary it_66021_edid.o $(CFG_BIN)
 
 install:
 	@echo "Installing static library: $(LIB)"
@@ -83,11 +79,10 @@ install:
 	@cp -f ../Common/NORFlash/Inc/nor_flash.h $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f ../Common/OV5640/Inc/ov5640.h $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f ./Inc/pmu_rtp5903.h $(OUTPUT_HEADER_STAGING_DIR)
-	@cp -f $(CFG_BIN) $(OUTPUT_BIN_STAGING_DIR)/
 
 clean:
 	@echo "Cleaning..."
-	@$(RM) $(LIB) $(OBJ_C) it_66021_edid.o  $(CFG_BIN) .depend $(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER)/$(LIB) $(OUTPUT_BIN_STAGING_DIR)/$(CFG_BIN)
+	@$(RM) $(LIB) $(OBJ_C) it_66021_edid.o  .depend $(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER)/$(LIB) $(OUTPUT_BIN_STAGING_DIR)/$(CFG_BIN)
 	@$(RM) $(OUTPUT_HEADER_STAGING_DIR)/it_66021.h
 	@$(RM) $(OUTPUT_HEADER_STAGING_DIR)/it6602.h
 	@$(RM) $(OUTPUT_HEADER_STAGING_DIR)/nor_flash.h

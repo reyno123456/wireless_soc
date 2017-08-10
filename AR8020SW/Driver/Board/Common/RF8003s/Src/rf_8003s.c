@@ -13,20 +13,122 @@ History:
 #include "rf_if.h"
 #include "systicks.h"
 #include "bb_ctrl_internal.h"
+#include "cfg_parser.h"
 
 
 static uint8_t cali_reg[2][10];
 
-STRU_FRQ_CHANNEL *Rc_2G_frq    = NULL;
-STRU_FRQ_CHANNEL *Sweep_2G_10m_frq = NULL;
-STRU_FRQ_CHANNEL *Sweep_2G_20m_frq = NULL;
-STRU_FRQ_CHANNEL *It_2G_frq    = NULL;
+static uint8_t *rf0_regs;
+static uint8_t *rf1_regs;
 
-STRU_FRQ_CHANNEL *Rc_5G_frq = NULL;
-STRU_FRQ_CHANNEL *Sweep_5G_10m_frq = NULL;
-STRU_FRQ_CHANNEL *Sweep_5G_20m_frq = NULL;
-STRU_FRQ_CHANNEL *It_5G_frq = NULL;
+static STRU_FRQ_CHANNEL *pstru_rcFreq_2g;
+static STRU_FRQ_CHANNEL *pstru_sweepFreq_2g_10m;
+static STRU_FRQ_CHANNEL *pstru_sweepFreq_2g_20m;
+static STRU_FRQ_CHANNEL *pstru_itFreq_2g;
 
+static STRU_FRQ_CHANNEL *pstru_rcFreq_5g;
+static STRU_FRQ_CHANNEL *pstru_sweepFreq_5g_10m;
+static STRU_FRQ_CHANNEL *pstru_sweepFreq_5g_20m;
+static STRU_FRQ_CHANNEL *pstru_itFreq_5g;
+
+static STRU_RF_REG *pstru_rf0_regBeforeCali;
+static STRU_RF_REG *pstru_rf1_regBeforeCali;
+
+static STRU_RF_REG *pstru_rf0_regAfterCali;
+static STRU_RF_REG *pstru_rf1_regAfterCali;
+
+static STRU_BOARD_RF_PARA *pstru_rf_boardcfg;
+
+void RF8003_getCfgData(ENUM_BB_MODE en_mode, STRU_cfgBin *cfg)
+{
+    STRU_cfgNode  *p_bbrf_boardNode;
+    STRU_cfgNode  *p_bbrf_dataNode;
+
+    STRU_cfgNode  *rfcfg_node;
+    p_bbrf_boardNode = CFGBIN_GetNode(cfg, RF_INIT_REG_NODE_ID_0);
+    if (NULL != p_bbrf_boardNode)
+    {
+        rf0_regs = (uint8_t *)(p_bbrf_boardNode + 1);
+    }
+
+    p_bbrf_boardNode = CFGBIN_GetNode(cfg, RF_INIT_REG_NODE_ID_1);
+    if ( NULL != p_bbrf_boardNode)
+    {
+        rf1_regs = (uint8_t *)(p_bbrf_boardNode + 1);
+    }
+
+    p_bbrf_boardNode  = CFGBIN_GetNode(cfg, RF_BOARDCFG_PARA_ID);
+    if (NULL==p_bbrf_boardNode)
+    {
+        return;
+    }
+    else
+    {
+        pstru_rf_boardcfg = (STRU_BOARD_RF_PARA *)(p_bbrf_boardNode + 1);
+    }
+
+    p_bbrf_dataNode  = CFGBIN_GetNode(cfg, RF_BOARDCFG_DATA_ID);
+
+    if (NULL != p_bbrf_dataNode)
+    {
+        if (en_mode == BB_SKY_MODE)
+        {
+            pstru_rf0_regBeforeCali = (STRU_RF_REG *)(p_bbrf_dataNode + 1);
+            pstru_rf1_regBeforeCali = pstru_rf0_regBeforeCali; 
+
+            pstru_rf0_regAfterCali = pstru_rf0_regBeforeCali + pstru_rf_boardcfg->u8_rf0SkyRegsCnt + pstru_rf_boardcfg->u8_rf0GrdRegsCnt;
+            pstru_rf1_regAfterCali = pstru_rf0_regAfterCali;
+        }
+        else
+        {
+            pstru_rf0_regBeforeCali =  (STRU_RF_REG *)(p_bbrf_dataNode + 1) + pstru_rf_boardcfg->u8_rf0SkyRegsCnt;
+            pstru_rf1_regBeforeCali =  pstru_rf0_regBeforeCali + pstru_rf_boardcfg->u8_rf0GrdRegsCnt;
+        
+            pstru_rf0_regAfterCali = pstru_rf1_regBeforeCali + pstru_rf_boardcfg->u8_rf0SkyRegsCntAfterCali;
+            pstru_rf1_regAfterCali = pstru_rf0_regAfterCali  + pstru_rf_boardcfg->u8_rf0GrdRegsCntAfterCali;
+        }
+    }
+
+    //2g
+    rfcfg_node = CFGBIN_GetNode(cfg, RF8003S_RC_2_4G_10M_FRQ_ID);
+    if (NULL != rfcfg_node)
+    {
+        pstru_rcFreq_2g = (STRU_FRQ_CHANNEL *)(rfcfg_node + 1);
+    }
+
+    rfcfg_node= CFGBIN_GetNode(cfg, RF8003S_IT_2_4G_10M_FRQ_ID);
+    if (NULL != rfcfg_node)
+    {
+        pstru_sweepFreq_2g_10m = (STRU_FRQ_CHANNEL *)(rfcfg_node + 1);
+        pstru_itFreq_2g = pstru_sweepFreq_2g_10m;
+    }
+
+    rfcfg_node= CFGBIN_GetNode(cfg, RF8003S_2_4G_20M_SWEEP_FRQ_ID);
+    if (NULL != rfcfg_node)
+    {
+        pstru_sweepFreq_2g_20m = (STRU_FRQ_CHANNEL *)(rfcfg_node +1);
+    }
+
+    //5g
+    rfcfg_node= CFGBIN_GetNode(cfg, RF8003S_RC_5G_10M_FRQ_ID);
+    if (NULL != rfcfg_node)
+    {
+        pstru_rcFreq_5g = (STRU_FRQ_CHANNEL *)(rfcfg_node + 1);
+    }
+
+    rfcfg_node= CFGBIN_GetNode(cfg, RF8003S_IT_5G_10M_FRQ_ID);
+    if (NULL != rfcfg_node)
+    {
+        pstru_sweepFreq_5g_10m = (STRU_FRQ_CHANNEL *)(rfcfg_node + 1);
+        pstru_itFreq_5g = pstru_sweepFreq_5g_10m;
+    }
+    
+    rfcfg_node= CFGBIN_GetNode(cfg, RF8003S_5G_20M_SWEEP_FRQ_ID);
+    if (NULL != rfcfg_node)
+    {
+        pstru_sweepFreq_5g_20m = (STRU_FRQ_CHANNEL *)(rfcfg_node +1);
+    }
+}
 
 
 #define  RF8003S_RF_CLOCKRATE    (1)    //1MHz clockrate
@@ -93,7 +195,7 @@ int RF_SPI_ReadReg(uint16_t u8_addr, uint8_t *pu8_rxValue)
     }
     else
     {
-        dlog_warning("pu8_rxValue == NULL");
+        dlog_error("pu8_rxValue == NULL");
     }
 
     return 0;
@@ -104,55 +206,42 @@ int RF_SPI_ReadReg(uint16_t u8_addr, uint8_t *pu8_rxValue)
   * @param : addr: 8003 SPI address
   * @retval  None
   */
-void RF_init(STRU_BoardCfg *boardCfg, ENUM_BB_MODE en_mode)
+void RF_init(ENUM_BB_MODE en_mode)
 {
     uint8_t idx;
     uint8_t cnt;
     uint8_t num;
 
-    STRU_SettingConfigure* cfg_addr = NULL;
-    GET_CONFIGURE_FROM_FLASH(cfg_addr);
-
-    Rc_2G_frq    = (STRU_FRQ_CHANNEL *)(cfg_addr->RC_2_4G_frq);
-    Sweep_2G_10m_frq = (STRU_FRQ_CHANNEL *)(cfg_addr->IT_2_4G_frq);
-    Sweep_2G_20m_frq = (STRU_FRQ_CHANNEL *)(cfg_addr->IT_2_4G_20M_sweep_frq);
-    It_2G_frq    = (STRU_FRQ_CHANNEL *)(cfg_addr->IT_2_4G_frq);
-
-    Rc_5G_frq = (STRU_FRQ_CHANNEL *)(cfg_addr->RC_5G_frq);
-    Sweep_5G_10m_frq = (STRU_FRQ_CHANNEL *)(cfg_addr->IT_5G_frq);
-    Sweep_5G_20m_frq = (STRU_FRQ_CHANNEL *)(cfg_addr->IT_5G_20M_sweep_frq);
-    It_5G_frq = (STRU_FRQ_CHANNEL *)(cfg_addr->IT_5G_frq);
-
     STRU_RF_REG * pstru_rfReg = NULL;
-    uint8_t *RF1_8003s_regs = &(cfg_addr->rf1_configure[0]);
-    uint8_t *RF2_8003s_regs = &(cfg_addr->rf2_configure[0]);
 
-    //RF 1
+    RF8003_getCfgData(en_mode, (STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR);
+
+    //RF 0
     {
         BB_SPI_curPageWriteByte(0x01,0x01);             //bypass: SPI change into 8003
 
-        if ( boardCfg != NULL )
+        if ( pstru_rf_boardcfg != NULL )
         {        
             if ( en_mode == BB_SKY_MODE )               //sky mode register replace
             {
-                num = boardCfg->u8_rf1SkyRegsCnt;
-                pstru_rfReg = (STRU_RF_REG * )boardCfg->pstru_rf1SkyRegs;
+                num = pstru_rf_boardcfg->u8_rf0SkyRegsCnt;
+                pstru_rfReg = pstru_rf0_regBeforeCali;
             }
             else                                        //ground mode register replace
             {
-                num = boardCfg->u8_rf1GrdRegsCnt;
-                pstru_rfReg = (STRU_RF_REG * )boardCfg->pstru_rf1GrdRegs;
+                num = pstru_rf_boardcfg->u8_rf0GrdRegsCnt;
+                pstru_rfReg = (STRU_RF_REG * )pstru_rf0_regBeforeCali;
             }
 
             for (cnt = 0; (pstru_rfReg != NULL) && (cnt < num); cnt++)
             {
-                RF1_8003s_regs[pstru_rfReg[cnt].addr] = pstru_rfReg[cnt].value;
+                rf0_regs[pstru_rfReg[cnt].addr_l] = pstru_rfReg[cnt].value;
             } 
         }
         
         for(idx = 0; idx < 128; idx++)
         {
-            RF8003s_SPI_WriteReg_internal( idx, RF1_8003s_regs[idx]);
+            RF8003s_SPI_WriteReg_internal(idx, rf0_regs[idx]);
         }
 
         {
@@ -164,22 +253,22 @@ void RF_init(STRU_BoardCfg *boardCfg, ENUM_BB_MODE en_mode)
         BB_SPI_curPageWriteByte(0x01,0x02);             //SPI change into 8020
     }
 
-    //RF 2 only used in ground   
-    if (boardCfg != NULL && boardCfg->u8_rfCnt > 1 && en_mode == BB_GRD_MODE )
+    //RF 1 only used in ground   
+    if (pstru_rf_boardcfg != NULL && pstru_rf_boardcfg->u8_rfCnt > 1 && en_mode == BB_GRD_MODE )
     {
-        num = boardCfg->u8_rf2GrdRegsCnt;
-        pstru_rfReg = (STRU_RF_REG * )boardCfg->pstru_rf2GrdRegs;
+        num = pstru_rf_boardcfg->u8_rf1GrdRegsCnt;
+        pstru_rfReg = pstru_rf1_regBeforeCali;
         
         BB_SPI_curPageWriteByte(0x01,0x03);             //bypass: SPI change into 2rd 8003s
         
         for (cnt = 0; (pstru_rfReg != NULL) && (cnt < num); cnt++)
         {
-            RF2_8003s_regs[pstru_rfReg[cnt].addr] = pstru_rfReg[cnt].value;
+            rf1_regs[pstru_rfReg[cnt].addr_l] = pstru_rfReg[cnt].value;
         }
 
         for(idx = 0; idx < 128; idx++)
         {
-            RF8003s_SPI_WriteReg_internal( idx, RF2_8003s_regs[idx]);
+            RF8003s_SPI_WriteReg_internal( idx, rf1_regs[idx]);
         }
 
         {
@@ -193,32 +282,32 @@ void RF_init(STRU_BoardCfg *boardCfg, ENUM_BB_MODE en_mode)
 }
 
 
-static void RF8003s_afterCali(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
+static void RF8003s_afterCali(ENUM_BB_MODE en_mode, STRU_BOARD_RF_PARA *pstru_rf_boardcfg)
 {
     STRU_RF_REG * rf1_regs, * rf2_regs;
     uint8_t cnt;
     uint8_t rf_regcnt1, rf_regcnt2;
 
-    if( NULL == boardCfg)
+    if( NULL == pstru_rf_boardcfg)
     {
         return;
     }
 
     if (en_mode == BB_SKY_MODE)
     {
-        rf_regcnt1 = boardCfg->u8_rf1SkyRegsCntAfterCali;
+        rf_regcnt1 = pstru_rf_boardcfg->u8_rf0SkyRegsCntAfterCali;
         rf_regcnt2 = 0;
 
-        rf1_regs   = (STRU_RF_REG * )boardCfg->pstru_rf1SkyRegsAfterCali;
+        rf1_regs   = pstru_rf0_regAfterCali;
         rf2_regs   = NULL;
     }
     else
     {
-        rf_regcnt1 = boardCfg->u8_rf1GrdRegsCntAfterCali;
-        rf_regcnt2 = boardCfg->u8_rf2GrdRegsCntAfterCali;
+        rf_regcnt1 = pstru_rf_boardcfg->u8_rf0GrdRegsCntAfterCali;
+        rf_regcnt2 = pstru_rf_boardcfg->u8_rf0GrdRegsCntAfterCali;
 
-        rf1_regs   = (STRU_RF_REG * )boardCfg->pstru_rf1GrdRegsAfterCali;
-        rf2_regs   = (STRU_RF_REG * )boardCfg->pstru_rf2GrdRegsAfterCali;
+        rf1_regs   = (STRU_RF_REG * )pstru_rf0_regAfterCali;
+        rf2_regs   = (STRU_RF_REG * )pstru_rf1_regAfterCali;
     }
 
     if ( rf_regcnt1 > 0 && rf1_regs != NULL)
@@ -227,7 +316,7 @@ static void RF8003s_afterCali(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
         
         for(cnt = 0; cnt < rf_regcnt1; cnt++)
         {
-            RF8003s_SPI_WriteReg_internal( rf1_regs[cnt].addr, rf1_regs[cnt].value);
+            RF8003s_SPI_WriteReg_internal( rf1_regs[cnt].addr_l, rf1_regs[cnt].value);
         }
 
         {
@@ -241,14 +330,13 @@ static void RF8003s_afterCali(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
         BB_SPI_curPageWriteByte(0x01,0x02);             //SPI change into 8020    
     }
 
-    if (boardCfg->u8_rfCnt > 1 && rf_regcnt2 > 0 && rf2_regs != NULL)
+    if (pstru_rf_boardcfg->u8_rfCnt > 1 && rf_regcnt2 > 0 && rf2_regs != NULL)
     {
         BB_SPI_curPageWriteByte(0x01,0x03);             //bypass: SPI change into 2rd 8003s
         
         for(cnt = 0; cnt < rf_regcnt2; cnt++)
         {
-            dlog_info("%x %x \n", rf2_regs[cnt].addr, rf2_regs[cnt].value);
-            RF8003s_SPI_WriteReg_internal( rf2_regs[cnt].addr, rf2_regs[cnt].value);
+            RF8003s_SPI_WriteReg_internal( rf2_regs[cnt].addr_l, rf2_regs[cnt].value);
         }
 
         {
@@ -476,7 +564,7 @@ void BB_RF_band_switch(ENUM_RF_BAND rf_band)
 }
 
 
-void RF_CaliProcess(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
+void RF_CaliProcess(ENUM_BB_MODE en_mode)
 {
     BB_before_RF_cali();
 
@@ -484,7 +572,7 @@ void RF_CaliProcess(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg)
 
     BB_WriteReg(PAGE0, TX_CALI_ENABLE, 0x00);   //disable calibration
 
-    RF8003s_afterCali(en_mode, boardCfg);
+    RF8003s_afterCali(en_mode, pstru_rf_boardcfg);
 }
 
 
@@ -499,7 +587,7 @@ void BB_grd_NotifyItFreqByValue(uint32_t u32_itFrq)
 
 void BB_grd_NotifyItFreqByCh(ENUM_RF_BAND band, uint8_t u8_ch)
 {
-    STRU_FRQ_CHANNEL *pstru_frq = ((band == RF_2G)?It_2G_frq:It_5G_frq);
+    STRU_FRQ_CHANNEL *pstru_frq = ((band == RF_2G)?pstru_itFreq_2g:pstru_itFreq_5g);
 
     BB_WriteReg(PAGE2, IT_FRQ_0, pstru_frq[u8_ch].frq1);
     BB_WriteReg(PAGE2, IT_FRQ_1, pstru_frq[u8_ch].frq2);
@@ -529,7 +617,7 @@ uint8_t BB_write_ItRegsByArr(uint8_t *pu8_it)
 
 uint8_t BB_set_ItFrqByCh(ENUM_RF_BAND band, uint8_t ch)
 {
-    STRU_FRQ_CHANNEL *it_ch_ptr = ((band == RF_2G)?It_2G_frq:It_5G_frq);
+    STRU_FRQ_CHANNEL *it_ch_ptr = ((band == RF_2G)?pstru_itFreq_2g:pstru_itFreq_5g);
 
     context.stru_itRegs.frq1 = it_ch_ptr[ch].frq1;
     context.stru_itRegs.frq2 = it_ch_ptr[ch].frq2;
@@ -562,7 +650,7 @@ uint8_t BB_write_RcRegs(uint32_t u32_rc)
 uint8_t BB_set_Rcfrq(ENUM_RF_BAND band, uint8_t ch)
 {
 
-    STRU_FRQ_CHANNEL *pu8_rcRegs = ((band == RF_2G)?Rc_2G_frq:Rc_5G_frq);
+    STRU_FRQ_CHANNEL *pu8_rcRegs = ((band == RF_2G)?pstru_rcFreq_2g:pstru_rcFreq_5g);
 
     context.stru_rcRegs.frq1 = pu8_rcRegs[ch].frq1;
     context.stru_rcRegs.frq2 = pu8_rcRegs[ch].frq2;
@@ -584,11 +672,11 @@ uint8_t BB_set_SweepFrq(ENUM_RF_BAND band, ENUM_CH_BW e_bw, uint8_t ch)
 
     if (BW_10M == e_bw)
     {
-        ch_ptr = ((band == RF_2G)?Sweep_2G_10m_frq:Sweep_5G_10m_frq);
+        ch_ptr = ((band == RF_2G)?pstru_sweepFreq_2g_10m:pstru_sweepFreq_5g_10m);
     }
     else
     {
-        ch_ptr = ((band == RF_2G)?Sweep_2G_20m_frq:Sweep_5G_20m_frq);
+        ch_ptr = ((band == RF_2G)?pstru_sweepFreq_2g_20m:pstru_sweepFreq_5g_20m);
     }
 
     //set sweep frequency

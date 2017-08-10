@@ -20,6 +20,8 @@ History:
 #include "hal_pwm.h"
 #include "debuglog.h"
 #include "driver_mutex.h"
+#include "driver_module_init.h"
+
 /**
 * @brief    register pwm
 * @param    e_pwmNum: pwm number, the right number should be 0-127.
@@ -42,6 +44,7 @@ HAL_RET_T HAL_PWM_RegisterPwm(ENUM_HAL_PWM_NUM e_pwmNum, uint32_t u32_lowus, uin
         return HAL_OCCUPIED;
     }
     COMMON_driverMutexSet(MUTEX_TIMER, (uint32_t)e_pwmNum);
+	COMMON_driverInitSet(INITED_TIMER, (uint32_t)e_pwmNum);
 
     init_timer_st st_pwm;
     memset(&st_pwm,0,sizeof(init_timer_st));
@@ -68,6 +71,12 @@ HAL_RET_T HAL_PWM_Stop(ENUM_HAL_PWM_NUM e_pwmNum)
     if (e_pwmNum > HAL_PWM_NUM9)
     {
         return HAL_PWM_ERR_UNKNOWN;
+    }
+	
+    if ( -1 == COMMON_driverInitGet(INITED_TIMER, e_pwmNum) )
+    {
+        dlog_error("fail, timer = %d", e_pwmNum);
+        return HAL_NOT_INITED;
     }
 
     init_timer_st st_pwm;
@@ -96,6 +105,12 @@ HAL_RET_T HAL_PWM_Start(ENUM_HAL_PWM_NUM e_pwmNum)
         return HAL_PWM_ERR_UNKNOWN;
     }
 
+    if ( -1 == COMMON_driverInitGet(INITED_TIMER, e_pwmNum) )
+    {
+        dlog_error("fail, timer = %d", e_pwmNum);
+        return HAL_NOT_INITED;
+    }
+	
     init_timer_st st_pwm;
     memset(&st_pwm,0,sizeof(init_timer_st));
 
@@ -123,6 +138,12 @@ HAL_RET_T HAL_PWM_DynamicModifyPwmDutyCycle(ENUM_HAL_PWM_NUM e_pwmNum, uint32_t 
         return HAL_PWM_ERR_UNKNOWN;
     }
 
+    if ( -1 == COMMON_driverInitGet(INITED_TIMER, e_pwmNum) )
+    {
+        dlog_error("fail, timer = %d", e_pwmNum);
+        return HAL_NOT_INITED;
+    }
+	
     init_timer_st st_pwm;
     memset(&st_pwm,0,sizeof(init_timer_st));
 

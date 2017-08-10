@@ -14,6 +14,8 @@
 #include "bb_types.h"
 #include "rtc.h"
 
+#include "memory_config.h"
+#include "cfg_parser.h"
 extern RC_DATA rca[];
 #define H264_ENCODER_BUFFER_HIGH_LEVEL    (1<<19)
 #define H264_ENCODER_BUFFER_LOW_LEVEL     (1<<17)
@@ -121,7 +123,7 @@ static int H264_Encoder_UpdateVideoInfo(unsigned char view, unsigned int resW, u
     unsigned int u32_data; 
     unsigned int tmp_resW;
     unsigned int tmp_resH;
-    STRU_WIRELESS_INFO_DISPLAY *osdptr = (STRU_WIRELESS_INFO_DISPLAY *)(OSD_STATUS_SHM_ADDR);
+    STRU_WIRELESS_INFO_DISPLAY *osdptr = (STRU_WIRELESS_INFO_DISPLAY *)(SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR);
 
     if (view >= 2)
     {
@@ -475,11 +477,13 @@ static void VEBRC_IRQ_Wrap_Handler(uint32_t u32_vectorNum)
 
                     Reg_Write32( (unsigned int) 0xa003004c, 0x04);
                     
-		    tick =  *((volatile uint32_t *)(SRAM_MODULE_SHARE_AVSYNC_TICK));
+                    tick =  *((volatile uint32_t *)(SRAM_MODULE_SHARE_AVSYNC_TICK));
+                    
                     //head: 0x35 + 0x53 + 0x55 + sum
                     sum += (0x35+0x53+0x55+((tick>>24)&0xff) + ((tick>>16) & 0xff) + ((tick>>8)& 0xff) + (tick& 0xff));
                     tmp = (sum << 24) + (0x55 << 16) + (0x53 <<8) + 0x35;
 
+                    Reg_Write32( (unsigned int) 0xb1800000, 0x7F010000);
                     Reg_Write32( (unsigned int) 0xb1800000, tmp);
                     tmp = ( ((tick & 0xff)<<24) + ((tick & 0xff00)<<8) + ((tick & 0xff0000)>>8) + ((tick & 0xff000000)<<24));
                     Reg_Write32( (unsigned int) 0xb1800000, tmp);
@@ -548,6 +552,15 @@ static void VEBRC_IRQ_Wrap_Handler(uint32_t u32_vectorNum)
     }
 }
 
+static STRU_H264_REG * H264_getCfgData(STRU_cfgBin *cfg, STRU_cfgNode *pnode)
+{
+    int i;
+
+    pnode = CFGBIN_GetNode(cfg, VSOC_ENC_INIT_ID);
+    dlog_info("h264 init size %d", pnode->nodeDataSize);
+    return (STRU_H264_REG *)(pnode+1);
+}
+
 int H264_Encoder_Init(uint8_t gop0, uint8_t br0, uint8_t brc0_e, uint8_t gop1, uint8_t br1, uint8_t brc1_e)
 {
     // variable Declaraton 
@@ -571,6 +584,17 @@ int H264_Encoder_Init(uint8_t gop0, uint8_t br0, uint8_t brc0_e, uint8_t gop1, u
     g_stEncoderStatus[1].bitrate = br1;
     g_stEncoderStatus[1].brc_enable = brc1_e;
     rca[1].poweron_rc_params_set = 1;
+    //load from cfg.bin and write register
+    {
+        int cnt = 0;
+        STRU_cfgNode node;
+        STRU_H264_REG *preg = H264_getCfgData((STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR, &node);
+
+        for (cnt = 0; cnt < node.nodeElemCnt; cnt++)
+        {
+            Reg_Write32_Mask(preg->u32_regAddr, preg->u32_regValue, preg->u32_regdataMask);
+        }
+     }
 
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_IDLE, H264_Encoder_IdleCallback);
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_H264_INPUT_FORMAT_CHANGE, H264_Encoder_InputVideoFormatChangeCallback);

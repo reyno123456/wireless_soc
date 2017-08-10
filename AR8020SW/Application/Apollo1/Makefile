@@ -6,6 +6,7 @@ BUILD_DIR ?= $(TOP_DIR)/Build
 
 # binary file director
 OUTPUT_DIR ?= $(TOP_DIR)/Output
+OUTPUTCFG_DIR ?= $(TOP_DIR)/Output/Staging/Config
 OUTPUT_HEADER_STAGING_DIR ?= $(OUTPUT_DIR)/Staging/Inc
 OUTPUT_LIB_STAGING_DIR ?= $(OUTPUT_DIR)/Staging/Lib
 
@@ -15,6 +16,7 @@ UTILITY_DIR ?= $(TOP_DIR)/Utility
 # current directory
 CURDIR ?= $(shell pwd)
 
+include ./src.cfg
 include $(BUILD_DIR)/config.mk
 
 ###############################################################################
@@ -27,6 +29,7 @@ TARGET_CPU2 = ar8020_cpu2
 TARGET_FLASH = ar8020.bin
 TARGET_FLASH_BOOT = boot.bin
 TARGET_FLASH_APP = app.bin
+TARGET_CONFIG	 = cfgdata.bin
 
 APPLICATION_SCENARIO ?= sky
 
@@ -40,38 +43,47 @@ ground: all
 
 all: .depend $(TARGET) install
 
-$(TARGET): $(TARGET_CPU0) $(TARGET_CPU1) $(TARGET_CPU2)
+$(TARGET): $(TARGET_CPU0) $(TARGET_CPU1) $(TARGET_CPU2) $(TARGET_CONFIG)
 	@echo $(APPLICATION_SCENARIO) > .APPLICATION_SCENARIO 
 
 $(TARGET_CPU0):
 	@$(MAKE) -C cpu0 all APPLICATION_SCENARIO=$(APPLICATION_SCENARIO)
 
 $(TARGET_CPU1):
-	@$(MAKE) -C cpu1 all
+	@$(MAKE) -C cpu1 all APPLICATION_SCENARIO=$(APPLICATION_SCENARIO)
 
 $(TARGET_CPU2):
 	@$(MAKE) -C cpu2 all APPLICATION_SCENARIO=$(APPLICATION_SCENARIO)
 
+CONFIG_BIN  :=  $(patsubst %.c,%.bin,$(CONFIG_SRC_C))
+
+$(TARGET_CONFIG) : CFLAGS = -I$(OUTPUT_HEADER_STAGING_DIR)
+$(TARGET_CONFIG) : $(CONFIG_BIN)
+
+
+$(CONFIG_BIN) : $(CONFIG_SRC_C)
 install:
+	@echo "Creating the config bin file..."
+	@mkdir -p $(OUTPUTCFG_DIR)
+	@mv $(CONFIG_BIN) $(OUTPUTCFG_DIR)
+	$(UTILITY_DIR)/jointbin.sh
 	@echo "Creating the flash image..."
-	@cp ./cpu0/$(TARGET_CPU0).bin  .
-	@cp ./cpu1/$(TARGET_CPU1).bin  .
-	@cp ./cpu2/$(TARGET_CPU2).bin  .
-	$(UTILITY_DIR)/joint2flash.sh -i $(OUTPUT_LIB_STAGING_DIR)/ar8020_boot.bin $(OUTPUT_LIB_STAGING_DIR)/ar8020_upgrade.bin $(TARGET_CPU0).bin $(TARGET_CPU1).bin $(TARGET_CPU2).bin -o $(TARGET_FLASH_BOOT) $(TARGET_FLASH_APP) $(TARGET_FLASH) 
-	@echo "Creat the flash image done."
-	@cp *.bin ../../Output
+	$(UTILITY_DIR)/joint2flash.sh  
+	@cp *.bin ../../Output/
+
 clean:
 	@$(MAKE) -C cpu0 clean APPLICATION_SCENARIO=`cat .APPLICATION_SCENARIO`
-	@$(MAKE) -C cpu1 clean
+	@$(MAKE) -C cpu1 clean APPLICATION_SCENARIO=`cat .APPLICATION_SCENARIO`
 	@$(MAKE) -C cpu2 clean APPLICATION_SCENARIO=`cat .APPLICATION_SCENARIO`
-	@rm -f $(TARGET_CPU0).bin $(TARGET_CPU1).bin $(TARGET_CPU2).bin 
 	@rm -f $(TARGET_FLASH)
 	@rm -f $(TARGET_FLASH_BOOT)
 	@rm -f $(TARGET_FLASH_APP)
 	@rm -f ../../Output/$(TARGET_FLASH_BOOT)
 	@rm -f ../../Output/$(TARGET_FLASH_APP)
 	@rm -f ../../Output/$(TARGET_FLASH)
-
+	@rm -f ../../Output/*.bin
+	@rm -f $(CONFIG_BIN) $(CONFIG_BIN:.bin=.o)
+	@rm -f $(OUTPUTCFG_DIR)/*.bin 
 
 .PHONY: all clean $(TARGET) $(TARGET_CPU0) $(TARGET_CPU1) $(TARGET_CPU2)
 

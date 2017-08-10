@@ -23,7 +23,6 @@ SRC_C := SysCtl/Src/reg_rw.c \
          BB/Src/bb_grd_ctrl.c \
          BB/Src/bb_grd_sweep.c \
          BB/Src/bb_snr_service.c \
-         BB/Src/bb_init_regs.c \
          BB/Src/bb_sys_param.c \
          BB/Src/bb_ctrl.c \
          BB/Src/bb_spi_com.c \

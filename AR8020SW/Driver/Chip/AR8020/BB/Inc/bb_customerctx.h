@@ -15,8 +15,6 @@ typedef struct
 
     ENUM_CH_BW  enum_chBandWidth;
 
-    STRU_BoardCfg *pstru_boardCfg;
-
 } STRU_CUSTOMER_CFG;
 
 

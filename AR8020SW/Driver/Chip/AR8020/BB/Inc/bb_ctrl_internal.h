@@ -7,6 +7,7 @@
 #include "bb_spi.h"
 #include "rf_if.h"
 #include "bb_regs.h"
+#include "memory_config.h"
 
 
 #define MAX_2G_RC_FRQ_SIZE          (34)
@@ -24,6 +25,10 @@
 
 #define OTHER_BAND(band)    ( (band == RF_2G)?  RF_5G : RF_2G )
 #define BAND_CHANGE_DELAY   (40)
+// CPU0 and CPU2 share memory for osd status info, offset in SRAM: 16K + 512Byte
+// last 16 bytes is for DEVICE INFO
+#define DEVICE_INFO_SHM_SIZE             (sizeof(STRU_DEVICE_INFO))
+#define DEVICE_INFO_SHM_ADDR             ((SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR + SRAM_BB_STATUS_SHARE_MEMORY_SIZE) - DEVICE_INFO_SHM_SIZE)
 typedef enum
 {
     IDLE,
@@ -184,7 +189,6 @@ typedef struct
     uint8_t             u8_agc[4];
     STRU_BandChange     stru_bandChange;
     STRU_CUSTOMER_CFG *pcustomer_cfg;
-    STRU_BoardCfg         *pstru_boardCfg;
 
     uint8_t              sky_rc_channel;
 }CONTEXT;

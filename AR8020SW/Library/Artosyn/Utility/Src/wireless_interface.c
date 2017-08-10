@@ -3,8 +3,10 @@
 #include "hal_usb_device.h"
 #include "debuglog.h"
 #include "hal_bb.h"
+#include "hal_bb_debug.h"
 #include "hal_sram.h"
 #include "bb_spi.h"
+#include "bb_ctrl_internal.h"
 #include "cmsis_os.h"
 #include "md5.h"
 #include "nor_flash.h"
@@ -118,7 +120,7 @@ WIRELESS_CONFIG_HANDLER g_stWirelessMsgHandler[MAX_PID_NUM] =
 
 uint8_t WIRELESS_IsInDebugMode(void)
 {
-    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)OSD_STATUS_SHM_ADDR;
+    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR;
 
     return g_pstWirelessInfoDisplay->in_debug;
 }
@@ -127,7 +129,7 @@ uint8_t WIRELESS_IsInDebugMode(void)
 /* get osd info from shared memory */
 uint8_t WIRELESS_GetOSDInfo(void)
 {
-    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)OSD_STATUS_SHM_ADDR;
+    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR;
 
     /* if cpu2 update info, and the info is valid */
     if ((0x0 == g_pstWirelessInfoDisplay->head)
@@ -500,7 +502,7 @@ uint8_t WIRELESS_INTERFACE_OSD_DISPLAY_Handler(void *param, uint8_t id)
         return 1;
     }
 
-    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)OSD_STATUS_SHM_ADDR;
+    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR;
 
     if (recvMessage->paramData[0] == 0)
     {
@@ -1381,7 +1383,7 @@ uint8_t PAD_WIRELESS_OSD_DISPLAY_Handler(void *param, uint8_t id)
 
     recvMessage = (STRU_WIRELESS_PARAM_CONFIG_MESSAGE *)param;
 
-    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)OSD_STATUS_SHM_ADDR;
+    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR;
 
     if (recvMessage->paramData[0] == 0)
     {
@@ -1432,7 +1434,7 @@ void Wireless_MessageProcess(void)
     STRU_WIRELESS_PARAM_CONFIG_MESSAGE     *pstWirelessParamConfig;
     uint8_t                                 u8_usbPortId;
 
-    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)OSD_STATUS_SHM_ADDR;
+    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR;
 
     if ((HAL_USB_DeviceGetConnState(0) == 0)&&
          (HAL_USB_DeviceGetConnState(1) == 0))
@@ -1533,7 +1535,7 @@ void Wireless_InitBuffer(void)
     memset((void *)&g_stWirelessParamConfig, 0, sizeof(STRU_WIRELESS_MESSAGE_BUFF));
     memset((void *)&g_stWirelessReply, 0, sizeof(STRU_WIRELESS_MESSAGE_BUFF));
 
-    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)OSD_STATUS_SHM_ADDR;
+    g_pstWirelessInfoDisplay  = (STRU_WIRELESS_INFO_DISPLAY *)SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR;
 
     g_pstWirelessInfoDisplay->osd_enable = 0;
 }
@@ -1546,7 +1548,7 @@ void Wireless_TaskInit(uint8_t u8_useRTOS)
 {
     Wireless_InitBuffer();
 
-    memset((void *)OSD_STATUS_SHM_ADDR, 0, 512);
+    memset((void *)SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR, 0, 512);
 
     HAL_USB_RegisterUserProcess(WIRELESS_ParseParamConfig, Wireless_InitBuffer);
 

@@ -23,6 +23,7 @@ outputtxt=ar8020.bin
 outputboottxt=boot.bin
 outputapptxt=app.bin
 outputtmp=apptmp.bin
+outcfgbin=cfgdata.bin
 
 Lib=../../Output/Staging/Lib
 bootload=$Lib/ar8020_boot.bin
@@ -148,12 +149,10 @@ echo -n -e \\x${tmpinfo:3:2}  >> $outputtxt
 applengthhead=$((46+$cpu0length+$cpu1length+$cpu2length))
 replenish=$((4-$applengthhead%4))
 applengthhead=$(($applengthhead+$replenish))
-for element in $CFG_BIN_FILE_NAME_LIST
-do
 
-    tmplength=`stat --format=%s $Bin/$element`
-    applengthhead=$(($applengthhead+$tmplength))
-done
+tmplength=`stat --format=%s $outcfgbin`
+applengthhead=$(($applengthhead+$tmplength))
+
 #echo $applengthhead
 #image length
 for i in {0..3}
@@ -204,10 +203,7 @@ do
         echo -n -e \\x0 >> $outputtmp
 done
 
-for element in $CFG_BIN_FILE_NAME_LIST
-do
-    cat $Bin/$element >> $outputtmp
-done
+cat $outcfgbin >> $outputtmp
 
 md5=`md5sum $outputtmp | cut -d ' ' -f 1`
 #echo `md5sum $outputtmp | cut -d ' ' -f 1`

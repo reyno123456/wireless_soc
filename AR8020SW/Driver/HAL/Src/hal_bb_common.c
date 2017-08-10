@@ -22,7 +22,7 @@ History:
 #include "hal_bb.h"
 #include "debuglog.h"
 #include "bb_customerctx.h"
-
+#include "memory_config.h"
 
 /** 
  * @brief       set channel Bandwidth 10M/20M
@@ -60,7 +60,7 @@ HAL_RET_T HAL_BB_SetFreqBandwidthSelectionProxy(ENUM_CH_BW e_bandwidth)
  * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
  * @note        The function can only be called by cpu0,1  
  */
-HAL_RET_T HAL_BB_SetFreqBandSelectionModeProxy(ENUM_RF_BAND e_mode)
+HAL_RET_T HAL_BB_SetFreqBandSelectionModeProxy(ENUM_RUN_MODE e_mode)
 {
     uint8_t u8_ret;
     STRU_WIRELESS_CONFIG_CHANGE st_cmd;
@@ -226,62 +226,6 @@ HAL_RET_T HAL_BB_SetItQamProxy(ENUM_BB_QAM e_qam)
     }     
 }
 
-
-/** 
- * @brief       Set the image transmit LDPC coderate
- * @param[in]   e_ldpc:                  ldpc coderate 
- * @retval      HAL_OK,                  means command is sent sucessfully. 
- * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1   
- */
-HAL_RET_T HAL_BB_SetItLdpcProxy(ENUM_BB_LDPC e_ldpc)
-{
-    uint8_t u8_ret;
-    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
-
-    st_cmd.u8_configClass  = WIRELESS_MCS_CHANGE;
-    st_cmd.u8_configItem   = MCS_IT_CODE_RATE_SELECT;
-    st_cmd.u32_configValue = (uint32_t)e_ldpc;
-
-    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
-    if( u8_ret )
-    {
-        return HAL_OK;
-    }
-    else
-    {
-        return HAL_BB_ERR_EVENT_NOTIFY;
-    }
-}
-
-/** 
- * @brief       Set the rc transmit LDPC coderate
- * @param[in]   e_ldpc:                  ldpc coderate 
- * @retval      HAL_OK,                  means command is sent sucessfully. 
- * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1   
- */
-HAL_RET_T HAL_BB_SetRcLdpcProxy(ENUM_BB_LDPC e_ldpc)
-{
-    uint8_t u8_ret;
-    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
-
-    st_cmd.u8_configClass  = WIRELESS_MCS_CHANGE;
-    st_cmd.u8_configItem   = MCS_RC_CODE_RATE_SELECT;
-    st_cmd.u32_configValue = (uint32_t)e_ldpc;
-
-    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
-    if( u8_ret )
-    {
-        return HAL_OK;
-    }
-    else
-    {
-        return HAL_BB_ERR_EVENT_NOTIFY;
-    }
-}
-
-
 /** 
  * @brief       Set the encoder bitrate control mode
  * @param[in]   e_mode: auto or manual selection.
@@ -343,27 +287,6 @@ HAL_RET_T HAL_BB_SetEncoderBitrateProxy(uint8_t u8_ch, uint8_t u8_bitrateMbps)
         return HAL_BB_ERR_EVENT_NOTIFY;
     }
 }
-
-
-/** 
- * @brief   Set board enter or out debug mode
- * @param   u8_mode	    0:  set Baseband to enter debug mode, 
-                        1:  set Baseband to out debug mode.
- * @retval  HAL_OK,                  means command is sent sucessfully. 
- * @retval  HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2                        
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_BB_SetBoardDebugModeProxy(uint8_t u8_mode)
-{
-    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
-
-    st_cmd.u8_configClass  = WIRELESS_DEBUG_CHANGE;
-    st_cmd.u8_configItem   = 0;
-    st_cmd.u32_configValue = (u8_mode & 1);
-
-    return SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
-}
-
 
 /** 
  * @brief   init the uart remote session
@@ -526,28 +449,6 @@ HAL_RET_T HAL_BB_SetItFreqProxy(uint32_t u32_freqSetting)
 	return SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&cmd);
 }
 
-
-/** 
- * @brief   set Baseband to It only mode
- * @param   mode                            1: enter It only mode  0: exit from the debug mode
- * @retval  HAL_OK,                         means command is sent sucessfully. 
- * @retval  HAL_BB_ERR_EVENT_NOTIFY         means error happens in sending the command to cpu2                        
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_BB_SetItOnlyFreqProxy(uint8_t mode)
-{
-    STRU_WIRELESS_CONFIG_CHANGE cmd;
-
-    cmd.u8_configClass  = WIRELESS_MISC;
-    cmd.u8_configItem   = MICS_IT_ONLY_MODE;
-    cmd.u32_configValue = mode;
-
-    return SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&cmd);
-}
-
-
-
-
 /** 
  * @brief       Set RC channel selection RUN mode(AUTO/Manual)
  * @param[in]   e_mode:                  the modulation QAM mode for rc.
@@ -573,96 +474,6 @@ HAL_RET_T HAL_BB_SetRcChannelSelectionModeProxy(ENUM_RUN_MODE e_mode)
     {
         return HAL_BB_ERR_EVENT_NOTIFY;
     }    
-}
-
-/** 
- * @brief       switch encoder channel on/off
- * @param[in]   u8_ch:   channel,0:ch1,1:ch2
- * @param[in]   u8_data: 0:off, 1:on 
- * @retval      HAL_OK,                  means command is sent sucessfully. 
- * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1        
- */
-HAL_RET_T HAL_BB_SwitchOnOffChProxy(uint8_t u8_ch, uint8_t u8_data)
-{
-    uint8_t u8_ret;
-    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
-    
-    st_cmd.u8_configClass  = WIRELESS_OTHER;
-    if (0 == u8_ch)
-    {
-        st_cmd.u8_configItem   = SWITCH_ON_OFF_CH1;
-    }
-    else
-    {
-        st_cmd.u8_configItem   = SWITCH_ON_OFF_CH2;
-    }
-
-    st_cmd.u32_configValue = u8_data;
-
-    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
-    if( u8_ret )
-    {
-        return HAL_OK;
-    }
-    else
-    {
-        return HAL_BB_ERR_EVENT_NOTIFY;
-    }
-}
-
-/** 
- * @brief       Set It(image transmit) QAM
- * @param[in]   e_qam:                  the modulation QAM mode for image transmit.
- * @retval      HAL_OK,                  means command is sent sucessfully. 
- * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1  
- */
-HAL_RET_T HAL_BB_SetFreqBandQamSelectionProxy(ENUM_BB_QAM e_qam)
-{
-    uint8_t u8_ret;
-    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
-    
-    st_cmd.u8_configClass  = WIRELESS_MCS_CHANGE;
-    st_cmd.u8_configItem   = MCS_IT_QAM_SELECT;
-    st_cmd.u32_configValue = (uint32_t)e_qam;
-
-    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
-    if( u8_ret )
-    {
-        return HAL_OK;
-    }
-    else
-    {
-        return HAL_BB_ERR_EVENT_NOTIFY;
-    }
-}
-
-/** 
- * @brief       Set rc QAM
- * @param[in]   e_qam:                  the modulation QAM mode for image transmit.
- * @retval      HAL_OK,                  means command is sent sucessfully. 
- * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1  
- */
-HAL_RET_T HAL_BB_SetRcQamSelectionProxy(ENUM_BB_QAM e_qam)
-{
-    uint8_t u8_ret;
-    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
-    
-    st_cmd.u8_configClass  = WIRELESS_MCS_CHANGE;
-    st_cmd.u8_configItem   = MCS_RC_QAM_SELECT;
-    st_cmd.u32_configValue = (uint32_t)e_qam;
-
-    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
-    if( u8_ret )
-    {
-        return HAL_OK;
-    }
-    else
-    {
-        return HAL_BB_ERR_EVENT_NOTIFY;
-    }
 }
 
 /** 
@@ -800,3 +611,26 @@ HAL_RET_T HAL_BB_GetRcId(uint8_t *pu8_rcId, uint8_t bufsize)
 
     return HAL_BB_ERR_MEM_NOT_ENOUGH;
 }
+
+/** 
+ * @brief       get baseband info storage address, details refer to structrue 
+ *              STRU_WIRELESS_INFO_DISPLAY, in header file bb_types.h 
+ * @param       pu8_bbInfoAddr: the pointer to baseband info storage address
+ * @retval      HAL_OK:     means get baseband info sucessfully. 
+ * @retval      HAL_BUSY:   means baseband info is updating.
+ * @note        None
+ */
+HAL_RET_T HAL_BB_GetInfo(STRU_WIRELESS_INFO_DISPLAY *pst_bbInfoAddr)
+{
+    pst_bbInfoAddr = (STRU_WIRELESS_INFO_DISPLAY *)(SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR);
+
+    if ((pst_bbInfoAddr->head != 0x00) || (pst_bbInfoAddr->tail != 0xFF))
+    {
+        return HAL_BUSY;
+    }
+    else
+    {
+        return HAL_OK;
+    }
+}
+

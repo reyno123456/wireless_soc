@@ -49,6 +49,7 @@ SRC_C := Src/hal.c \
          Src/hal_bb_common.c \
          Src/hal_bb_ground.c \
          Src/hal_bb_sky.c \
+         Src/hal_bb_debug.c \
          Src/hal_nvic.c \
          Src/hal_sd.c \
          Src/hal_dma.c \

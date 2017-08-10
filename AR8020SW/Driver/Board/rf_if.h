@@ -7,9 +7,9 @@ int RF_SPI_WriteReg(uint16_t u8_addr, uint8_t u8_data);
 
 int RF_SPI_ReadReg(uint16_t u8_addr, uint8_t *pu8_rxValue);
 
-void RF_init(STRU_BoardCfg *boardCfg, ENUM_BB_MODE en_mode);
+void RF_init(ENUM_BB_MODE en_mode);
 
-void RF_CaliProcess(ENUM_BB_MODE en_mode, STRU_BoardCfg *boardCfg);
+void RF_CaliProcess(ENUM_BB_MODE en_mode);
 
 void BB_RF_band_switch(ENUM_RF_BAND rf_band);
 

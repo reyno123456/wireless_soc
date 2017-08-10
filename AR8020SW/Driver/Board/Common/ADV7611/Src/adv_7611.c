@@ -8,7 +8,7 @@
 #include "debuglog.h"
 #include "sys_event.h"
 #include "interrupt.h"
-
+#include "cfg_parser.h"
 
 typedef unsigned char (*HDMI_SET_TABLE)[3];
 static HDMI_SET_TABLE hdmi_edid_table = NULL;
@@ -123,11 +123,11 @@ static void ADV_7611_WriteTable(uint8_t index, unsigned char(*reg_table)[3])
         dlog_error("reg_table is NULL", reg_table);
         return;
     }
-    
+
     while (i < MAX_TABLE_ITEM_COUNT)
     {
         if ((reg_table[i][0] == 0xFF) && (reg_table[i][1] == 0xFF) && (reg_table[i][2] == 0xFF))
-        {
+        {            
             break;
         }
 
@@ -147,24 +147,29 @@ static void ADV_7611_WriteTable(uint8_t index, unsigned char(*reg_table)[3])
         
         i++;
     }
+    
 }
 
 static void ADV_7611_GenericInitial(uint8_t index)
 {
     ADV_7611_WriteTable(index, adv_i2c_addr_table);
-    ADV_7611_WriteTable(index, hdmi_edid_table);
+    if (hdmi_edid_table)
+    {
+        ADV_7611_WriteTable(index, hdmi_edid_table);
+    }
     ADV_7611_Delay(1000);
     ADV_7611_WriteTable(index, hdmi_default_settings);
 }
 
+
 void ADV_7611_Initial(uint8_t index)
 {
-    STRU_SettingConfigure* cfg_addr;
-    GET_CONFIGURE_FROM_FLASH(cfg_addr);    
-    hdmi_edid_table = (HDMI_SET_TABLE)(&(cfg_addr->hdmi_configure));
-    
+    STRU_cfgNode *node = CFGBIN_GetNode((STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR, HDMI_EDID_CFG_ID);
+    hdmi_edid_table =  (HDMI_SET_TABLE)(node +1);
+
     ADV_7611_I2CInitial();
     ADV_7611_GenericInitial(index);
+
     dlog_info("HDMI ADV7611 %d init finished!", index);
 }
 
@@ -247,7 +252,7 @@ void ADV_7611_DumpOutEdidData(uint8_t index)
         }
         else
         {
-            dlog_error("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", hdmi_edid_table[i][0] + slv_addr_offset, hdmi_edid_table[i][1], val, hdmi_edid_table[i][2]);
+            dlog_info("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", hdmi_edid_table[i][0] + slv_addr_offset, hdmi_edid_table[i][1], val, hdmi_edid_table[i][2]);
         }
     }
 }
@@ -279,7 +284,7 @@ void ADV_7611_DumpOutDefaultSettings(uint8_t index)
         }
         else
         {
-            dlog_error("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", adv_i2c_addr_table[i][0] + slv_addr_offset, adv_i2c_addr_table[i][1], val, adv_i2c_addr_table[i][2] + slv_addr_offset);            
+            dlog_info("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", adv_i2c_addr_table[i][0] + slv_addr_offset, adv_i2c_addr_table[i][1], val, adv_i2c_addr_table[i][2] + slv_addr_offset);            
         }
     }
  
@@ -304,7 +309,7 @@ void ADV_7611_DumpOutDefaultSettings(uint8_t index)
         }
         else
         {
-            dlog_error("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", hdmi_default_settings[i][0] + slv_addr_offset, hdmi_default_settings[i][1], val, hdmi_default_settings[i][2]);
+            dlog_info("0x%x, 0x%x, 0x%x, Error: right value 0x%x!", hdmi_default_settings[i][0] + slv_addr_offset, hdmi_default_settings[i][1], val, hdmi_default_settings[i][2]);
         }
     }
 }

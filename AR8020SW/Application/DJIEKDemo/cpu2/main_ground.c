@@ -25,7 +25,6 @@ static STRU_CUSTOMER_CFG stru_user_cfg =
     .rcid             =  {0x20, 0x30, 0x40, 0x50, 0x60},
 
     .enum_chBandWidth =  BW_10M,
-    .pstru_boardCfg   =  NULL,
 };
 
 /**

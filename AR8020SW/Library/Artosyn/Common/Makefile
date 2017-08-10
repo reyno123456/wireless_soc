@@ -36,16 +36,19 @@ SRC_C   := Src/sys_event.c \
            Src/md5.c \
            Src/log10.c \
            Src/driver_buffer.c \
-           Src/driver_mutex.c \
-           Src/driver_module_init.c 
+           Src/cfg_parser.c \
+           Src/driver_module_init.c \
+           Src/driver_mutex.c 
 
 INCDIRS :=  -IInc \
             -I$(TOP_DIR)/Library/Artosyn/SimpleC/Inc \
-            -I$(TOP_DIR)/Driver/Chip/AR8020/SysCtl/Inc \
             -I$(TOP_DIR)/Configure/Include \
+            -I$(TOP_DIR)/Driver/Chip/AR8020/SysCtl/Inc \
+            -I$(TOP_DIR)/Driver/Chip/AR8020/H264Encoder/Inc \
             -I$(TOP_DIR)/Driver/Chip/AR8020/UART/Inc \
             -I$(TOP_DIR)/Driver/Chip/AR8020/BB/Inc \
             -I$(TOP_DIR)/Driver/Chip/AR8020/SPI/Inc \
+            -I$(TOP_DIR)/Driver/Board \
             -I$(TOP_DIR)/Driver/HAL/Inc \
             -I$(OUTPUT_HEADER_STAGING_DIR)
 
@@ -66,6 +69,7 @@ install:
 	@cp -f Inc/sys_event.h $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f Inc/md5.h $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f Inc/local_irq.h $(OUTPUT_HEADER_STAGING_DIR)
+	@cp -f Inc/cfg_parser.h $(OUTPUT_HEADER_STAGING_DIR)
 
 clean:
 	@echo "Cleaning..."

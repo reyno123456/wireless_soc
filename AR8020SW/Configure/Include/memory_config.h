@@ -248,39 +248,7 @@ extern "C" {
                                          (((uint32_t)(*(any_addr+1))) << 8) | \
                                          (((uint32_t)(*(any_addr+2))) << 16) | \
                                          ((uint32_t)((*(any_addr+3))) << 24))
-typedef struct 
-{    
-    unsigned char  flag[4]                      __attribute__ ((aligned (4)));
-#ifdef USE_BB_REG_CONFIG_BIN
-    unsigned char bb_sky_configure[4][256]      __attribute__ ((aligned (4)));
-    unsigned char bb_grd_configure[4][256]      __attribute__ ((aligned (4)));
-    unsigned char rf1_configure[128]            __attribute__ ((aligned (4)));
-    unsigned char rf2_configure[128]            __attribute__ ((aligned (4)));
-    unsigned char RC_2_4G_frq[34][5]            __attribute__ ((aligned (4)));
-    unsigned char IT_2_4G_frq[8][5]             __attribute__ ((aligned (4)));
-    unsigned char IT_2_4G_20M_sweep_frq[4][5]   __attribute__ ((aligned (4)));
-    unsigned char RC_5G_frq[40][5]              __attribute__ ((aligned (4)));
-    unsigned char IT_5G_frq[13][5]              __attribute__ ((aligned (4)));
-    unsigned char IT_5G_20M_sweep_frq[7][5]     __attribute__ ((aligned (4)));
-#ifdef RF9363
-    uint8_t RF9363_common_regs[2572][3]         __attribute__ ((aligned (4)));
-    uint8_t RF9363_sky_regs[59][3]              __attribute__ ((aligned (4)));
-    uint8_t RF9363_ground_regs[52][3]           __attribute__ ((aligned (4)));
-#endif
-#endif
-#ifdef USE_ADV7611_EDID_CONFIG_BIN
-    unsigned char hdmi_configure[264][3];
-#endif
-#ifdef USE_IT66021_EDID_CONFIG_BIN
-    unsigned char hdmi_configure[257][3];
-#endif
-}STRU_SettingConfigure;
 
-#define GET_CONFIGURE_FROM_FLASH(structaddress) {do\
-                                                 {\
-                                                    structaddress=(STRU_SettingConfigure *)(SRAM_CONFIGURE_MEMORY_ST_ADDR);\
-                                                 }while(0);\
-                                                 }
 
 // nonvolatile variable management struct 
 typedef struct

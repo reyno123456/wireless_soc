@@ -1040,7 +1040,7 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
         {
             case FREQ_BAND_MODE:
             {
-                context.e_rfbandMode = (ENUM_RF_BAND)value;
+                context.e_rfbandMode = (ENUM_RUN_MODE)value;
                 break;
             }
 

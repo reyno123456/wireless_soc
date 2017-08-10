@@ -10,7 +10,7 @@
  * @param[in]   en_mode: brief @ENUM_BB_MODE
  */
 
-void BB_init(ENUM_BB_MODE en_mode, STRU_BoardCfg *pstru_boardCfg, STRU_CUSTOMER_CFG *pstru_customerCfg);
+void BB_init(ENUM_BB_MODE en_mode, STRU_CUSTOMER_CFG *pstru_customerCfg);
 
 
 /** 

@@ -8,6 +8,7 @@
 #include "reg_map.h"
 #include "cpu_info.h"
 #include "mpu.h"
+#include "cfg_parser.h"
 
 static void InterCore_IRQ0Handler(uint32_t u32_vectorNum);
 static void InterCore_IRQ1Handler(uint32_t u32_vectorNum);
@@ -96,14 +97,8 @@ static void InterCore_CopyConfigureFormFlashToSRAM(void)
     uint32_t cpu2_app_size = GET_WORD_FROM_ANY_ADDR(cpu2_app_size_addr);
     uint32_t cpu2_app_start_addr = cpu1_app_start_addr + cpu1_app_size + 4;
     uint32_t configure_start_addr =(cpu2_app_start_addr + cpu2_app_size +(4-(cpu2_app_start_addr + cpu2_app_size)%4));
-    uint32_t *sram_configure_start_addr = (uint32_t *)(SRAM_CONFIGURE_MEMORY_ST_ADDR);
-    while(CONFIGURE_INIT_FLAG_VALUE != (*sram_configure_start_addr))
-    {
-        
-        memcpy((uint8_t *)(SRAM_CONFIGURE_MEMORY_ST_ADDR+4),(uint8_t *)(configure_start_addr),sizeof(STRU_SettingConfigure));
-        (*sram_configure_start_addr) = CONFIGURE_INIT_FLAG_VALUE;
-    }
-    
+
+    CFGBIN_LoadFromFlash(SRAM_CONFIGURE_MEMORY_ST_ADDR, configure_start_addr);
 }
 void InterCore_Init(void)
 {

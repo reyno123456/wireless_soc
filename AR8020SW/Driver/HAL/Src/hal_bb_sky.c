@@ -30,14 +30,7 @@ History:
  */
 HAL_RET_T HAL_BB_InitSky(STRU_CUSTOMER_CFG *stru_customerCfg )
 {
-    if (NULL == stru_customerCfg|| NULL == stru_customerCfg->pstru_boardCfg)
-    {
-        BB_init( BB_SKY_MODE, &stru_boardCfg, stru_customerCfg);
-    }
-    else
-    {
-        BB_init( BB_SKY_MODE, stru_customerCfg->pstru_boardCfg , stru_customerCfg );
-    }
+    BB_init( BB_SKY_MODE, stru_customerCfg);
 
     BB_SKY_start();
 

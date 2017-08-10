@@ -63,7 +63,7 @@ HAL_RET_T HAL_BB_SetFreqBandwidthSelectionProxy(ENUM_CH_BW e_bandwidth);
  * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
  * @note        The function can only be called by cpu0,1  
  */
-HAL_RET_T HAL_BB_SetFreqBandSelectionModeProxy(ENUM_RF_BAND e_mode);
+HAL_RET_T HAL_BB_SetFreqBandSelectionModeProxy(ENUM_RUN_MODE e_mode);
 
 
 /**
@@ -121,24 +121,6 @@ HAL_RET_T HAL_BB_SetMcsModeProxy(ENUM_RUN_MODE e_mode);
 HAL_RET_T HAL_BB_SetItQamProxy(ENUM_BB_QAM e_qam);
 
 /** 
- * @brief       Set the image transmit LDPC coderate
- * @param[in]   e_ldpc:                  ldpc coderate 
- * @retval      HAL_OK,                  means command is sent sucessfully. 
- * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1   
- */
-HAL_RET_T HAL_BB_SetItLdpcProxy(ENUM_BB_LDPC e_ldpc);
-
-/** 
- * @brief       Set the rc transmit LDPC coderate
- * @param[in]   e_ldpc:                  ldpc coderate 
- * @retval      HAL_OK,                  means command is sent sucessfully. 
- * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        The function can only be called by cpu0,1   
- */
-HAL_RET_T HAL_BB_SetRcLdpcProxy(ENUM_BB_LDPC e_ldpc);
-
-/** 
  * @brief       Set the encoder bitrate control mode
  * @param[in]   e_mode: auto or manual selection.
  * @retval      HAL_OK,                  means command is sent sucessfully. 
@@ -158,17 +140,6 @@ HAL_RET_T HAL_BB_SetEncoderBrcModeProxy(ENUM_RUN_MODE e_mode);
  * @note        the function can only be called by cpu0,1
  */
 HAL_RET_T HAL_BB_SetEncoderBitrateProxy(uint8_t u8_ch, uint8_t u8_bitrateMbps);
-
-
-/** 
- * @brief   Set board enter or out debug mode
- * @param   mode	    0:  set Baseband to enter debug mode, 
-                        1:  set Baseband to out debug mode.
- * @note    The function can only be called by cpu0,1 
- */
-HAL_RET_T HAL_BB_SetBoardDebugModeProxy(uint8_t mode);
-
-
 
 /** 
  * @brief   init the uart remote session
@@ -252,21 +223,6 @@ HAL_RET_T HAL_BB_SetRcFreqProxy(uint32_t u32_freqSetting);
  */
 HAL_RET_T HAL_BB_SetItFreqProxy(uint32_t u32_freqSetting);
 
-
-
-
-
-/** 
- * @brief   set Baseband to It only mode
- * @param   mode                            1: enter It only mode
- * @retval  HAL_OK,                         means command is sent sucessfully. 
- * @retval  HAL_BB_ERR_EVENT_NOTIFY         means error happens in sending the command to cpu2                        
- * @note    The function can only be called by cpu0,1, and only call for debug.
- */
-HAL_RET_T HAL_BB_SetItOnlyFreqProxy(uint8_t mode);
-
-
-
 /** 
  * @brief   Set baseband sky to auto search the ground RC id
  * @param   NONE
@@ -285,34 +241,6 @@ HAL_RET_T HAL_BB_SetAutoSearchRcIdProxy(void);
  * @note        None
  */
 HAL_RET_T HAL_BB_SetRcChannelSelectionModeProxy(ENUM_RUN_MODE e_mode);
-
-/** 
- * @brief       Set It(image transmit) QAM
- * @param[in]   e_qam:                  the modulation QAM mode for image transmit.
- * @retval      HAL_OK,                  means command is sent sucessfully. 
- * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        None
- */
-HAL_RET_T HAL_BB_SetFreqBandQamSelectionProxy(ENUM_BB_QAM e_qam);
-
-/** 
- * @brief       Set rc QAM
- * @param[in]   e_qam:                  the modulation QAM mode for image transmit.
- * @retval      HAL_OK,                  means command is sent sucessfully. 
- * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        None
- */
-HAL_RET_T HAL_BB_SetRcQamSelectionProxy(ENUM_BB_QAM e_qam);
-
-/** 
- * @brief       switch encoder channel on/off
- * @param[in]   u8_ch:   channel,0:ch1,1:ch2
- * @param[in]   u8_data: 0:off, 1:on 
- * @retval      HAL_OK,                  means command is sent sucessfully. 
- * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
- * @note        None
- */
-HAL_RET_T HAL_BB_SwitchOnOffChProxy(uint8_t u8_ch, uint8_t u8_data);
 
 /** 
  * @brief       force baseband reset.
@@ -390,6 +318,18 @@ HAL_RET_T HAL_BB_SaveRcId(uint8_t *pu8_rcId);
  * @note        None
  */
 HAL_RET_T HAL_BB_GetRcId(uint8_t *pu8_rcId, uint8_t bufsize);
+
+
+/** 
+ * @brief       get baseband info storage address, details refer to structrue 
+ *              STRU_WIRELESS_INFO_DISPLAY, in header file bb_types.h 
+ * @param       pst_bbInfoAddr: the pointer to baseband info storage address
+ * @retval      HAL_OK:     means get baseband info sucessfully. 
+ * @retval      HAL_BUSY:   means baseband info is updating.
+ * @note        None
+ */
+HAL_RET_T HAL_BB_GetInfo(STRU_WIRELESS_INFO_DISPLAY *pst_bbInfoAddr);
+
 
 
 #ifdef __cplusplus
