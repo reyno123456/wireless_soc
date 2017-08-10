@@ -15,6 +15,7 @@ History:
 #include "hal_ret_type.h"
 #include "hal_norflash.h"
 #include "driver_mutex.h"
+#include "driver_module_init.h"
 
 HAL_RET_T HAL_NORFLASH_Init(void)
 {
@@ -24,6 +25,7 @@ HAL_RET_T HAL_NORFLASH_Init(void)
         return HAL_OCCUPIED;
     }
     COMMON_driverMutexSet(MUTEX_NOR_FLASH, 0);
+    COMMON_driverInitSet(INITED_NOR_FLASH, 0);
 
     NOR_FLASH_Init();
 }
@@ -31,6 +33,12 @@ HAL_RET_T HAL_NORFLASH_Init(void)
 
 HAL_RET_T HAL_NORFLASH_Erase(ENUM_HAL_NORFLASH_EraseIndex e_index, uint32_t u32_startAddr)
 {
+    if ( -1 == COMMON_driverInitGet(INITED_NOR_FLASH, 0) )
+    {
+        dlog_error("fail, not inited");
+        return HAL_NOT_INITED;
+    }
+
     switch (e_index)
     {
         case 0:
@@ -53,12 +61,24 @@ HAL_RET_T HAL_NORFLASH_Erase(ENUM_HAL_NORFLASH_EraseIndex e_index, uint32_t u32_
 
 HAL_RET_T HAL_NORFLASH_WriteByteBuffer(uint32_t u32_startAddr, uint8_t* pu8_dataBuff, uint32_t u32_size)
 {
-     NOR_FLASH_WriteByteBuffer(u32_startAddr, pu8_dataBuff, u32_size);
-     return HAL_OK;
+    if ( -1 == COMMON_driverInitGet(INITED_NOR_FLASH, 0) )
+    {
+        dlog_error("fail, not inited");
+        return HAL_NOT_INITED;
+    }
+
+    NOR_FLASH_WriteByteBuffer(u32_startAddr, pu8_dataBuff, u32_size);
+    return HAL_OK;
 }
 
 HAL_RET_T HAL_NORFLASH_ReadByteBuffer(uint32_t u32_startAddr,uint8_t* pu8_dataBuff, uint32_t u32_size)
 {
-     NOR_FLASH_ReadByteBuffer(u32_startAddr, pu8_dataBuff, u32_size);
-     return HAL_OK;
+    if ( -1 == COMMON_driverInitGet(INITED_NOR_FLASH, 0) )
+    {
+        dlog_error("fail, not inited");
+        return HAL_NOT_INITED;
+    }
+
+    NOR_FLASH_ReadByteBuffer(u32_startAddr, pu8_dataBuff, u32_size);
+    return HAL_OK;
 }

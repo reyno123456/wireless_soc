@@ -16,6 +16,7 @@ History:
 #include "debuglog.h"
 #include <stdio.h>
 #include "driver_mutex.h"
+#include "driver_module_init.h"
 
 /**
 * @brief   can controller initialization. 
@@ -41,6 +42,7 @@ HAL_RET_T HAL_CAN_Init(STRU_HAL_CAN_CONFIG *st_halCanConfig)
         return HAL_OCCUPIED;
     }
     COMMON_driverMutexSet(MUTEX_CAN, (uint32_t)(st_halCanConfig->e_halCanComponent));
+    COMMON_driverInitSet(INITED_UART, (uint32_t)(st_halCanConfig->e_halCanComponent));
 
     u8_canCh = (uint8_t)(st_halCanConfig->e_halCanComponent);
 
@@ -87,6 +89,12 @@ HAL_RET_T HAL_CAN_Send(STRU_HAL_CAN_MSG *st_halCanMsg, uint32_t u32_timeOut)
     uint32_t start;
     volatile uint32_t tmpCnt = 100;
     
+    if ( -1 == COMMON_driverInitGet(INITED_CAN, st_halCanMsg->e_halCanComponent) )
+    {
+        dlog_error("fail, channel = %d", st_halCanMsg->e_halCanComponent);
+        return HAL_NOT_INITED;
+    }
+
     if (CAN_GetTxBusyStatus(st_halCanMsg->e_halCanComponent))
     {
         return HAL_BUSY; 

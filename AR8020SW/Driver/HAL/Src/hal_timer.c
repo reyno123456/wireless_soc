@@ -21,6 +21,7 @@ History:
 #include "hal_timer.h"
 #include "debuglog.h"
 #include "driver_mutex.h"
+#include "driver_module_init.h"
 
 void TIMER_ClearNvic(uint32_t e_vectorNum);
 
@@ -46,6 +47,7 @@ HAL_RET_T HAL_TIMER_RegisterTimer(ENUM_HAL_TIMER_NUM e_timerNum, uint32_t u32_ti
         return HAL_OCCUPIED;
     }
     COMMON_driverMutexSet(MUTEX_TIMER, (uint32_t)e_timerNum);
+    COMMON_driverInitSet(INITED_TIMER, (uint32_t)e_timerNum);
 
     init_timer_st st_timer;
     memset(&st_timer,0,sizeof(init_timer_st));
@@ -77,6 +79,12 @@ HAL_RET_T HAL_TIMER_Stop(ENUM_HAL_TIMER_NUM e_timerNum)
         return HAL_TIMER_ERR_UNKNOWN;
     }
 
+    if ( -1 == COMMON_driverInitGet(INITED_TIMER, e_timerNum) )
+    {
+        dlog_error("fail, timer = %d", e_timerNum);
+        return HAL_NOT_INITED;
+    }
+
     init_timer_st st_timer;
     memset(&st_timer,0,sizeof(init_timer_st));
 
@@ -105,6 +113,12 @@ HAL_RET_T HAL_TIMER_Start(ENUM_HAL_TIMER_NUM e_timerNum)
     if (e_timerNum > HAL_TIMER_NUM23)
     {
         return HAL_TIMER_ERR_UNKNOWN;
+    }
+
+    if ( -1 == COMMON_driverInitGet(INITED_TIMER, e_timerNum) )
+    {
+        dlog_error("fail, timer = %d", e_timerNum);
+        return HAL_NOT_INITED;
     }
 
     init_timer_st st_timer;

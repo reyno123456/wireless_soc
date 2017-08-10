@@ -19,6 +19,7 @@ History:
 #include "interrupt.h"
 #include "debuglog.h"
 #include "driver_mutex.h"
+#include "driver_module_init.h"
 
 
 /**
@@ -88,6 +89,7 @@ HAL_RET_T HAL_I2C_MasterInit(ENUM_HAL_I2C_COMPONENT e_i2cComponent,
         return HAL_OCCUPIED;
     }
     COMMON_driverMutexSet(MUTEX_I2C, (uint32_t)e_i2cComponent);
+    COMMON_driverInitSet(INITED_I2C, (uint32_t)e_i2cComponent);
 
     if (HAL_I2C_COMPONENT_5 == e_i2cComponent)
     {
@@ -156,6 +158,12 @@ HAL_RET_T HAL_I2C_MasterWriteData(ENUM_HAL_I2C_COMPONENT e_i2cComponent,
             break;
         default:
             return HAL_I2C_ERR_WRITE_DATA;
+    }
+
+    if ( -1 == COMMON_driverInitGet(INITED_I2C, en_component) )
+    {
+        dlog_error("fail, channel = %d", en_component);
+        return HAL_NOT_INITED;
     }
 
     I2C_Master_ClrTxAbrt(en_component);
@@ -232,6 +240,12 @@ HAL_RET_T HAL_I2C_MasterReadData(ENUM_HAL_I2C_COMPONENT e_i2cComponent,
             break;
         default:
             return HAL_I2C_ERR_READ_DATA;
+    }
+
+    if ( -1 == COMMON_driverInitGet(INITED_I2C, en_component) )
+    {
+        dlog_error("fail, channel = %d", en_component);
+        return HAL_NOT_INITED;
     }
 
     I2C_Master_ClrTxAbrt(en_component);

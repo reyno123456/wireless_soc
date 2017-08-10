@@ -19,6 +19,7 @@ History:
 
 #include "debuglog.h"
 #include "driver_mutex.h"
+#include "driver_module_init.h"
 
 
 static const uint32_t s_u32_uartBaudrTbl[] = 
@@ -95,6 +96,7 @@ HAL_RET_T HAL_UART_Init(ENUM_HAL_UART_COMPONENT e_uartComponent,
         return HAL_OCCUPIED;
     }
     COMMON_driverMutexSet(MUTEX_UART, (uint32_t)e_uartComponent);
+    COMMON_driverInitSet(INITED_UART, (uint32_t)e_uartComponent);
     
     u8_uartCh = (uint8_t)(e_uartComponent);
     u8_uartVecNum = u8_uartCh + HAL_NVIC_UART_INTR0_VECTOR_NUM;
@@ -156,6 +158,12 @@ HAL_RET_T HAL_UART_TxData(ENUM_HAL_UART_COMPONENT e_uartComponent,
     if (0 == u32_len)
     {
         return HAL_UART_ERR_WRITE_DATA;
+    }
+
+    if ( -1 == COMMON_driverInitGet(INITED_UART, e_uartComponent) )
+    {
+        dlog_error("fail, e_uartComponent = %d", e_uartComponent);
+        return HAL_NOT_INITED;
     }
 
     u8_uartCh = (uint8_t)(e_uartComponent);

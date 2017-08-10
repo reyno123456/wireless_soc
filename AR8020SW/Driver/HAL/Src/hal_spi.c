@@ -16,6 +16,7 @@ History:
 #include "systicks.h"
 #include "hal.h"
 #include "driver_mutex.h"
+#include "driver_module_init.h"
 
 /**
 * @brief  The SPI initialization function which must be called 
@@ -61,7 +62,7 @@ HAL_RET_T HAL_SPI_MasterInit(ENUM_HAL_SPI_COMPONENT e_spiComponent,
         return HAL_OCCUPIED;
     }
     COMMON_driverMutexSet(MUTEX_SPI, (uint32_t)e_spiComponent);
-   
+    COMMON_driverInitSet(INITED_SPI, (uint32_t)e_spiComponent);
     // BAUDR
     st_spiInit.clk_Mhz = pst_spiInitInfo->u16_halSpiBaudr;
     
@@ -133,11 +134,17 @@ HAL_RET_T HAL_SPI_MasterWriteRead(ENUM_HAL_SPI_COMPONENT e_spiComponent,
         return HAL_SPI_ERR_READ_DATA;
     }
 
+    if ( -1 == COMMON_driverInitGet(INITED_UART, e_spiComponent) )
+    {
+        dlog_error("fail, e_spiComponent = %d", e_spiComponent);
+        return HAL_NOT_INITED;
+    }
+
     if (SPI_GetBusyStatus(e_spiComponent))
     {
         return HAL_BUSY;
     }
-    
+        
     SPI_write_read((ENUM_SPI_COMPONENT)(e_spiComponent),
                     pu8_wrData,
                     u32_wrSize,

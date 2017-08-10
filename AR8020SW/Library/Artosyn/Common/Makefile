@@ -36,7 +36,8 @@ SRC_C   := Src/sys_event.c \
            Src/md5.c \
            Src/log10.c \
            Src/driver_buffer.c \
-           Src/driver_mutex.c 
+           Src/driver_mutex.c \
+           Src/driver_module_init.c 
 
 INCDIRS :=  -IInc \
             -I$(TOP_DIR)/Library/Artosyn/SimpleC/Inc \
