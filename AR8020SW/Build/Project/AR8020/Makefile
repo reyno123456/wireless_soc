@@ -36,6 +36,7 @@ LIBALL := $(TOP_DIR)/Driver/Chip \
           $(TOP_DIR)/Library/ThirdParty/FatFs \
           $(TOP_DIR)/Library/ThirdParty/MP3Encoder \
           $(TOP_DIR)/Library/ThirdParty/MP3Decoder \
+          $(TOP_DIR)/Library/ThirdParty/LwIP \
           $(TOP_DIR)/Bootload
 
 LIB0 := $(TOP_DIR)/Driver/Chip \
@@ -43,6 +44,7 @@ LIB0 := $(TOP_DIR)/Driver/Chip \
         $(TOP_DIR)/Library/ThirdParty/FatFs \
         $(TOP_DIR)/Library/ThirdParty/MP3Encoder \
         $(TOP_DIR)/Library/ThirdParty/MP3Decoder \
+        $(TOP_DIR)/Library/ThirdParty/LwIP \
         $(TOP_DIR)/Driver/HAL \
         $(TOP_DIR)/Kernel/FreeRTOS \
         $(TOP_DIR)/Library/Artosyn/Common \
