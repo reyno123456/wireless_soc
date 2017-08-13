@@ -60,7 +60,6 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
-#include "cmsis_os.h"
 
 // #include "common.h"
 /* Standard library includes. */

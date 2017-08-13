@@ -88,10 +88,7 @@ SRC_C   := lwip/src/api/tcpip.c \
            porting/ethernetif.c \
            porting/sys_arch.c
 
-INCDIRS :=  -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/test/unit/udp \
-            -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/test/unit/tcp \
-            -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include/netif \
-            -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include \
+INCDIRS :=  -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include/netif \
             -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include \
             -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include/ipv4 \
             -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/netif/ppp \
@@ -117,6 +114,8 @@ install:
 	@mkdir -p $(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER)
 	@mkdir -p $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f $(LIB) $(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER)
+#	@cp -f $(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include * $(OUTPUT_HEADER_STAGING_DIR) -r
+#	@cp -f $(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include/lwip/tcpip.h $(OUTPUT_HEADER_STAGING_DIR)
 #	@cp -f Inc/debuglog.h $(OUTPUT_HEADER_STAGING_DIR)
 #	@cp -f Inc/sys_event.h $(OUTPUT_HEADER_STAGING_DIR)
 #	@cp -f Inc/md5.h $(OUTPUT_HEADER_STAGING_DIR)

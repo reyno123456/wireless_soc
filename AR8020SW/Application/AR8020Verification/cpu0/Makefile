@@ -106,12 +106,18 @@ SRC_CXX :=
 endif
 
 # compile flags
-CFLAGS   += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share -I../../Example
+CFLAGS   += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share -I../../Example \
+            -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include/netif \
+            -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include \
+            -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include/ipv4 \
+            -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/netif/ppp \
+            -I$(TOP_DIR)/Library/ThirdParty/LwIP/porting/lwip \
+            -I$(TOP_DIR)/Library/ThirdParty/LwIP/porting 
 CXXFLAGS += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share -I../../Example
 
 # libs
 LD_LIBS := --start-group
-LD_LIBS += -lfreertos -lutility -lfatfs -lhal -lboard -lAR8020drv -lmp3enc -lm -lcommon -lc_nano -lnosys -lgcc
+LD_LIBS += -lfreertos -lutility -lfatfs -lhal -lboard -lAR8020drv -lmp3enc -lm -lcommon -lc_nano -lnosys -lgcc -llwip
 ifeq ($(SRC_CXX), )
 LD_LIBS += --end-group
 else
