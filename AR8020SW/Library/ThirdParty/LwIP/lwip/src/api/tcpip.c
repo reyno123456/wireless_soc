@@ -53,6 +53,7 @@
 #include "lwip/init.h"
 #include "netif/etharp.h"
 #include "netif/ppp_oe.h"
+#include "debuglog.h"
 
 /* global variables */
 static void (* tcpip_init_done)(void *arg);
@@ -261,6 +262,7 @@ tcpip_thread(void *arg)
 
   LOCK_TCPIP_CORE();
   while (1) {                          /* MAIN Loop */
+    dlog_info("reyno tested");
     sys_mbox_fetch(mbox, (void *)&msg);
     switch (msg->type) {
 #if LWIP_NETCONN
@@ -553,6 +555,10 @@ tcpip_init(void (* initfunc)(void *), void *arg)
 #endif /* LWIP_TCPIP_CORE_LOCKING */
 
   sys_thread_new(TCPIP_THREAD_NAME, tcpip_thread, NULL, TCPIP_THREAD_STACKSIZE, TCPIP_THREAD_PRIO);
+
+    dlog_info("tcpip created");
+  LWIP_DEBUGF(LWIP_DBG_TYPES_ON, ("tcpip created "));
+
 }
 
 /**

@@ -19,7 +19,7 @@ include $(BUILD_DIR)/config.mk
 LIB = liblwip.a
 
 ifeq ($(CPU_NUMBER), cpu0)
-    CFLAGS += $(CPU0_COMPILE_FLAGS)
+    CFLAGS += $(CPU0_COMPILE_FLAGS) -g
 endif
 
 ifeq ($(CPU_NUMBER), cpu1)
