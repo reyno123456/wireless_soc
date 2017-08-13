@@ -39,7 +39,7 @@
 #include "testhal_dma.h"
 #include "ar_freertos_specific.h"
 #include "hal.h"
-#include "lwip/tcpip.h"
+#include "test_net.h"
 
 
 void command_readMemory(char *addr);
@@ -378,7 +378,7 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     }
     else if ((memcmp(cmdArray[0], "test_net", strlen("test_net")) == 0))
     {
-        tcpip_init( NULL, NULL );
+        test_net();
         dlog_info("%d, time = %s", __LINE__, __TIME__);
     }
     else if (memcmp(cmdArray[0], "test_local_irq", strlen("test_local_irq")) == 0)
