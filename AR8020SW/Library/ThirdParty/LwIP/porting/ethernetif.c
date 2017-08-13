@@ -72,23 +72,22 @@
 #define configMAC_ADDR4	0x00
 #define configMAC_ADDR5	0x01
 
-/* IP address configuration. */
+/*
 #define configIP_ADDR0		172
 #define configIP_ADDR1		16
 #define configIP_ADDR2		162
 #define configIP_ADDR3		15
 
-/* Netmask configuration. */
 #define configNET_MASK0		255
 #define configNET_MASK1		255
 #define configNET_MASK2		255
 #define configNET_MASK3		0
 
-/* Gateway IP address configuration. */
 #define configGW_ADDR0	        192
 #define configGW_ADDR1	        168
 #define configGW_ADDR2	        0
 #define configGW_ADDR3	        1
+*/
 
 #define configNUM_ENET_RX_BUFFERS	8
 #define configNUM_ENET_TX_BUFFERS       8
