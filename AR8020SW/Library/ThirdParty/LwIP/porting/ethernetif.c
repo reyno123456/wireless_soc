@@ -60,10 +60,125 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
+#include "cmsis_os.h"
 
 // #include "common.h"
 /* Standard library includes. */
 #include <string.h>
+
+#define configMAC_ADDR0	0x00
+#define configMAC_ADDR1	0xCF
+#define configMAC_ADDR2	0x52
+#define configMAC_ADDR3	0x35
+#define configMAC_ADDR4	0x00
+#define configMAC_ADDR5	0x01
+
+/* IP address configuration. */
+#define configIP_ADDR0		172
+#define configIP_ADDR1		16
+#define configIP_ADDR2		162
+#define configIP_ADDR3		15
+
+/* Netmask configuration. */
+#define configNET_MASK0		255
+#define configNET_MASK1		255
+#define configNET_MASK2		255
+#define configNET_MASK3		0
+
+/* Gateway IP address configuration. */
+#define configGW_ADDR0	        192
+#define configGW_ADDR1	        168
+#define configGW_ADDR2	        0
+#define configGW_ADDR3	        1
+
+#define configNUM_ENET_RX_BUFFERS	8
+#define configNUM_ENET_TX_BUFFERS       8
+#define configENET_RX_BUFFER_SIZE	1520
+#define configENET_TX_BUFFER_SIZE	1520
+#define configUSE_PROMISCUOUS_MODE	0
+#define configUSE_MII_MODE              0/*FSL: using RMII mode*/
+#define configETHERNET_INPUT_TASK_STACK_SIZE ( 256 )
+#define configETHERNET_INPUT_TASK_PRIORITY ( configMAX_PRIORITIES - 1 )
+
+#define NBUF_LITTLE_ENDIAN
+
+#define ENHANCED_BD
+
+#define TX_BD_R			0x0080
+#define TX_BD_TO1		0x0040
+#define TX_BD_W			0x0020
+#define TX_BD_TO2		0x0010
+#define TX_BD_L			0x0008
+#define TX_BD_TC		0x0004
+#define TX_BD_ABC		0x0002
+
+// ----------------------------------------------------------------------
+// TX Enhanced BD Bit Definitions
+// ----------------------------------------------------------------------
+#define TX_BD_INT       0x00000040 
+#define TX_BD_TS        0x00000020 
+#define TX_BD_PINS      0x00000010 
+#define TX_BD_IINS      0x00000008 
+#define TX_BD_TXE       0x00800000 
+#define TX_BD_UE        0x00200000 
+#define TX_BD_EE        0x00100000
+#define TX_BD_FE        0x00080000 
+#define TX_BD_LCE       0x00040000 
+#define TX_BD_OE        0x00020000 
+#define TX_BD_TSE       0x00010000 
+
+#define TX_BD_BDU       0x00000080    
+
+// ----------------------------------------------------------------------
+// RX Buffer Descriptor Bit Definitions
+// ----------------------------------------------------------------------
+
+// Offset 0 flags - status: Big Endian
+#define RX_BD_E			0x0080
+#define RX_BD_R01		0x0040
+#define RX_BD_W			0x0020
+#define RX_BD_R02		0x0010
+#define RX_BD_L			0x0008
+#define RX_BD_M			0x0001
+#define RX_BD_BC		0x8000
+#define RX_BD_MC		0x4000
+#define RX_BD_LG		0x2000
+#define RX_BD_NO		0x1000
+#define RX_BD_CR		0x0400
+#define RX_BD_OV		0x0200
+#define RX_BD_TR		0x0100
+
+// ----------------------------------------------------------------------
+// RX Enhanced BD Bit Definitions
+// ----------------------------------------------------------------------
+#define RX_BD_ME               0x00000080    
+#define RX_BD_PE               0x00000004    
+#define RX_BD_CE               0x00000002    
+#define RX_BD_UC               0x00000001
+    
+#define RX_BD_INT              0x00008000    
+
+#define RX_BD_ICE              0x20000000    
+#define RX_BD_PCR              0x10000000    
+#define RX_BD_VLAN             0x04000000    
+#define RX_BD_IPV6             0x02000000    
+#define RX_BD_FRAG             0x01000000    
+
+#define RX_BD_BDU              0x00000080    
+
+typedef struct
+{
+	uint16_t status;	            /* control and status */
+	uint16_t length;	            /* transfer length */
+	uint8_t  *data;	                /* buffer address */
+	uint32_t ebd_status;
+	uint16_t length_proto_type;
+	uint16_t payload_checksum;
+	uint32_t bdu;
+	uint32_t timestamp;
+	uint32_t reserverd_word1;
+	uint32_t reserverd_word2;
+} NBUF;
 
 /* Demo includes. */
 /* #include "eth_phy.h" */
@@ -174,175 +289,41 @@ const unsigned portCHAR ucMACAddress[6] =
   /* Do whatever else is needed to initialize interface. */  
   
   /* Enable the ENET clock. */
-  SIM_SCGC2 |= SIM_SCGC2_ENET_MASK;
+  //SIM_SCGC2 |= SIM_SCGC2_ENET_MASK;
 
   /*FSL: allow concurrent access to MPU controller. Example: ENET uDMA to SRAM, otherwise bus error*/
-  MPU_CESR = 0;         
+  //MPU_CESR = 0;         
         
   prvInitialiseENETBuffers();
   vSemaphoreCreateBinary( xENETSemaphore );
   
   /* Set the Reset bit and clear the Enable bit */
-  ENET_ECR = ENET_ECR_RESET_MASK;
+  //ENET_ECR = ENET_ECR_RESET_MASK;
 
   /* Wait at least 8 clock cycles */
-  for( usData = 0; usData < 10; usData++ )
-  {
-  asm( "NOP" );
-  }
     
   /*FSL: start MII interface*/
-  mii_init(0, periph_clk_khz/1000/*MHz*/);       
+  //mii_init(0, periph_clk_khz/1000/*MHz*/);       
         
   //enet_interrupt_routine
-  set_irq_priority (76, 6);
-  enable_irq(76);//ENET xmit interrupt
+  //set_irq_priority (76, 6);
+  //enable_irq(76);//ENET xmit interrupt
   //enet_interrupt_routine
-  set_irq_priority (77, 6);
-  enable_irq(77);//ENET rx interrupt
+  //set_irq_priority (77, 6);
+  //enable_irq(77);//ENET rx interrupt
   //enet_interrupt_routine
-  set_irq_priority (78, 6);
-  enable_irq(78);//ENET error and misc interrupts       
+  //set_irq_priority (78, 6);
+  //enable_irq(78);//ENET error and misc interrupts       
         
   /*
    * Make sure the external interface signals are enabled
    */
-  PORTB_PCR0  = PORT_PCR_MUX(4);//GPIO;//RMII0_MDIO/MII0_MDIO
-  PORTB_PCR1  = PORT_PCR_MUX(4);//GPIO;//RMII0_MDC/MII0_MDC    
-
-#if configUSE_MII_MODE
-  PORTA_PCR14 = PORT_PCR_MUX(4);//RMII0_CRS_DV/MII0_RXDV
-#if 0
-  PORTA_PCR5  = PORT_PCR_MUX(4);//RMII0_RXER/MII0_RXER
-#else
-  PORTA_PCR5  = (0|PORT_PCR_MUX(1)|PORT_PCR_PE_MASK|!PORT_PCR_PS_MASK);//GPIO pull down
-#endif
-  PORTA_PCR12 = PORT_PCR_MUX(4);//RMII0_RXD1/MII0_RXD1
-  PORTA_PCR13 = PORT_PCR_MUX(4);//RMII0_RXD0/MII0_RXD0
-  PORTA_PCR15 = PORT_PCR_MUX(4);//RMII0_TXEN/MII0_TXEN
-  PORTA_PCR16 = PORT_PCR_MUX(4);//RMII0_TXD0/MII0_TXD0
-  PORTA_PCR17 = PORT_PCR_MUX(4);//RMII0_TXD1/MII0_TXD1
-  PORTA_PCR11 = PORT_PCR_MUX(4);//MII0_RXCLK
-  PORTA_PCR25 = PORT_PCR_MUX(4);//MII0_TXCLK
-  PORTA_PCR9  = PORT_PCR_MUX(4);//MII0_RXD3
-  PORTA_PCR10 = PORT_PCR_MUX(4);//MII0_RXD2  
-  PORTA_PCR28 = PORT_PCR_MUX(4);//MII0_TXER
-  PORTA_PCR24 = PORT_PCR_MUX(4);//MII0_TXD2
-  PORTA_PCR26 = PORT_PCR_MUX(4);//MII0_TXD3
-  PORTA_PCR27 = PORT_PCR_MUX(4);//MII0_CRS
-  PORTA_PCR29 = PORT_PCR_MUX(4);//MII0_COL
-#else
-  PORTA_PCR14 = PORT_PCR_MUX(4);//RMII0_CRS_DV/MII0_RXDV
-#if 0
-  PORTA_PCR5  = PORT_PCR_MUX(4);//RMII0_RXER/MII0_RXER
-#else
-  PORTA_PCR5  = (0|PORT_PCR_MUX(1)|PORT_PCR_PE_MASK|!PORT_PCR_PS_MASK);//GPIO pull down
-#endif
-  PORTA_PCR12 = PORT_PCR_MUX(4);//RMII0_RXD1/MII0_RXD1
-  PORTA_PCR13 = PORT_PCR_MUX(4);//RMII0_RXD0/MII0_RXD0
-  PORTA_PCR15 = PORT_PCR_MUX(4);//RMII0_TXEN/MII0_TXEN
-  PORTA_PCR16 = PORT_PCR_MUX(4);//RMII0_TXD0/MII0_TXD0
-  PORTA_PCR17 = PORT_PCR_MUX(4);//RMII0_TXD1/MII0_TXD1
-#endif   
-    
-  /* Can we talk to the PHY? */
-  do
-  {
-    vTaskDelay( netifLINK_DELAY );
-    usData = 0xffff;
-    mii_read( 0, configPHY_ADDRESS, PHY_PHYIDR1, &usData );
-        
-  } while( usData == 0xffff );
-
-  /* Start auto negotiate. */
-  mii_write( 0, configPHY_ADDRESS, PHY_BMCR, ( PHY_BMCR_AN_RESTART | PHY_BMCR_AN_ENABLE ) );
-
-  /* Wait for auto negotiate to complete. */
-  do
-  {
-    vTaskDelay( netifLINK_DELAY );
-    mii_read( 0, configPHY_ADDRESS, PHY_BMSR, &usData );
-
-  } while( !( usData & PHY_BMSR_AN_COMPLETE ) );
-
-  /* When we get here we have a link - find out what has been negotiated. */
-  usData = 0;
-  mii_read( 0, configPHY_ADDRESS, PHY_STATUS, &usData );  
-
-  /* Clear the Individual and Group Address Hash registers */
-  ENET_IALR = 0;
-  ENET_IAUR = 0;
-  ENET_GALR = 0;
-  ENET_GAUR = 0;
-  
-  /* Set the Physical Address for the selected ENET */
-  enet_set_address( 0, ucMACAddress );
-        
-#if configUSE_MII_MODE        
-  /* Various mode/status setup. */
-  ENET_RCR = ENET_RCR_MAX_FL(configENET_RX_BUFFER_SIZE) | ENET_RCR_MII_MODE_MASK | ENET_RCR_CRCFWD_MASK;
-#else
-  ENET_RCR = ENET_RCR_MAX_FL(configENET_RX_BUFFER_SIZE) | ENET_RCR_MII_MODE_MASK | ENET_RCR_CRCFWD_MASK | ENET_RCR_RMII_MODE_MASK;
-#endif
-
-  /*FSL: clear rx/tx control registers*/
-  ENET_TCR = 0;
-        
-  /* Setup half or full duplex. */
-  if( usData & PHY_DUPLEX_STATUS )
-  {
-    /*Full duplex*/
-    ENET_RCR &= (unsigned portLONG)~ENET_RCR_DRT_MASK;
-    ENET_TCR |= ENET_TCR_FDEN_MASK;
-  }
-  else
-  {
-    /*half duplex*/
-    ENET_RCR |= ENET_RCR_DRT_MASK;
-    ENET_TCR &= (unsigned portLONG)~ENET_TCR_FDEN_MASK;
-  }
-  /* Setup speed */
-  if( usData & PHY_SPEED_STATUS )
-  {
-    /*10Mbps*/
-    ENET_RCR |= ENET_RCR_RMII_10T_MASK;
-  }
-
-  #if( configUSE_PROMISCUOUS_MODE == 1 )
-  {
-    ENET_RCR |= ENET_RCR_PROM_MASK;
-  }
-  #endif
-
-  #ifdef ENHANCED_BD
-    ENET_ECR = ENET_ECR_EN1588_MASK;
-  #else
-    ENET_ECR = 0;
-  #endif
-  
-  /* Set Rx Buffer Size */
-  ENET_MRBR = (unsigned portSHORT) configENET_RX_BUFFER_SIZE;
-
-  /* Point to the start of the circular Rx buffer descriptor queue */
-  ENET_RDSR = ( unsigned portLONG ) &( xENETRxDescriptors[ 0 ] );
-
-  /* Point to the start of the circular Tx buffer descriptor queue */
-  ENET_TDSR = ( unsigned portLONG ) xENETTxDescriptors;
-
-  /* Clear all ENET interrupt events */
-  ENET_EIR = ( unsigned portLONG ) -1;
-
-  /* Enable interrupts. */
-  ENET_EIMR = ENET_EIR_TXF_MASK | ENET_EIMR_RXF_MASK | ENET_EIMR_RXB_MASK | ENET_EIMR_UN_MASK | ENET_EIMR_RL_MASK | ENET_EIMR_LC_MASK | ENET_EIMR_BABT_MASK | ENET_EIMR_BABR_MASK | ENET_EIMR_EBERR_MASK;
+  //PORTB_PCR0  = PORT_PCR_MUX(4);//GPIO;//RMII0_MDIO/MII0_MDIO
+  //PORTB_PCR1  = PORT_PCR_MUX(4);//GPIO;//RMII0_MDC/MII0_MDC    
 
   /* Create the task that handles the MAC ENET. */
   xTaskCreate( ethernetif_input, ( signed char * ) "ETH_INT", configETHERNET_INPUT_TASK_STACK_SIZE, (void *)netif, configETHERNET_INPUT_TASK_PRIORITY, &xEthIntTask );  
   
-  /* Enable the MAC itself. */
-  ENET_ECR |= ENET_ECR_ETHEREN_MASK;
-
-  /* Indicate that there have been empty receive buffers produced */
-  ENET_RDAR = ENET_RDAR_RDAR_MASK;
 }
 
 /**
@@ -387,9 +368,9 @@ low_level_output(struct netif *netif, struct pbuf *p)
     else
     {
       #ifdef NBUF_LITTLE_ENDIAN
-      pcTxData = (unsigned char *)__REV((uint32_t)xENETTxDescriptors[ uxNextTxBuffer ].data);
+        pcTxData = (unsigned char *)((uint32_t)xENETTxDescriptors[ uxNextTxBuffer ].data);
       #else
-      pcTxData = xENETTxDescriptors[ uxNextTxBuffer ].data;
+        pcTxData = xENETTxDescriptors[ uxNextTxBuffer ].data;
       #endif
       break;
     }
@@ -418,7 +399,7 @@ low_level_output(struct netif *netif, struct pbuf *p)
         
   /* Setup the buffer descriptor for transmission */
   #ifdef NBUF_LITTLE_ENDIAN
-  xENETTxDescriptors[ uxNextTxBuffer ].length = __REVSH(l);//nbuf->length + ETH_HDR_LEN;
+  xENETTxDescriptors[ uxNextTxBuffer ].length = l;//nbuf->length + ETH_HDR_LEN;
   #else
   xENETTxDescriptors[ uxNextTxBuffer ].length = l;//nbuf->length + ETH_HDR_LEN;
   #endif
@@ -430,7 +411,7 @@ low_level_output(struct netif *netif, struct pbuf *p)
   #endif
                 
   /* Continue the Tx DMA task (in case it was waiting for a new TxBD) */
-  ENET_TDAR = ENET_TDAR_TDAR_MASK;
+  //ENET_TDAR = ENET_TDAR_TDAR_MASK;
 
   uxNextTxBuffer++;
   if( uxNextTxBuffer >= configNUM_ENET_TX_BUFFERS )
@@ -442,7 +423,7 @@ low_level_output(struct netif *netif, struct pbuf *p)
   pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
 #endif
   
-  LINK_STATS_INC(link.xmit);
+  //LINK_STATS_INC(link.xmit);
 
   return ERR_OK;
 }
@@ -474,7 +455,7 @@ low_level_input(struct netif *netif)
   /* Obtain the size of the packet and put it into the "len"
      variable. */
   #ifdef NBUF_LITTLE_ENDIAN
-  len = __REVSH(xENETRxDescriptors[ uxNextRxBuffer ].length);
+  len = (xENETRxDescriptors[ uxNextRxBuffer ].length);
   #else
   len = xENETRxDescriptors[ uxNextRxBuffer ].length;
   #endif
@@ -508,7 +489,7 @@ low_level_input(struct netif *netif)
             * pbuf is the sum of the chained pbuf len members.
             */
             #ifdef NBUF_LITTLE_ENDIAN
-            data_temp = (u8_t *)__REV((u32_t)xENETRxDescriptors[ uxNextRxBuffer ].data);
+            data_temp = (u8_t *)((u32_t)xENETRxDescriptors[ uxNextRxBuffer ].data);
             memcpy((u8_t*)q->payload, &( data_temp[l] ), q->len);
             #else
             memcpy((u8_t*)q->payload, &( xENETRxDescriptors[ uxNextRxBuffer ].data[l] ), q->len);
@@ -538,14 +519,14 @@ low_level_input(struct netif *netif)
      else
      {
         //drop packet();
-        LINK_STATS_INC(link.memerr);
-        LINK_STATS_INC(link.drop);     
+        //LINK_STATS_INC(link.memerr);
+        //LINK_STATS_INC(link.drop);     
      }
     
      //acknowledge that packet has been read();
      /* Free the descriptor. */
      xENETRxDescriptors[ uxNextRxBuffer ].status |= RX_BD_E;
-     ENET_RDAR = ENET_RDAR_RDAR_MASK;
+     // ENET_RDAR = ENET_RDAR_RDAR_MASK;
     
      uxNextRxBuffer++;
      if( uxNextRxBuffer >= configNUM_ENET_RX_BUFFERS )
@@ -594,30 +575,13 @@ ethernetif_input(/*FSL:struct netif *netif*/void *pParams)
     /* points to packet payload, which starts with an Ethernet header */
     ethhdr = p->payload;
 
-    switch (htons(ethhdr->type)) 
-    {
-      /* IP or ARP packet? */
-      case ETHTYPE_IP:
-      case ETHTYPE_ARP:
-    #if PPPOE_SUPPORT
-      /* PPPoE packet? */
-      case ETHTYPE_PPPOEDISC:
-      case ETHTYPE_PPPOE:
-    #endif /* PPPOE_SUPPORT */
-        /* full packet send to tcpip_thread to process */
         if (netif->input(p, netif)!=ERR_OK)
          { LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
            pbuf_free(p);
            p = NULL;
          }
-        break;
-    
-      default:
-        pbuf_free(p);
-        p = NULL;
-        break;
+
     }
-  }
 }
 
 /**
@@ -709,7 +673,7 @@ unsigned char *pcBufPointer;
   {
     xENETTxDescriptors[ ux ].status = TX_BD_TC;
     #ifdef NBUF_LITTLE_ENDIAN
-    xENETTxDescriptors[ ux ].data = (uint8_t *)__REV((uint32_t)pcBufPointer);
+    xENETTxDescriptors[ ux ].data = (uint8_t *)((uint32_t)pcBufPointer);
     #else
     xENETTxDescriptors[ ux ].data = pcBufPointer;
     #endif
@@ -731,7 +695,7 @@ unsigned char *pcBufPointer;
       xENETRxDescriptors[ ux ].status = RX_BD_E;
       xENETRxDescriptors[ ux ].length = 0;
       #ifdef NBUF_LITTLE_ENDIAN
-      xENETRxDescriptors[ ux ].data = (uint8_t *)__REV((uint32_t)pcBufPointer);
+      xENETRxDescriptors[ ux ].data = (uint8_t *)((uint32_t)pcBufPointer);
       #else
       xENETRxDescriptors[ ux ].data = pcBufPointer;
       #endif
@@ -752,28 +716,12 @@ unsigned char *pcBufPointer;
 /*-----------------------------------------------------------*/
 
 void vENETISRHandler( void )
-{
-unsigned long ulEvent;
+{  
 portBASE_TYPE xHighPriorityTaskWoken = pdFALSE;
-   
-  /* Determine the cause of the interrupt. */
-  ulEvent = ENET_EIR & ENET_EIMR;
-  ENET_EIR = ulEvent;
-  
-  if( ( ulEvent & ENET_EIR_RXB_MASK ) || ( ulEvent & ENET_EIR_RXF_MASK ) )
-  {
+
     /* A packet has been received.  Wake the handler task. */
     xSemaphoreGiveFromISR( xENETSemaphore, &xHighPriorityTaskWoken );
-  }
-
-  if (ulEvent & ( ENET_EIR_UN_MASK | ENET_EIR_RL_MASK | ENET_EIR_LC_MASK | ENET_EIR_EBERR_MASK | ENET_EIR_BABT_MASK | ENET_EIR_BABR_MASK | ENET_EIR_EBERR_MASK ) )
-  {
-    /* Sledge hammer error handling. */
-    prvInitialiseENETBuffers();
-    ENET_RDAR = ENET_RDAR_RDAR_MASK;
-  }
-
-  portEND_SWITCHING_ISR( xHighPriorityTaskWoken );
+    portEND_SWITCHING_ISR( xHighPriorityTaskWoken );
 }
 
 #endif /* 0 */

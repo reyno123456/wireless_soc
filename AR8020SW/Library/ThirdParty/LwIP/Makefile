@@ -85,7 +85,7 @@ SRC_C   := lwip/src/api/tcpip.c \
            lwip/src/core/init.c \
            lwip/src/core/udp.c \
            porting/etharp.c \
-#           porting/ethernetif.c \
+           porting/ethernetif.c \
            porting/sys_arch.c
 
 INCDIRS :=  -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/test/unit/udp \
