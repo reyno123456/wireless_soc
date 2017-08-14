@@ -38,6 +38,7 @@
 //#define LWIP_PROVIDE_ERRNO 1
 #include "lwip_errno.h"
 #include "sys_arch.h"//FSL
+#include "debuglog.h"
 
 #undef LWIP_NOASSERT//FSL
 
@@ -64,7 +65,8 @@ typedef int sys_prot_t;
 // Platform specific diagnostic output
 
 // non-fatal, print a message.
-#define LWIP_PLATFORM_DIAG(x)                     sys_debug( x )
+//#define LWIP_PLATFORM_DIAG(x)                     sys_debug( x )
+#define LWIP_PLATFORM_DIAG(x)                     do {printf x;} while(0)
 // fatal, print message and abandon execution.
 #define LWIP_PLATFORM_ASSERT(x)                   sys_assert( x )
 

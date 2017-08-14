@@ -262,9 +262,9 @@ tcpip_thread(void *arg)
 
   LOCK_TCPIP_CORE();
   while (1) {                          /* MAIN Loop */
-    dlog_info("reyno tested");
     sys_mbox_fetch(mbox, (void *)&msg);
-    switch (msg->type) {
+/*      dlog_info("%d, msg->type = %d", __LINE__, msg->type); */
+   switch (msg->type) {
 #if LWIP_NETCONN
     case TCPIP_MSG_API:
       LWIP_DEBUGF(TCPIP_DEBUG, ("tcpip_thread: API message %p\n", (void *)msg));

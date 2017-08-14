@@ -1785,7 +1785,7 @@
  * TCPIP_DEBUG: Enable debugging in tcpip.c.
  */
 #ifndef TCPIP_DEBUG
-#define TCPIP_DEBUG                     LWIP_DBG_OFF
+#define TCPIP_DEBUG                     LWIP_DBG_ON
 #endif
 
 /**

@@ -127,7 +127,7 @@ static void net_http_handler( void const * argument)
         if( pxNewConnection != NULL )
         {
             /* Service connection. */
-            // vProcessConnection( pxNewConnection );
+            vProcessConnection( pxNewConnection );
             while( netconn_delete( pxNewConnection ) != ERR_OK )
             {
                 vTaskDelay( webSHORT_DELAY );
