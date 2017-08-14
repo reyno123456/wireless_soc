@@ -263,7 +263,8 @@ netconn_accept(struct netconn *conn)
     newconn = NULL;
   } else
 #else
-  sys_arch_mbox_fetch(conn->acceptmbox, (void *)&newconn, 0);
+/*   sys_arch_mbox_fetch(conn->acceptmbox, (void *)&newconn, 0); */
+    sys_arch_mbox_fetch(conn->acceptmbox, (void *)&newconn, 10);
 #endif /* LWIP_SO_RCVTIMEO*/
   {
     /* Register event with callback */

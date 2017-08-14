@@ -99,6 +99,7 @@ INCDIRS :=  -I$(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include/netif \
             -I$(TOP_DIR)/Driver/HAL/Inc \
             -I$(TOP_DIR)/Library/Artosyn/Common/Inc \
             -I$(TOP_DIR)/Kernel/FreeRTOS/portable/GCC/ARM_CM7/r0p1 \
+            -I$(TOP_DIR)/Kernel/FreeRTOS/CMSIS_RTOS \
             -I$(OUTPUT_HEADER_STAGING_DIR)
 
 # object file(s)

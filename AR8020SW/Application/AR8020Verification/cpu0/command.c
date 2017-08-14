@@ -378,7 +378,7 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
     }
     else if ((memcmp(cmdArray[0], "test_net", strlen("test_net")) == 0))
     {
-        test_net();
+        command_test_net(cmdArray[1]);
         dlog_info("%d, time = %s", __LINE__, __TIME__);
     }
     else if (memcmp(cmdArray[0], "test_local_irq", strlen("test_local_irq")) == 0)

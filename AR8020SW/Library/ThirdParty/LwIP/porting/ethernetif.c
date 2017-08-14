@@ -60,6 +60,7 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
+#include "cmsis_os.h"
 
 // #include "common.h"
 /* Standard library includes. */
@@ -246,7 +247,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p);
 static struct pbuf *low_level_input(struct netif *netif);
 
 /* Forward declarations. */
-static void  ethernetif_input(/*FSL:struct netif *netif*/void *pParams);
+static void  ethernetif_input(/*FSL:struct netif *netif*/void const *pParams);
 
 /**
  * In this function, the hardware should be initialized.
@@ -292,7 +293,7 @@ const unsigned portCHAR ucMACAddress[6] =
   /*FSL: allow concurrent access to MPU controller. Example: ENET uDMA to SRAM, otherwise bus error*/
   //MPU_CESR = 0;         
         
-  prvInitialiseENETBuffers();
+/*   prvInitialiseENETBuffers(); */
   vSemaphoreCreateBinary( xENETSemaphore );
   
   /* Set the Reset bit and clear the Enable bit */
@@ -320,7 +321,17 @@ const unsigned portCHAR ucMACAddress[6] =
   //PORTB_PCR1  = PORT_PCR_MUX(4);//GPIO;//RMII0_MDC/MII0_MDC    
 
   /* Create the task that handles the MAC ENET. */
-  xTaskCreate( ethernetif_input, ( signed char * ) "ETH_INT", configETHERNET_INPUT_TASK_STACK_SIZE, (void *)netif, configETHERNET_INPUT_TASK_PRIORITY, &xEthIntTask );  
+/*
+  xTaskCreate( ethernetif_input, ( signed char * ) "ETH_INT", 
+               configETHERNET_INPUT_TASK_STACK_SIZE * 8, 
+               (void *)netif, 
+               configETHERNET_INPUT_TASK_PRIORITY, 
+               &xEthIntTask );  
+*/
+
+	osThreadDef(ETHERNETIF_INPUT, ethernetif_input, osPriorityNormal, 0, 8 * configMINIMAL_STACK_SIZE);
+	osThreadCreate(osThread(ETHERNETIF_INPUT), NULL);
+
   
 }
 
@@ -546,7 +557,7 @@ low_level_input(struct netif *netif)
  * @param netif the lwip network interface structure for this ethernetif
  */
 static void
-ethernetif_input(/*FSL:struct netif *netif*/void *pParams)
+ethernetif_input(/*FSL:struct netif *netif*/void const *pParams)
 {
 //FSL:  struct ethernetif *ethernetif;
   struct netif *netif;
