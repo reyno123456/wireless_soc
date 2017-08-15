@@ -26,6 +26,40 @@
 
 static struct netif ENET_if;
 
+static char *itoa(int val, char *buf, unsigned radix)
+{
+    char   *p;             
+    char   *firstdig;      
+    char   temp;           
+    unsigned   digval;     
+    p = buf;
+    if(val <0)
+    {
+        *p++ = '-';
+        val = (unsigned long)(-(long)val);
+    }
+    firstdig = p; 
+    do{
+        digval = (unsigned)(val % radix);
+        val /= radix;
+       
+        if  (digval > 9)
+            *p++ = (char)(digval - 10 + 'a'); 
+        else
+            *p++ = (char)(digval + '0');      
+    }while(val > 0);
+   
+    *p-- = '\0';         
+    do{
+        temp = *p;
+        *p = *firstdig;
+        *firstdig = temp;
+        --p;
+        ++firstdig;        
+    }while(firstdig < p);  
+    return buf;
+}
+
 static void test_net_loop_server( void const * argument)
 {
     int fd; 
@@ -76,6 +110,8 @@ static void test_net_loop_client( void const * argument)
     myaddr.sin_family = AF_INET; 
     myaddr.sin_port = htons(2222); 
     myaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
+
+    char send_buf[100] = {0};
      
     if((sockfd = socket(AF_INET, SOCK_DGRAM, 0))<0) 
     { 
@@ -83,10 +119,17 @@ static void test_net_loop_client( void const * argument)
         return;     
     } 
 
+    uint32_t i = 0;
+
+    char buf_tmp[9] = {0};
+
     while(1)
-    {     
-        dlog_info("hello!");
-        sendto(sockfd, "hello!", 10, 0, (struct sockaddr*)&myaddr, len); 
+    {
+        //fprintf(send_buf, "send time:%s", itoa(send_buf, i));
+        strcpy(send_buf, "send times:");
+        itoa(i++, buf_tmp, 10);
+        strcpy(&send_buf[strlen("send times:")], buf_tmp);  
+        sendto(sockfd, send_buf, strlen(send_buf), 0, (struct sockaddr*)&myaddr, len); 
         recvfrom(sockfd, buf, 100, 0, (struct sockaddr*)&myaddr, (socklen_t*)&len); 
         dlog_info("recv:%s\n",buf);
         HAL_Delay(1000);
