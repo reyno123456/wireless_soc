@@ -5,6 +5,7 @@
 #include "debuglog.h"
 #include "hal.h"
 #include "lwip/tcpip.h"
+#include "test_net_loop.h"
 
 #define configIP_ADDR0		172
 #define configIP_ADDR1		16
@@ -152,6 +153,10 @@ void command_test_net(char* arg1)
     {
         case 0:
             test_net_http();
+        break;
+
+        case 1:
+            test_net_loop();
         break;
 
         default:break;

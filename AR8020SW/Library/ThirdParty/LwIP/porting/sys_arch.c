@@ -334,9 +334,10 @@ sys_arch_timeouts(void)
 {
     sys_tcb_t      *ptask;
 
-    ptask = sys_arch_thread_current(  );
-    LWIP_ASSERT( "sys_arch_timeouts: ptask != NULL", ptask != NULL );
-    return ptask != NULL ? &( ptask->timeouts ) : NULL;
+    ptask = sys_arch_thread_current();
+    //LWIP_ASSERT( "sys_arch_timeouts: ptask != NULL", ptask != NULL );
+    //return ptask != NULL ? &( ptask->timeouts ) : NULL;
+    return &(ptask->timeouts);
 }
 
 /*-----------------------------------------------------------------------------------*/

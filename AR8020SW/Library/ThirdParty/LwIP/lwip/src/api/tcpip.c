@@ -555,10 +555,6 @@ tcpip_init(void (* initfunc)(void *), void *arg)
 #endif /* LWIP_TCPIP_CORE_LOCKING */
 
   sys_thread_new(TCPIP_THREAD_NAME, tcpip_thread, NULL, TCPIP_THREAD_STACKSIZE, TCPIP_THREAD_PRIO);
-
-    dlog_info("tcpip created");
-  LWIP_DEBUGF(LWIP_DBG_TYPES_ON, ("tcpip created "));
-
 }
 
 /**

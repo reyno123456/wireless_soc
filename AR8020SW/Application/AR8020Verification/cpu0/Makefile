@@ -63,7 +63,8 @@ SRC_C   := main_sky.c \
            ../../Example/test_os_message.c \
            ../../Example/test_os_timer.c \
            ../../Example/test_bb_led_ctrl.c \
-           ../../Example/test_net.c
+           ../../Example/test_net.c \
+           ../../Example/test_net_loop.c
 
 
 

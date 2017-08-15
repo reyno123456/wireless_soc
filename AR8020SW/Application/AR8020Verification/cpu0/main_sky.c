@@ -17,6 +17,7 @@
 #include "hal_dma.h"
 #include "hal_sd.h"
 #include "test_bb_led_ctrl.h"
+#include "lwip/tcpip.h"
 
 
 void console_init(uint32_t uart_num, uint32_t baut_rate)
