@@ -73,7 +73,7 @@ static void test_net_loop_server( void const * argument)
     int len = sizeof(clientaddr); 
     myaddr.sin_family = AF_INET; 
     myaddr.sin_port = htons(2222); 
-    myaddr.sin_addr.s_addr = inet_addr("127.0.0.1");//设定本机的回环地址 
+    myaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     if((sockfd = socket(AF_INET, SOCK_DGRAM, 0))<0) 
     { 
@@ -125,7 +125,6 @@ static void test_net_loop_client( void const * argument)
 
     while(1)
     {
-        //fprintf(send_buf, "send time:%s", itoa(send_buf, i));
         strcpy(send_buf, "send times:");
         itoa(i++, buf_tmp, 10);
         strcpy(&send_buf[strlen("send times:")], buf_tmp);  
