@@ -4,7 +4,8 @@
 #include "hal_usb_device.h"
 
 
-uint8_t    g_bitrate_info[8];
+static uint8_t                      g_bitrate_info[8];
+static ENUM_HAL_SRAM_VIDEO_CHANNEL  g_eBypassChannel;
 
 
 void bitrate_change_callback(void* p)
@@ -26,8 +27,10 @@ void bypass_encoder_init(ENUM_HAL_SRAM_VIDEO_CHANNEL e_bypassVideoCh)
     /* open channel to transfer */
     HAL_SRAM_EnableSkyBypassVideo(e_bypassVideoCh);
 
+    g_eBypassChannel = e_bypassVideoCh;
+
     /* register receive callback to receive video stream from USB host */
-    HAL_USB_RegisterCustomerRecvData(receive_video_stream);
+    HAL_USB_RegisterEncoderBypassVideo(receive_video_stream);
 
     /* register callback to receive bitrate info */
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_SUPPORT_BR_CHANGE, bitrate_change_callback);
@@ -37,9 +40,9 @@ void bypass_encoder_init(ENUM_HAL_SRAM_VIDEO_CHANNEL e_bypassVideoCh)
 void receive_video_stream(void *video_buff, uint32_t length, uint8_t port_id)
 {
     /* received video, now transfer video stream to ground */
-    HAL_SRAM_TransferBypassVideoStream(HAL_SRAM_VIDEO_CHANNEL_0, video_buff, length);
+    HAL_SRAM_TransferBypassVideoStream(g_eBypassChannel, video_buff, length);
 
-    dlog_info("len: %d, port: %d", length, port_id);
+    dlog_info("len: %d, port: %d, g_eBypassChannel: %d", length, port_id, g_eBypassChannel);
 }
 
 

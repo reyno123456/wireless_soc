@@ -4,7 +4,7 @@
 #include "debuglog.h"
 #include "serial.h"
 #include "interrupt.h"
-#include "upgrade.h"
+#include "test_upgrade.h"
 #include "cmsis_os.h"
 #include "testhal_pwm.h"
 #include "test_hal_uart.h"
@@ -43,7 +43,7 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
         }
         memcpy(path,cmdArray[1],strlen(cmdArray[1]));
         path[strlen(cmdArray[1])]='\0';
-        osThreadDef(UsbUpgrade, UPGRADE_Upgrade, osPriorityNormal, 0, 15 * 128);
+        osThreadDef(UsbUpgrade, UPGRADE_LocalUpgrade, osPriorityNormal, 0, 15 * 128);
         osThreadCreate(osThread(UsbUpgrade), path);
         vTaskDelay(100);       
     }

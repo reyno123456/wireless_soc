@@ -32,7 +32,6 @@ SRC_S   := start.s
 ifeq ($(APPLICATION_SCENARIO), sky)
 SRC_C   := main_sky.c \
            command.c \
-           upgrade.c \
            ../../Example/test_hal_camera.c \
            ../../Example/test_i2c_adv7611.c \
            ../../Example/test_hal_mipi.c \
@@ -40,14 +39,14 @@ SRC_C   := main_sky.c \
            ../../Example/test_bb.c \
            ../../Example/test_hal_nv.c \
            ../../Example/test_sd.c \
-           ../../Example/test_bb_led_ctrl.c
+           ../../Example/test_bb_led_ctrl.c \
+           ../../Example/test_upgrade.c
 SRC_CXX :=
 endif
 
 ifeq ($(APPLICATION_SCENARIO), ground)
 SRC_C   := main_ground.c \
            command.c \
-           upgrade.c \
            ../../Example/test_hal_camera.c \
            ../../Example/test_i2c_adv7611.c \
            ../../Example/test_hal_mipi.c \
@@ -55,7 +54,8 @@ SRC_C   := main_ground.c \
            ../../Example/test_bb.c \
            ../../Example/test_hal_nv.c \
            ../../Example/test_sd.c \
-           ../../Example/test_bb_led_ctrl.c
+           ../../Example/test_bb_led_ctrl.c \
+           ../../Example/test_upgrade.c
 SRC_CXX :=
 endif
 

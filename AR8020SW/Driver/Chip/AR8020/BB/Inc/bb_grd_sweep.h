@@ -20,7 +20,8 @@ typedef enum _ENUM_CH_SEL_OPT
 #define CMP_POWER_AVR_LEVEL             (3)
 
 
-void BB_SweepStart( ENUM_RF_BAND e_rfBand, ENUM_CH_BW e_bw);
+void BB_SweepStart(ENUM_RF_BAND e_bandsupport, ENUM_CH_BW e_bw);
+
 
 uint8_t BB_GetSweepedChResult( uint8_t flag );
 

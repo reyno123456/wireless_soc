@@ -1,6 +1,9 @@
 #ifndef MD5_H  
 #define MD5_H  
-#include "stdint.h"  
+#include "stdint.h" 
+
+#define MD5_SIZE        (16)
+
 typedef struct  
 {  
     uint32_t count[2];  

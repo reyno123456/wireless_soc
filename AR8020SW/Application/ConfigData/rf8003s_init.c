@@ -50,9 +50,9 @@ uint8_t RF8003s_regs1[128]  __attribute__ ((aligned (4))) =
 
 extern uint8_t RF8003s_RC_2_4G_frq[34][5];
 
-STRU_cfgNode RF8803s_Rc_2_4G_nodeInfo = 
+STRU_cfgNode RF8003s_Rc_2_4G_nodeInfo = 
 {
-    .nodeId       = RF8003S_RC_2_4G_10M_FRQ_ID,
+    .nodeId       = RF_RC_BAND0_10M_FRQ_ID,
     .nodeElemCnt  = 34,
     .nodeDataSize = sizeof(RF8003s_RC_2_4G_frq)
 };
@@ -100,7 +100,7 @@ uint8_t RF8003s_RC_2_4G_frq[34][5] __attribute__ ((aligned (4))) =    // 2.4G
 extern uint8_t RF8003s_It_2_4G_frq[8][5];
 
 STRU_cfgNode RF8803s_It_2_4G_nodeInfo = {
-    .nodeId       = RF8003S_IT_2_4G_10M_FRQ_ID,
+    .nodeId       = RF_IT_BAND0_10M_FRQ_ID,
     .nodeElemCnt  = 8,
     .nodeDataSize = sizeof(RF8003s_It_2_4G_frq)
 };
@@ -122,7 +122,7 @@ extern uint8_t RF8003s_2_4G_20M_sweep_frq[4][5];
 
 STRU_cfgNode RF8003s_2_4G_sweep_20M_nodeInfo = 
 {
-    .nodeId       = RF8003S_2_4G_20M_SWEEP_FRQ_ID,
+    .nodeId       = RF_SWEEP_BAND0_20M_FRQ_ID,
     .nodeElemCnt  = 4,
     .nodeDataSize = sizeof(RF8003s_2_4G_20M_sweep_frq)
 };
@@ -142,7 +142,7 @@ extern uint8_t RF8003s_Rc_5G_10M_frq[40][5];
 
 
 STRU_cfgNode RF8003s_rc_5G_10M_nodeInfo = {
-    .nodeId       = RF8003S_RC_5G_10M_FRQ_ID,
+    .nodeId       = RF_BAND1_10M_FRQ_ID,
     .nodeElemCnt  = 40,
     .nodeDataSize = sizeof(RF8003s_Rc_5G_10M_frq)
 };
@@ -197,7 +197,7 @@ uint8_t RF8003s_Rc_5G_10M_frq[40][5] __attribute__ ((aligned (4))) =       // 5G
 extern uint8_t RF8003s_It_5G_10M_frq[13][5];
 
 STRU_cfgNode RF8003s_It_5G_10M_nodeInfo = {
-    .nodeId       = RF8003S_IT_5G_10M_FRQ_ID,
+    .nodeId       = RF_IT_BAND1_10M_FRQ_ID,
     .nodeElemCnt  = 13,
     .nodeDataSize = sizeof(RF8003s_It_5G_10M_frq)
 };
@@ -226,7 +226,7 @@ extern uint8_t RF8003s_It_5G_20M_sweep_frq[7][5];
 
 STRU_cfgNode RF8003s_It_5G_20M_nodeInfo = 
 {
-    .nodeId       = RF8003S_5G_20M_SWEEP_FRQ_ID,
+    .nodeId       = RF_SWEEP_BAND1_20M_FRQ_ID,
     .nodeElemCnt  = 7,
     .nodeDataSize = sizeof(RF8003s_It_5G_20M_sweep_frq)
 };
@@ -239,5 +239,5 @@ uint8_t RF8003s_It_5G_20M_sweep_frq[7][5] __attribute__ ((aligned (4))) =
     {0x55, 0x55, 0x95, 0x60, 0x00},   //5795
     {0xAA, 0xAA, 0xEA, 0x60, 0x00},   //5815
     {0x00, 0x00, 0x40, 0x61, 0x00},   //5835
-    {0xAA, 0xAA, 0x6A, 0x61, 0x00},   //5845
+    {0x55, 0x55, 0x95, 0x61, 0x00},   //5855
 };

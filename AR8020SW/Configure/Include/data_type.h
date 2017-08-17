@@ -29,13 +29,6 @@
 
 #define POSITION_VAL(VAL)     (__CLZ(__RBIT(VAL)))
 
-#ifdef __cplusplus
-  #define   __I     volatile             /*!< Defines 'read only' permissions                 */
-#else
-  #define   __I     volatile const       /*!< Defines 'read only' permissions                 */
-#endif
-#define     __O     volatile             /*!< Defines 'write only' permissions                */
-
 #define __IO    volatile             /*!< Defines 'read / write' permissions */
 
 #define m7_malloc             pvPortMalloc

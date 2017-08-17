@@ -256,8 +256,6 @@
 #define     TX_CALI_ENABLE                  (0x61)
 
 #define     POWER_GATE                      (0x45)
-#define     AAGC_GAIN_FAR                   (0x12)
-#define     AAGC_GAIN_NEAR                  (0x3F)
 
 #define     SDRAM_BLOCK_SIZE                (0xcc)
 #define     USB_BYPASS_MODE                 (0x56)

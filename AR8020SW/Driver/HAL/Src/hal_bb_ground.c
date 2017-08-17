@@ -89,3 +89,29 @@ HAL_RET_T HAL_BB_SetCalcDistZeroPoint(uint32_t value)
         return HAL_BB_ERR_EVENT_NOTIFY;
     }
 }
+/** 
+ * @brief       HAL_BB_PrepareUpgrade
+ * @param       1: enter into upgrade    0: exit upgrade
+ * @retval      HAL_OK,                  means command is sent sucessfully. 
+ * @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
+ * @note        The function can only be called by cpu0,1         
+ */
+HAL_RET_T HAL_BB_UpgradeMode( uint8_t u8_flag )
+{
+    uint8_t u8_ret;
+    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
+
+    st_cmd.u8_configClass  = WIRELESS_MCS_CHANGE;
+    st_cmd.u8_configItem   = MCS_CHG_RC_RATE;
+    st_cmd.u32_configValue = u8_flag;
+
+    u8_ret = SYS_EVENT_Notify(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    if( u8_ret )
+    {
+        return HAL_OK;
+    }
+    else
+    {
+        return HAL_BB_ERR_EVENT_NOTIFY;
+    }
+}

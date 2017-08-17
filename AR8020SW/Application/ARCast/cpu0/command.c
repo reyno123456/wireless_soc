@@ -208,7 +208,7 @@ static void command_dma(char * u32_src, char *u32_dst, char *u32_byteNum)
 #endif
     /***********************/
     
-    #define MD5_SIZE 16
+    //#define MD5_SIZE 16
     uint8_t    md5_value[MD5_SIZE];
     int i = 0;
     MD5_CTX md5;

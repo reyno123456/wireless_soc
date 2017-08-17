@@ -9,6 +9,11 @@
 #include "bb_regs.h"
 #include "memory_config.h"
 
+#define MAX_RC_FRQ_SIZE             (40)
+#define MAX_IT_FRQ_SIZE             (20)
+
+#define MAX_600M_RC_FRQ_SIZE        (40)
+#define MAX_600M_IT_FRQ_SIZE        (20)
 
 #define MAX_2G_RC_FRQ_SIZE          (34)
 #define MAX_2G_IT_FRQ_SIZE          (8)
@@ -19,7 +24,6 @@
 
 #define RC_FRQ_MAX_MASK_NUM         (10)
 #define RC_FRQ_MASK_THRESHOLD       (5)
-#define RF_FRQ_MAX_NUM              ((MAX_2G_RC_FRQ_SIZE>=MAX_5G_RC_FRQ_SIZE)?MAX_2G_RC_FRQ_SIZE:MAX_5G_RC_FRQ_SIZE)
 
 #define RC_ID_SIZE                  (5)
 
@@ -74,7 +78,7 @@ typedef enum
 #define  SKY_AGC_STATUS         (2)
 #define  RF_BAND_SWITCH         (3)
 #define  RC_ID_SYNC             (4)
-
+#define  SKY_UPGRADE            (5)
 
 typedef struct _STRU_skyStatusMsg
 {
@@ -98,6 +102,13 @@ typedef struct _STRU_skyStatusMsg
             uint8_t u8_skyRcIdArray[RC_ID_SIZE];
             uint8_t u8_grdRcIdArray[RC_ID_SIZE];
         }rcId;
+
+        struct
+        {
+            uint8_t  u8_opt;
+            uint8_t  u8_md5[16];
+            uint16_t u16_data[3];
+        }upgradeDataPack;
 
         uint64_t u64_rcMask;
     } par;
@@ -229,7 +240,7 @@ typedef struct
 {
     uint64_t    u64_mask; // bit0 <-> freq0  ... bit63 <-> freq63
     uint64_t    u64_rcvGrdMask; // received mask from spi, send by grd
-    uint8_t     u8_unLock[RF_FRQ_MAX_NUM]; // continue unlock cnt 
+    uint8_t     u8_unLock[MAX_RC_FRQ_SIZE]; // continue unlock cnt 
     uint8_t     u8_maskOrderIndex;
     uint8_t     u8_maskOrder[RC_FRQ_MAX_MASK_NUM]; // u8_maskOrder[0] earlist masked frq's channel                                      
 } STRU_RC_FRQ_MASK;
@@ -276,7 +287,6 @@ void BB_set_RF_bandwitdh(ENUM_BB_MODE sky_ground, ENUM_CH_BW rf_bw);
 
 int BB_GetCmd(STRU_WIRELESS_CONFIG_CHANGE *pconfig);
 
-void BB_HandleEventsCallback(void *p);
 
 void BB_handle_misc_cmds(STRU_WIRELESS_CONFIG_CHANGE* pcmd);
 
@@ -293,8 +303,6 @@ int BB_WriteRegMask(ENUM_REG_PAGES page, uint8_t addr, uint8_t data, uint8_t mas
 int grd_GetDistAverage(int *pDist);
 
 void BB_grd_NotifyItFreqByValue(uint32_t u32_itFrq);
-
-int32_t cal_chk_sum(uint8_t *pu8_data, uint32_t u32_len, uint8_t *u8_check);
 
 void BB_saveRcid(uint8_t *u8_idArray);
 

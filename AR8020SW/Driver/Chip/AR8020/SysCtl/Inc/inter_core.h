@@ -18,12 +18,12 @@
 
 typedef struct
 {
-    INTER_CORE_CPU_ID    enSrcCpuID;
-    INTER_CORE_CPU_ID    enDstCpuID;
-    uint32_t             dataAccessed;
-    uint32_t             lock;
-    INTER_CORE_MSG_ID    enMsgID;
-    uint8_t              data[INTER_CORE_MSG_SHARE_MEMORY_DATA_LENGTH];
+    INTER_CORE_CPU_ID    enSrcCpuID                                     __attribute__ ((aligned (4)));
+    INTER_CORE_CPU_ID    enDstCpuID                                     __attribute__ ((aligned (4)));
+    uint32_t             dataAccessed                                   __attribute__ ((aligned (4)));
+    uint32_t             lock                                           __attribute__ ((aligned (4)));
+    INTER_CORE_MSG_ID    enMsgID                                        __attribute__ ((aligned (4)));
+    uint8_t              data[INTER_CORE_MSG_SHARE_MEMORY_DATA_LENGTH]  __attribute__ ((aligned (4)));
 }INTER_CORE_MSG_TYPE;
 
 void SRAM_SKY_BypassVideoConfig(uint32_t channel);

@@ -42,7 +42,7 @@ int main(void)
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_EVENT, BB_skyEventHandler);
     
     HAL_BB_InitSky(NULL);
-    dlog_set_output_level(LOG_LEVEL_ERROR);
+
     for( ;; )
     {
         SYS_EVENT_Process();

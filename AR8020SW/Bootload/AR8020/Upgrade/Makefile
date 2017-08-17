@@ -24,7 +24,7 @@ CPU_NUMBER := cpu0
 
 CFLAGS += $(CPU0_COMPILE_FLAGS)
 
-LD_LIBS := -lfatfs -lhal -lboard -lAR8020drv -lcommon -lsimplec
+LD_LIBS := -lfatfs -lutility -lhal -lboard -lAR8020drv -lcommon -lsimplec
 
 LDFLAGS += -Bstatic
 LDFLAGS += -L$(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER) $(LD_LIBS)

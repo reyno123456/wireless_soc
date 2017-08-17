@@ -18,6 +18,10 @@ History:
 
 #define  RF9363_RF_CLOCKRATE    (9)    //1MHz clockrate
 
+#define     AAGC_GAIN_FAR_9363                   (0x4C)
+#define     AAGC_GAIN_NEAR_9363                  (0x18)
+
+
 static uint8_t *RF9363_common_regs;
 static uint32_t u32_common_regscnt;
 
@@ -28,13 +32,15 @@ static uint8_t *RF9363_grd_regs;
 static uint32_t u32_grd_regscnt;
 
 static STRU_FRQ_CHANNEL *pstru_rcFreq;
-static uint32_t u32_rcFreq;
+static uint8_t u8_rcFreqCnt;
 
 static STRU_FRQ_CHANNEL *pstru_sweepFreq_10M;
-static uint32_t u32_sweepFreqCnt;
+static STRU_FRQ_CHANNEL *pstru_sweepFreq_20M;
+
+static uint8_t u8_sweepFreqCnt;
 
 static STRU_FRQ_CHANNEL *pstru_itFreq;
-static uint32_t u32_itFreq;
+static uint8_t u8_itFreqCnt;
 
 
 static int RF9363_SPI_WriteReg_internal(uint8_t u8_data[3])
@@ -239,21 +245,27 @@ static void RF9363_getCfgData(ENUM_BB_MODE en_mode, STRU_cfgBin *cfg)
         u32_grd_regscnt  = pcfg_node->nodeElemCnt;
     }
 
-    pcfg_node  = CFGBIN_GetNode(cfg, RF9363_RC_VHF_10M_FRQ_ID);
+    pcfg_node  = CFGBIN_GetNode(cfg, RF_RC_BAND0_10M_FRQ_ID);
     if (NULL!=pcfg_node)
     {
         pstru_rcFreq = (STRU_FRQ_CHANNEL *)(pcfg_node + 1);
-        u32_rcFreq = pcfg_node->nodeElemCnt;
+        u8_rcFreqCnt = pcfg_node->nodeElemCnt;
     }
 
-    pcfg_node  = CFGBIN_GetNode(cfg, RF9363_IT_VHF_10M_FRQ_ID);
+    pcfg_node  = CFGBIN_GetNode(cfg, RF_IT_BAND0_10M_FRQ_ID);
     if (NULL!=pcfg_node)
     {
         pstru_sweepFreq_10M  = (STRU_FRQ_CHANNEL *)(pcfg_node + 1);
-        u32_sweepFreqCnt = pcfg_node->nodeElemCnt;
+        u8_sweepFreqCnt = pcfg_node->nodeElemCnt;
 
         pstru_itFreq    = pstru_sweepFreq_10M;
-        u32_itFreq       = pcfg_node->nodeElemCnt;
+        u8_itFreqCnt       = pcfg_node->nodeElemCnt;
+    }
+
+    pcfg_node  = CFGBIN_GetNode(cfg, RF_SWEEP_BAND0_20M_FRQ_ID);
+    if (NULL!=pcfg_node)
+    {
+        pstru_sweepFreq_20M  = (STRU_FRQ_CHANNEL *)(pcfg_node + 1);
     }
 }
 
@@ -412,12 +424,51 @@ uint8_t BB_set_Rcfrq(ENUM_RF_BAND band, uint8_t ch)
 
 uint8_t BB_set_SweepFrq(ENUM_RF_BAND band, ENUM_CH_BW e_bw, uint8_t ch)
 {
-    STRU_FRQ_CHANNEL *ch_ptr = pstru_sweepFreq_10M;
+    STRU_FRQ_CHANNEL *ch_ptr = ((BW_10M == e_bw) ? pstru_sweepFreq_10M : pstru_sweepFreq_20M);
 
     BB_WriteReg(PAGE2, 0x15, ch_ptr[ch].frq1);
     BB_WriteReg(PAGE2, 0x16, ch_ptr[ch].frq2);
     BB_WriteReg(PAGE2, 0x17, ch_ptr[ch].frq3);
     BB_WriteReg(PAGE2, 0x18, ch_ptr[ch].frq4);
     BB_WriteReg(PAGE2, 0x19, ch_ptr[ch].frq5);
+    
     return 0;
 }
+
+
+
+uint8_t BB_GetRcFrqNum(ENUM_RF_BAND e_rfBand)
+{
+    return u8_rcFreqCnt;
+}
+
+uint8_t BB_GetItFrqNum(ENUM_RF_BAND e_rfBand)
+{
+    return u8_itFreqCnt;
+}
+
+uint8_t BB_SetAgcGain(uint8_t gain)
+{
+    if(AAGC_GAIN_FAR == gain)
+    {
+        BB_WriteReg(PAGE0, AGC_2, AAGC_GAIN_FAR_9363);
+        BB_WriteReg(PAGE0, AGC_3, AAGC_GAIN_FAR_9363);
+    }
+    else if(AAGC_GAIN_NEAR == gain)
+    {
+        BB_WriteReg(PAGE0, AGC_2, AAGC_GAIN_NEAR_9363);
+        BB_WriteReg(PAGE0, AGC_3, AAGC_GAIN_NEAR_9363);
+    }
+    else
+    {
+        ;
+    }
+
+    return 0;
+}
+
+int32_t BB_SweepEnergyCompensation(int32_t data)
+{
+    return ( data += (-130) );
+}
+

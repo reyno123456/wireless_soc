@@ -15,21 +15,31 @@ History:
 #include "bb_ctrl_internal.h"
 #include "cfg_parser.h"
 
+#define     AAGC_GAIN_FAR_8003S                   (0x12)
+#define     AAGC_GAIN_NEAR_8003S                  (0x3F)
+
 
 static uint8_t cali_reg[2][10];
 
-static uint8_t *rf0_regs;
-static uint8_t *rf1_regs;
+static uint8_t *pu8_rf0_regs;
+static uint8_t *pu8_rf1_regs;
 
 static STRU_FRQ_CHANNEL *pstru_rcFreq_2g;
 static STRU_FRQ_CHANNEL *pstru_sweepFreq_2g_10m;
 static STRU_FRQ_CHANNEL *pstru_sweepFreq_2g_20m;
 static STRU_FRQ_CHANNEL *pstru_itFreq_2g;
 
+static uint8_t u8_rcFreqCnt_2g;
+static uint8_t u8_itFreqCnt_2g;
+
+
 static STRU_FRQ_CHANNEL *pstru_rcFreq_5g;
 static STRU_FRQ_CHANNEL *pstru_sweepFreq_5g_10m;
 static STRU_FRQ_CHANNEL *pstru_sweepFreq_5g_20m;
 static STRU_FRQ_CHANNEL *pstru_itFreq_5g;
+
+static uint8_t u8_rcFreqCnt_5g;
+static uint8_t u8_itFreqCnt_5g;
 
 static STRU_RF_REG *pstru_rf0_regBeforeCali;
 static STRU_RF_REG *pstru_rf1_regBeforeCali;
@@ -39,7 +49,7 @@ static STRU_RF_REG *pstru_rf1_regAfterCali;
 
 static STRU_BOARD_RF_PARA *pstru_rf_boardcfg;
 
-void RF8003_getCfgData(ENUM_BB_MODE en_mode, STRU_cfgBin *cfg)
+void RF8003s_getCfgData(ENUM_BB_MODE en_mode, STRU_cfgBin *cfg)
 {
     STRU_cfgNode  *p_bbrf_boardNode;
     STRU_cfgNode  *p_bbrf_dataNode;
@@ -48,13 +58,13 @@ void RF8003_getCfgData(ENUM_BB_MODE en_mode, STRU_cfgBin *cfg)
     p_bbrf_boardNode = CFGBIN_GetNode(cfg, RF_INIT_REG_NODE_ID_0);
     if (NULL != p_bbrf_boardNode)
     {
-        rf0_regs = (uint8_t *)(p_bbrf_boardNode + 1);
+        pu8_rf0_regs = (uint8_t *)(p_bbrf_boardNode + 1);
     }
 
     p_bbrf_boardNode = CFGBIN_GetNode(cfg, RF_INIT_REG_NODE_ID_1);
     if ( NULL != p_bbrf_boardNode)
     {
-        rf1_regs = (uint8_t *)(p_bbrf_boardNode + 1);
+        pu8_rf1_regs = (uint8_t *)(p_bbrf_boardNode + 1);
     }
 
     p_bbrf_boardNode  = CFGBIN_GetNode(cfg, RF_BOARDCFG_PARA_ID);
@@ -90,40 +100,44 @@ void RF8003_getCfgData(ENUM_BB_MODE en_mode, STRU_cfgBin *cfg)
     }
 
     //2g
-    rfcfg_node = CFGBIN_GetNode(cfg, RF8003S_RC_2_4G_10M_FRQ_ID);
+    rfcfg_node = CFGBIN_GetNode(cfg, RF_RC_BAND0_10M_FRQ_ID);
     if (NULL != rfcfg_node)
     {
         pstru_rcFreq_2g = (STRU_FRQ_CHANNEL *)(rfcfg_node + 1);
+        u8_rcFreqCnt_2g = rfcfg_node->nodeElemCnt;
     }
 
-    rfcfg_node= CFGBIN_GetNode(cfg, RF8003S_IT_2_4G_10M_FRQ_ID);
+    rfcfg_node= CFGBIN_GetNode(cfg, RF_IT_BAND0_10M_FRQ_ID);
     if (NULL != rfcfg_node)
     {
         pstru_sweepFreq_2g_10m = (STRU_FRQ_CHANNEL *)(rfcfg_node + 1);
         pstru_itFreq_2g = pstru_sweepFreq_2g_10m;
+        u8_itFreqCnt_2g = rfcfg_node->nodeElemCnt;
     }
 
-    rfcfg_node= CFGBIN_GetNode(cfg, RF8003S_2_4G_20M_SWEEP_FRQ_ID);
+    rfcfg_node= CFGBIN_GetNode(cfg, RF_SWEEP_BAND0_20M_FRQ_ID);
     if (NULL != rfcfg_node)
     {
         pstru_sweepFreq_2g_20m = (STRU_FRQ_CHANNEL *)(rfcfg_node +1);
     }
 
     //5g
-    rfcfg_node= CFGBIN_GetNode(cfg, RF8003S_RC_5G_10M_FRQ_ID);
+    rfcfg_node= CFGBIN_GetNode(cfg, RF_BAND1_10M_FRQ_ID);
     if (NULL != rfcfg_node)
     {
         pstru_rcFreq_5g = (STRU_FRQ_CHANNEL *)(rfcfg_node + 1);
+        u8_rcFreqCnt_5g = rfcfg_node->nodeElemCnt;
     }
 
-    rfcfg_node= CFGBIN_GetNode(cfg, RF8003S_IT_5G_10M_FRQ_ID);
+    rfcfg_node= CFGBIN_GetNode(cfg, RF_IT_BAND1_10M_FRQ_ID);
     if (NULL != rfcfg_node)
     {
         pstru_sweepFreq_5g_10m = (STRU_FRQ_CHANNEL *)(rfcfg_node + 1);
         pstru_itFreq_5g = pstru_sweepFreq_5g_10m;
+        u8_itFreqCnt_5g = rfcfg_node->nodeElemCnt;
     }
     
-    rfcfg_node= CFGBIN_GetNode(cfg, RF8003S_5G_20M_SWEEP_FRQ_ID);
+    rfcfg_node= CFGBIN_GetNode(cfg, RF_SWEEP_BAND1_20M_FRQ_ID);
     if (NULL != rfcfg_node)
     {
         pstru_sweepFreq_5g_20m = (STRU_FRQ_CHANNEL *)(rfcfg_node +1);
@@ -214,7 +228,7 @@ void RF_init(ENUM_BB_MODE en_mode)
 
     STRU_RF_REG * pstru_rfReg = NULL;
 
-    RF8003_getCfgData(en_mode, (STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR);
+    RF8003s_getCfgData(en_mode, (STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR);
 
     //RF 0
     {
@@ -235,13 +249,13 @@ void RF_init(ENUM_BB_MODE en_mode)
 
             for (cnt = 0; (pstru_rfReg != NULL) && (cnt < num); cnt++)
             {
-                rf0_regs[pstru_rfReg[cnt].addr_l] = pstru_rfReg[cnt].value;
+                pu8_rf0_regs[pstru_rfReg[cnt].addr_l] = pstru_rfReg[cnt].value;
             } 
         }
         
         for(idx = 0; idx < 128; idx++)
         {
-            RF8003s_SPI_WriteReg_internal(idx, rf0_regs[idx]);
+            RF8003s_SPI_WriteReg_internal(idx, pu8_rf0_regs[idx]);
         }
 
         {
@@ -263,12 +277,12 @@ void RF_init(ENUM_BB_MODE en_mode)
         
         for (cnt = 0; (pstru_rfReg != NULL) && (cnt < num); cnt++)
         {
-            rf1_regs[pstru_rfReg[cnt].addr_l] = pstru_rfReg[cnt].value;
+            pu8_rf1_regs[pstru_rfReg[cnt].addr_l] = pstru_rfReg[cnt].value;
         }
 
         for(idx = 0; idx < 128; idx++)
         {
-            RF8003s_SPI_WriteReg_internal( idx, rf1_regs[idx]);
+            RF8003s_SPI_WriteReg_internal( idx, pu8_rf1_regs[idx]);
         }
 
         {
@@ -284,7 +298,7 @@ void RF_init(ENUM_BB_MODE en_mode)
 
 static void RF8003s_afterCali(ENUM_BB_MODE en_mode, STRU_BOARD_RF_PARA *pstru_rf_boardcfg)
 {
-    STRU_RF_REG * rf1_regs, * rf2_regs;
+    STRU_RF_REG * pu8_rf1_regs, * rf2_regs;
     uint8_t cnt;
     uint8_t rf_regcnt1, rf_regcnt2;
 
@@ -298,7 +312,7 @@ static void RF8003s_afterCali(ENUM_BB_MODE en_mode, STRU_BOARD_RF_PARA *pstru_rf
         rf_regcnt1 = pstru_rf_boardcfg->u8_rf0SkyRegsCntAfterCali;
         rf_regcnt2 = 0;
 
-        rf1_regs   = pstru_rf0_regAfterCali;
+        pu8_rf1_regs   = pstru_rf0_regAfterCali;
         rf2_regs   = NULL;
     }
     else
@@ -306,17 +320,17 @@ static void RF8003s_afterCali(ENUM_BB_MODE en_mode, STRU_BOARD_RF_PARA *pstru_rf
         rf_regcnt1 = pstru_rf_boardcfg->u8_rf0GrdRegsCntAfterCali;
         rf_regcnt2 = pstru_rf_boardcfg->u8_rf0GrdRegsCntAfterCali;
 
-        rf1_regs   = (STRU_RF_REG * )pstru_rf0_regAfterCali;
+        pu8_rf1_regs   = (STRU_RF_REG * )pstru_rf0_regAfterCali;
         rf2_regs   = (STRU_RF_REG * )pstru_rf1_regAfterCali;
     }
 
-    if ( rf_regcnt1 > 0 && rf1_regs != NULL)
+    if ( rf_regcnt1 > 0 && pu8_rf1_regs != NULL)
     {
         BB_SPI_curPageWriteByte(0x01,0x01);             //bypass: SPI change into 1st 8003s
         
         for(cnt = 0; cnt < rf_regcnt1; cnt++)
         {
-            RF8003s_SPI_WriteReg_internal( rf1_regs[cnt].addr_l, rf1_regs[cnt].value);
+            RF8003s_SPI_WriteReg_internal( pu8_rf1_regs[cnt].addr_l, pu8_rf1_regs[cnt].value);
         }
 
         {
@@ -630,6 +644,7 @@ uint8_t BB_set_ItFrqByCh(ENUM_RF_BAND band, uint8_t ch)
     BB_WriteReg(PAGE2, AGC3_3, it_ch_ptr[ch].frq4);
 }
 
+
 uint8_t BB_write_RcRegs(uint32_t u32_rc)
 {
 
@@ -642,8 +657,6 @@ uint8_t BB_write_RcRegs(uint32_t u32_rc)
     BB_WriteReg(PAGE2, AGC3_b, context.stru_rcRegs.frq2);
     BB_WriteReg(PAGE2, AGC3_c, context.stru_rcRegs.frq3);
     BB_WriteReg(PAGE2, AGC3_d, context.stru_rcRegs.frq4);
-
-    
 }
 
 
@@ -661,7 +674,6 @@ uint8_t BB_set_Rcfrq(ENUM_RF_BAND band, uint8_t ch)
     BB_WriteReg(PAGE2, AGC3_b, pu8_rcRegs[ch].frq2);
     BB_WriteReg(PAGE2, AGC3_c, pu8_rcRegs[ch].frq3);
     BB_WriteReg(PAGE2, AGC3_d, pu8_rcRegs[ch].frq4); 
-
 }
 
 
@@ -694,5 +706,64 @@ uint8_t BB_set_SweepFrq(ENUM_RF_BAND band, ENUM_CH_BW e_bw, uint8_t ch)
     BB_WriteReg(PAGE2, SWEEP_FREQ_1, ch_ptr[ch].frq2);
     BB_WriteReg(PAGE2, SWEEP_FREQ_2, ch_ptr[ch].frq3);
     BB_WriteReg(PAGE2, SWEEP_FREQ_3, ch_ptr[ch].frq4);
+}
+
+
+uint8_t BB_GetRcFrqNum(ENUM_RF_BAND e_rfBand)
+{
+    if (e_rfBand == RF_2G)
+    {
+        return u8_rcFreqCnt_2g;
+    }
+    else if (e_rfBand == RF_5G)
+    {
+        return u8_rcFreqCnt_5g;
+    }
+    return 0;
+}
+
+uint8_t BB_GetItFrqNum(ENUM_RF_BAND e_rfBand)
+{
+    if (e_rfBand == RF_2G)
+    {
+        return u8_itFreqCnt_2g;
+    }
+    else if (e_rfBand == RF_5G)
+    {
+        return u8_itFreqCnt_5g;
+    }
+    return 0;
+}
+
+uint8_t BB_SetAgcGain(uint8_t gain)
+{
+    if(AAGC_GAIN_FAR == gain)
+    {
+        BB_WriteReg(PAGE0, AGC_2, AAGC_GAIN_FAR_8003S);
+        BB_WriteReg(PAGE0, AGC_3, AAGC_GAIN_FAR_8003S);
+
+        BB_WriteReg(PAGE0, AGC_5G_GAIN1, AAGC_GAIN_FAR_8003S); //add 5G agc setting
+        BB_WriteReg(PAGE0, AGC_5G_GAIN2, AAGC_GAIN_FAR_8003S);
+    }
+    else if(AAGC_GAIN_NEAR == gain)
+    {
+        BB_WriteReg(PAGE0, AGC_2, AAGC_GAIN_NEAR_8003S);
+        BB_WriteReg(PAGE0, AGC_3, AAGC_GAIN_NEAR_8003S);
+
+        BB_WriteReg(PAGE0, AGC_5G_GAIN1, AAGC_GAIN_NEAR_8003S); //add 5G agc setting
+        BB_WriteReg(PAGE0, AGC_5G_GAIN2, AAGC_GAIN_NEAR_8003S);
+    }
+    else
+    {
+        ;
+    }
+
+    return 0;
+}
+
+
+int32_t BB_SweepEnergyCompensation(int32_t data)
+{
+    return ( data += ( (data > 30) ? (-123) : (-125) ) );
 }
 

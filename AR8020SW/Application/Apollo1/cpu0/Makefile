@@ -32,11 +32,11 @@ SRC_S   := start.s
 ifeq ($(APPLICATION_SCENARIO), sky)
 SRC_C   := main_sky.c \
            command.c \
-           upgrade.c \
            com_task.c \
            uvc_task.c \
            ../../Example/test_usbh.c \
            ../../Example/test_hal_uart.c \
+           ../../Example/test_upgrade.c \
            ../../Example/testhal_pwm.c \
            ../../Example/testhal_gpio.c \
            ../../Example/test_hal_nv.c \
@@ -48,13 +48,13 @@ endif
 ifeq ($(APPLICATION_SCENARIO), ground)
 SRC_C   := main_ground.c \
            command.c \
-           upgrade.c \
            com_task.c \
            uvc_task.c \
 	   ../../Example/test_usbh.c \
            ../../Example/test_hal_uart.c \
            ../../Example/testhal_pwm.c \
            ../../Example/testhal_gpio.c \
+           ../../Example/test_upgrade.c \
            ../../Example/test_hal_nv.c \
            ../../Example/test_bb_led_ctrl.c
 SRC_CXX :=

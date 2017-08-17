@@ -171,10 +171,10 @@ void HAL_SRAM_TransferBypassVideoStream(ENUM_HAL_SRAM_VIDEO_CHANNEL e_channel, v
         {
             bypass_address[e_channel] = bypass_address_raw[e_channel];
         }
-        else
-        {
-            dlog_error("invalid channel number");
-        }
+    }
+    else
+    {
+        dlog_error("invalid channel number");
     }
 
     return;

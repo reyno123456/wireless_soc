@@ -7,6 +7,7 @@
 #include "memory_config.h"
 #include "lock.h"
 #include "bb_ctrl_internal.h"
+#include "cpu_info.h"
 
 
 static uint8_t header[] = {0xFF, 0x5A, 0xA5};
@@ -420,6 +421,7 @@ void BB_UARTComInit(SYS_Event_Handler session0RcvDataHandler)
     g_BBUARTComSessionArray[0].rx_buf->header.in_use = 1;
     g_BBUARTComSessionArray[0].rx_buf->header.rx_buf_wr_pos = 0;
     g_BBUARTComSessionArray[0].rx_buf->header.rx_buf_rd_pos = 0;
+    g_BBUARTComSessionArray[0].rx_buf->header.cpu_id = ENUM_CPU2_ID;
     g_BBUARTComSessionArray[0].data_max_size = sizeof(g_BBUARTComSession0RxBuffer) - sizeof(STRU_BBUartComSessionRxBufferHeader);
     if ( session0RcvDataHandler )
     {
@@ -431,24 +433,28 @@ void BB_UARTComInit(SYS_Event_Handler session0RcvDataHandler)
     g_BBUARTComSessionArray[1].rx_buf->header.in_use = 0;
     g_BBUARTComSessionArray[1].rx_buf->header.rx_buf_wr_pos = 0;
     g_BBUARTComSessionArray[1].rx_buf->header.rx_buf_rd_pos = 0;
+    g_BBUARTComSessionArray[1].rx_buf->header.cpu_id = ENUM_CPU0_ID;
     g_BBUARTComSessionArray[1].data_max_size = SRAM_BB_UART_COM_SESSION_1_SHARE_MEMORY_SIZE - sizeof(STRU_BBUartComSessionRxBufferHeader);
 
     g_BBUARTComSessionArray[2].rx_buf = (STRU_BBUartComSessionRxBuffer*)SRAM_BB_UART_COM_SESSION_2_SHARE_MEMORY_ST_ADDR;
     g_BBUARTComSessionArray[2].rx_buf->header.in_use = 0;
     g_BBUARTComSessionArray[2].rx_buf->header.rx_buf_wr_pos = 0;
     g_BBUARTComSessionArray[2].rx_buf->header.rx_buf_rd_pos = 0;
+    g_BBUARTComSessionArray[2].rx_buf->header.cpu_id = ENUM_CPU0_ID;
     g_BBUARTComSessionArray[2].data_max_size = SRAM_BB_UART_COM_SESSION_2_SHARE_MEMORY_SIZE - sizeof(STRU_BBUartComSessionRxBufferHeader);
 
     g_BBUARTComSessionArray[3].rx_buf = (STRU_BBUartComSessionRxBuffer*)SRAM_BB_UART_COM_SESSION_3_SHARE_MEMORY_ST_ADDR;
     g_BBUARTComSessionArray[3].rx_buf->header.in_use = 0;
     g_BBUARTComSessionArray[3].rx_buf->header.rx_buf_wr_pos = 0;
     g_BBUARTComSessionArray[3].rx_buf->header.rx_buf_rd_pos = 0;
+    g_BBUARTComSessionArray[3].rx_buf->header.cpu_id = ENUM_CPU0_ID;
     g_BBUARTComSessionArray[3].data_max_size = SRAM_BB_UART_COM_SESSION_3_SHARE_MEMORY_SIZE - sizeof(STRU_BBUartComSessionRxBufferHeader);
 
     g_BBUARTComSessionArray[4].rx_buf = (STRU_BBUartComSessionRxBuffer*)SRAM_BB_UART_COM_SESSION_4_SHARE_MEMORY_ST_ADDR;
     g_BBUARTComSessionArray[4].rx_buf->header.in_use = 0;
     g_BBUARTComSessionArray[4].rx_buf->header.rx_buf_wr_pos = 0;
     g_BBUARTComSessionArray[4].rx_buf->header.rx_buf_rd_pos = 0;
+    g_BBUARTComSessionArray[4].rx_buf->header.cpu_id = ENUM_CPU0_ID;
     g_BBUARTComSessionArray[4].data_max_size = SRAM_BB_UART_COM_SESSION_4_SHARE_MEMORY_SIZE - sizeof(STRU_BBUartComSessionRxBufferHeader);
 
     g_pstBBUartComTxQueue[BB_UART_SESSION_PRIORITY_HIGH]
@@ -509,6 +515,7 @@ uint8_t BB_UARTComRegisterSession(ENUM_BBUARTCOMSESSIONID session_id,
             g_BBUARTComSessionArray[session_id].rx_buf->header.in_use = 1;
             g_BBUARTComSessionArray[session_id].rx_buf->header.rx_buf_wr_pos = 0;
             g_BBUARTComSessionArray[session_id].rx_buf->header.rx_buf_rd_pos = 0;
+            g_BBUARTComSessionArray[session_id].rx_buf->header.cpu_id = CPUINFO_GetLocalCpuId();
 
             g_BBUARTComSessionArray[session_id].e_sessionDataType = session_dataType;
             g_BBUARTComSessionArray[session_id].e_sessionPriority = session_priority;
@@ -551,6 +558,16 @@ uint8_t BB_UARTComSendMsg(ENUM_BBUARTCOMSESSIONID session_id,
 
     if (data_buf == NULL)
     {
+        return 0;
+    }
+
+    if (CPUINFO_GetLocalCpuId() != g_BBUARTComSessionArray[session_id].rx_buf->header.cpu_id)
+    {
+        dlog_error("cpu id not match: session id: %d, local cpu: %d, session cpu: %d",
+                    session_id,
+                    CPUINFO_GetLocalCpuId(),
+                    g_BBUARTComSessionArray[session_id].rx_buf->header.cpu_id);
+
         return 0;
     }
 
@@ -765,17 +782,17 @@ uint16_t BB_UARTComGetMsgFromTXQueue(ENUM_BB_UART_SESSION_PRIORITY session_prior
         total_length       = ((user_data_length + BBCOM_UART_SESSION_DATA_HEADER_SIZE) + 1);
 
         /* get free length of tx fifo */
-        if (g_BBUartTxFIFO.tx_fifo_rd_pos < g_BBUartTxFIFO.tx_fifo_wr_pos)
+        if (g_BBUartTxFIFO.tx_fifo_rd_pos <= g_BBUartTxFIFO.tx_fifo_wr_pos)
         {
-            tx_fifo_free_length = g_BBUartTxFIFO.tx_fifo_wr_pos - g_BBUartTxFIFO.tx_fifo_rd_pos;
+            tx_fifo_free_length = (g_BBUartTxFIFO.tx_fifo_rd_pos + BBCOM_UART_TX_FIFO_SIZE) - g_BBUartTxFIFO.tx_fifo_wr_pos;
         }
         else
         {
-            tx_fifo_free_length = (g_BBUartTxFIFO.tx_fifo_wr_pos + BBCOM_UART_TX_FIFO_SIZE) - g_BBUartTxFIFO.tx_fifo_rd_pos;
+            tx_fifo_free_length = g_BBUartTxFIFO.tx_fifo_rd_pos - g_BBUartTxFIFO.tx_fifo_wr_pos;
         }
 
         /* get tx fifo free length */
-        if (tx_fifo_free_length >= total_length)
+        if (tx_fifo_free_length > total_length)
         {
             /* insert msg into tx fifo */
             for (i = 0; i < total_length; i++)

@@ -328,9 +328,16 @@ HAL_RET_T HAL_BB_GetRcId(uint8_t *pu8_rcId, uint8_t bufsize);
  * @retval      HAL_BUSY:   means baseband info is updating.
  * @note        None
  */
-HAL_RET_T HAL_BB_GetInfo(STRU_WIRELESS_INFO_DISPLAY *pst_bbInfoAddr);
+HAL_RET_T HAL_BB_GetInfo(STRU_WIRELESS_INFO_DISPLAY **pst_bbInfoAddr);
 
 
+/** 
+ ** @brief       HAL_BB_UpgradeMode
+ ** @param       1: enter into upgrade    0: exit upgrade
+ ** @retval      HAL_OK,                  means command is sent sucessfully. 
+ ** @retval      HAL_BB_ERR_EVENT_NOTIFY  means error happens in sending the command to cpu2
+ **/
+HAL_RET_T HAL_BB_UpgradeMode(uint8_t u8_flag);
 
 #ifdef __cplusplus
 }

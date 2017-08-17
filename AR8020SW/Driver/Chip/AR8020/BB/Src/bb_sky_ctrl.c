@@ -166,7 +166,7 @@ static uint8_t sky_checkRcLock(uint8_t u8_lockStatus)
 
 static void sky_checkRcCrcUnlockTimeOut(uint8_t u8_lockStatus)
 {
-	uint8_t max_ch_size = ((context.e_curBand == RF_2G) || (context.e_curBand == RF_600M)) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
+	uint8_t max_ch_size = BB_GetRcFrqNum(context.e_curBand);
     static uint16_t rc_unlock_cnt = 0;
 
     if (SKY_CRC_OK(u8_lockStatus))
@@ -214,12 +214,8 @@ static void sky_agcGainToggle(void)
     }
     else*/
     {
-        BB_WriteReg(PAGE0, AGC_2, AAGC_GAIN_FAR);
-        BB_WriteReg(PAGE0, AGC_3, AAGC_GAIN_FAR);
-
-        BB_WriteReg(PAGE0, AGC_5G_GAIN1, AAGC_GAIN_FAR); //add 5G agc setting
-        BB_WriteReg(PAGE0, AGC_5G_GAIN2, AAGC_GAIN_FAR);
-
+        BB_SetAgcGain(AAGC_GAIN_FAR);
+        
         BB_WriteReg(PAGE1, 0x03, 0x28);
         BB_WriteReg(PAGE0, 0xBC, 0xC0);
 
@@ -604,7 +600,7 @@ static void Sky_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
 
 static void sky_rc_hopfreq(void)
 {
-	uint8_t max_ch_size = ((context.e_curBand == RF_2G) || (context.e_curBand == RF_600M)) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
+	uint8_t max_ch_size = BB_GetRcFrqNum(context.e_curBand);
 
     context.sky_rc_channel++;
     if(context.sky_rc_channel >= max_ch_size)
@@ -1033,7 +1029,7 @@ static void sky_handle_rc_rcv_grd_mask_code_cmd(void)
 static void sky_handle_rc_channel_sync_cmd(void)
 {
     uint8_t data0 = BB_ReadReg(PAGE2, GRD_RC_CHANNEL);
-    uint8_t max_ch_size = ((context.e_curBand == RF_2G) || (context.e_curBand == RF_600M)) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
+    uint8_t max_ch_size = BB_GetRcFrqNum(context.e_curBand);
     
     if (data0 != context.sky_rc_channel)
     {
@@ -1523,7 +1519,7 @@ static void sky_rcFrqStatusStatistics(void)
     uint8_t i = 0;
     uint64_t u64_mask;
     uint64_t u64_preMask = stru_skystatus.s_st_rcFrqMask.u64_mask;
-    int8_t max_ch_size = ((context.e_curBand == RF_2G) || (context.e_curBand == RF_600M)) ? (MAX_2G_RC_FRQ_SIZE):(MAX_5G_RC_FRQ_SIZE);
+    int8_t max_ch_size = BB_GetRcFrqNum(context.e_curBand);
     
     //if(context.dev_state == ID_MATCH_LOCK)
     {
@@ -1577,7 +1573,7 @@ static void sky_rcFrqStatusStatistics(void)
             }
 
             // mask one, then all start again.
-            memset(&(stru_skystatus.s_st_rcFrqMask.u8_unLock[0]), 0x00, RF_FRQ_MAX_NUM);
+            memset(&(stru_skystatus.s_st_rcFrqMask.u8_unLock[0]), 0x00, MAX_RC_FRQ_SIZE);
             stru_skystatus.s_st_rcFrqMask.u8_unLock[u8_rcCh] = RC_FRQ_MASK_THRESHOLD;
         }
 

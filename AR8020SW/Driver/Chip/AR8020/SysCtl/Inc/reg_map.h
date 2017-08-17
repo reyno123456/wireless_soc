@@ -1,28 +1,13 @@
 #ifndef REG_MAP_H
 #define REG_MAP_H
 
-#include "data_type.h"
-
-//#define   __I     volatile const       /*!< Defines 'read only' permissions                 */
-//#define   __O     volatile             /*!< Defines 'write only' permissions                */
-//#define   __IO    volatile             /*!< Defines 'read / write' permissions              */
+#define   __I     volatile const       /*!< Defines 'read only' permissions                 */
+#define   __O     volatile             /*!< Defines 'write only' permissions                */
+#define   __IO    volatile             /*!< Defines 'read / write' permissions              */
 
 /*==========================================================*/
 /*     ARM_M7 Interrupt Vector Enable  Declaration          */
 /*==========================================================*/
-#define NVIC_ISER_BASE 0xE000E100
-typedef struct
-{
-   unsigned int ISER0; // 0x00
-   unsigned int ISER1; // 0x04
-   unsigned int ISER2; // 0x08
-   unsigned int ISER3; // 0x0c
-   unsigned int ISER4; // 0x10
-   unsigned int ISER5; // 0x14
-   unsigned int ISER6; // 0x18
-   unsigned int ISER7; // 0x1c
-} NVIC_ISER_type;
-#define NVIC_ISER ((NVIC_ISER_type *) NVIC_ISER_BASE)
 
 #define NVIC_CTRL_BASE 0xE000E100
 typedef struct

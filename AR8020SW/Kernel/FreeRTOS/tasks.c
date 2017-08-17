@@ -3918,7 +3918,8 @@ TCB_t *pxTCB;
 	size_t x;
 
 		/* Start by copying the entire string. */
-		strcpy( pcBuffer, pcTaskName );
+		//strcpy( pcBuffer, pcTaskName );
+		memcpy(pcBuffer, pcTaskName, strlen(pcTaskName));
 
 		/* Pad the end of the string with spaces to ensure columns line up when
 		printed out. */

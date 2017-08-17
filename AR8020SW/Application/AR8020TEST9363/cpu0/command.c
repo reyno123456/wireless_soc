@@ -8,7 +8,7 @@
 #include "test_i2c_adv7611.h"
 #include "test_hal_camera.h"
 #include "hal_dma.h"
-#include "upgrade.h"
+#include "test_upgrade.h"
 #include "memory_config.h"
 #include "hal_ret_type.h"
 #include "test_hal_mipi.h"
@@ -47,7 +47,7 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
         }
         memcpy(path,cmdArray[1],strlen(cmdArray[1]));
         path[strlen(cmdArray[1])]='\0';
-        osThreadDef(UsbUpgrade, UPGRADE_Upgrade, osPriorityNormal, 0, 15 * 128);
+        osThreadDef(UsbUpgrade, UPGRADE_LocalUpgrade, osPriorityNormal, 0, 15 * 128);
         osThreadCreate(osThread(UsbUpgrade), path);
         vTaskDelay(100);       
     }

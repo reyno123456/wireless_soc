@@ -21,42 +21,36 @@
 #define RF_GRD_INIT_REG_ID_0                            (6)
 
 
-#define RF8003S_RC_2_4G_10M_FRQ_ID                      (7)
-#define RF8003S_IT_2_4G_10M_FRQ_ID                      (8)
+#define RF_RC_BAND0_10M_FRQ_ID                          (7)
+#define RF_IT_BAND0_10M_FRQ_ID                          (8)
 
 
-#define RF8003S_RC_2_4G_20M_FRQ_ID                      (9)
-#define RF8003S_IT_2_4G_20M_FRQ_ID                      (10)
+#define RF_RC_BAND0_20M_FRQ_ID                          (9)
+#define RF_IT_BAND0_20M_FRQ_ID                          (10)
 
 
-#define RF8003S_2_4G_20M_SWEEP_FRQ_ID                   (11)
+#define RF_SWEEP_BAND0_20M_FRQ_ID                       (11)
 
 
-#define RF8003S_RC_5G_10M_FRQ_ID                        (12)
-#define RF8003S_IT_5G_10M_FRQ_ID                        (13)
+#define RF_BAND1_10M_FRQ_ID                             (12)
+#define RF_IT_BAND1_10M_FRQ_ID                          (13)
 
 
-#define RF8003S_RC_5G_20M_FRQ_ID                        (14)
-#define RF8003S_IT_5G_20M_FRQ_ID                        (15)
+#define RF_RC_BAND1_20M_FRQ_ID                          (14)
+#define RF_IT_BAND1_20M_FRQ_ID                          (15)
 
-#define RF8003S_5G_20M_SWEEP_FRQ_ID                     (16)
-
-
-#define RF9363_RC_VHF_10M_FRQ_ID                        (17)
-#define RF9363_IT_VHF_10M_FRQ_ID                        (18)
-#define RF9363_20M_SWEEP_FRQ_ID                         (19)
-
+#define RF_SWEEP_BAND1_20M_FRQ_ID                       (16)
 
 
 //board config
-#define BB_BOARDCFG_PARA_ID                           (20)
-#define BB_BOARDCFG_DATA_ID                           (21)
+#define BB_BOARDCFG_PARA_ID                             (17)
+#define BB_BOARDCFG_DATA_ID                             (18)
 
-#define RF_BOARDCFG_PARA_ID                           (22)
-#define RF_BOARDCFG_DATA_ID                           (23)
+#define RF_BOARDCFG_PARA_ID                             (19)
+#define RF_BOARDCFG_DATA_ID                             (20)
 
 
-#define VSOC_ENC_INIT_ID                                (24)
+#define VSOC_ENC_INIT_ID                                (21)
 
 
 #define CFG_DATA_HEAD_FLAG                              (0x3553F708)

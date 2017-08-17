@@ -55,15 +55,16 @@ typedef union
 
 typedef struct
 {
-    volatile uint32_t in_use;
-    volatile uint32_t rx_buf_wr_pos;
-    volatile uint32_t rx_buf_rd_pos;
+    volatile uint16_t in_use;
+    volatile uint16_t rx_buf_wr_pos;
+    volatile uint16_t rx_buf_rd_pos;
+    volatile uint16_t cpu_id;
 } STRU_BBUartComSessionRxBufferHeader;
 
 typedef struct
 {
-    STRU_BBUartComSessionRxBufferHeader header;
-    volatile uint8_t data[1];
+    STRU_BBUartComSessionRxBufferHeader header  __attribute__ ((aligned (4)));
+    volatile uint8_t data[1]                    __attribute__ ((aligned (4)));
 } STRU_BBUartComSessionRxBuffer;
 
 typedef struct
@@ -85,8 +86,8 @@ typedef struct
 
 typedef struct
 {
-    STRU_BB_UARTComTxQueueHeader    tx_queue_header;
-    volatile uint8_t                tx_data[1];
+    STRU_BB_UARTComTxQueueHeader    tx_queue_header __attribute__ ((aligned (4)));
+    volatile uint8_t                tx_data[1]      __attribute__ ((aligned (4)));
 } STRU_BBUartComTxQueue;
 
 

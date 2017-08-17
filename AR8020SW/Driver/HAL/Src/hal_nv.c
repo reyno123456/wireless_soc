@@ -8,6 +8,7 @@
 #include "memory_config.h"
 #include "sys_event.h"
 #include "inter_core.h"
+#include "hal_norflash.h"
 
 
 #define NV_SRAM_ADDR         (SRAM_NV_MEMORY_ST_ADDR)
@@ -297,10 +298,11 @@ static int32_t NV_CalChk(STRU_NV_DATA *pst_nvData, uint8_t *u8_chk)
     uint8_t *p_u8Addr;
 
     u32_nvDataLen = sizeof(STRU_NV_DATA);
+	u32_i = sizeof(pst_nvData->u8_nvChk);
     p_u8Addr = (uint8_t *)pst_nvData;
-    
+
     //calculate checkSum
-    for (u32_i = 1; u32_i < u32_nvDataLen; u32_i++)
+    for (u32_i; u32_i < u32_nvDataLen; u32_i++)
     {
         u8_checkSum += *(p_u8Addr + u32_i);
     }
@@ -377,7 +379,7 @@ HAL_RET_T HAL_NV_Init(void)
 {
     STRU_NV *pst_nv = (STRU_NV *)NV_SRAM_ADDR;
 
-    NOR_FLASH_Init();
+    HAL_NORFLASH_Init();
     
     NV_GetInit();
 

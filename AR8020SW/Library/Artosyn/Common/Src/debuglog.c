@@ -52,8 +52,8 @@ typedef struct
 
 typedef struct
 {
-    volatile STRU_DebugLogInputBufferHeader header;
-    volatile char buf[1];
+    volatile STRU_DebugLogInputBufferHeader header  __attribute__ ((aligned (4)));
+    volatile char buf[1]                            __attribute__ ((aligned (4)));
 } STRU_DebugLogInputBuffer;
 
 typedef struct
@@ -64,8 +64,8 @@ typedef struct
 
 typedef struct
 {
-    volatile STRU_DebugLogOutputBufferHeader header;
-    volatile char buf[1];
+    volatile STRU_DebugLogOutputBufferHeader header __attribute__ ((aligned (4)));
+    volatile char buf[1]                            __attribute__ ((aligned (4)));
 } STRU_DebugLogOutputBuffer;
 
 static char *s_debug_log_output_buf_rd_pos_0 = DEBUG_LOG_OUTPUT_BUF_HEAD_0;

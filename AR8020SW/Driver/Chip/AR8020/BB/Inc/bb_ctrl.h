@@ -154,5 +154,4 @@ int BB_GetRcId(uint8_t *pu8_rcId, uint8_t bufsize);
  */
 uint32_t BB_GetRcRate(ENUM_BB_MODE en_mode);
 
-
 #endif

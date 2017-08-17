@@ -16,7 +16,7 @@
 #include "test_float.h"
 #include "test_hal_camera.h"
 #include "hal_dma.h"
-#include "upgrade.h"
+#include "test_upgrade.h"
 #include "test_bb.h"
 #include "testhal_gpio.h"
 #include "testhal_timer.h"
@@ -127,7 +127,7 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
         }
         memcpy(path,cmdArray[1],strlen(cmdArray[1]));
         path[strlen(cmdArray[1])]='\0';
-        osThreadDef(UsbUpgrade, UPGRADE_Upgrade, osPriorityNormal, 0, 15 * 128);
+        osThreadDef(UsbUpgrade, UPGRADE_LocalUpgrade, osPriorityNormal, 0, 15 * 128);
         osThreadCreate(osThread(UsbUpgrade), path);
         vTaskDelay(100);       
     }

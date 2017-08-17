@@ -115,18 +115,16 @@ install:
 	@mkdir -p $(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER)
 	@mkdir -p $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f $(LIB) $(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER)
-#	@cp -f $(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include * $(OUTPUT_HEADER_STAGING_DIR) -r
 #	@cp -f $(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include/lwip/tcpip.h $(OUTPUT_HEADER_STAGING_DIR)
-#	@cp -f Inc/debuglog.h $(OUTPUT_HEADER_STAGING_DIR)
-#	@cp -f Inc/sys_event.h $(OUTPUT_HEADER_STAGING_DIR)
-#	@cp -f Inc/md5.h $(OUTPUT_HEADER_STAGING_DIR)
-#	@cp -f Inc/local_irq.h $(OUTPUT_HEADER_STAGING_DIR)
-#	@cp -f Inc/cfg_parser.h $(OUTPUT_HEADER_STAGING_DIR)
+#	@cp -f $(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include/lwip/sockets.h $(OUTPUT_HEADER_STAGING_DIR)
+#	@cp -f $(TOP_DIR)/Library/ThirdParty/LwIP/lwip/src/include/netif/loopif.h $(OUTPUT_HEADER_STAGING_DIR)
 
 clean:
 	@echo "Cleaning..."
 	@$(RM) $(LIB) $(OBJ_C) $(OBJ_CPP) .depend $(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER)/$(LIB) $(OUTPUT_HEADER_STAGING_DIR)/debuglog.h $(OUTPUT_HEADER_STAGING_DIR)/sys_event.h $(OUTPUT_HEADER_STAGING_DIR)/local_irq.h $(OUTPUT_HEADER_STAGING_DIR)/md5.h
-
+#	@$(RM) $(OUTPUT_HEADER_STAGING_DIR)/tcpip.h
+#	@$(RM) $(OUTPUT_HEADER_STAGING_DIR)/sockets.h
+#	@$(RM) $(OUTPUT_HEADER_STAGING_DIR)/loopif.h
 .PHONY: all clean install
 #########################################################################
 

@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include "reg_rw.h"
 #include "sd_core.h"
-//#include "stm32f746xx.h"
+#include "stm32f746xx.h"
 #include "FreeRTOSConfig.h"
 #include "memory_config.h"
 #include "debuglog.h"

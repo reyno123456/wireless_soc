@@ -379,7 +379,18 @@ HAL_RET_T HAL_BB_UartComSendMsg(ENUM_BBUARTCOMSESSIONID e_sessionId,
                                 uint8_t  *pu8_dataBuf, 
                                 uint32_t u32_length)
 {
-    uint8_t u8_ret = BB_UARTComSendMsg(e_sessionId, pu8_dataBuf, u32_length);
+    uint8_t u8_ret = 0;
+
+    if (BB_UART_COM_SESSION_0 == e_sessionId)
+    {
+        dlog_error("session 0 can not be used");
+
+
+        return HAL_BB_ERR_SESSION_SEND;
+    }
+
+    u8_ret = BB_UARTComSendMsg(e_sessionId, pu8_dataBuf, u32_length);
+
     if ( u8_ret )
     {
         return HAL_OK;
@@ -620,11 +631,14 @@ HAL_RET_T HAL_BB_GetRcId(uint8_t *pu8_rcId, uint8_t bufsize)
  * @retval      HAL_BUSY:   means baseband info is updating.
  * @note        None
  */
-HAL_RET_T HAL_BB_GetInfo(STRU_WIRELESS_INFO_DISPLAY *pst_bbInfoAddr)
+HAL_RET_T HAL_BB_GetInfo(STRU_WIRELESS_INFO_DISPLAY **ppst_bbInfoAddr)
 {
-    pst_bbInfoAddr = (STRU_WIRELESS_INFO_DISPLAY *)(SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR);
+    if (NULL != ppst_bbInfoAddr && NULL != *ppst_bbInfoAddr)
+    {
+        *ppst_bbInfoAddr = (STRU_WIRELESS_INFO_DISPLAY *)(SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR);     
+    }
 
-    if ((pst_bbInfoAddr->head != 0x00) || (pst_bbInfoAddr->tail != 0xFF))
+    if (((*ppst_bbInfoAddr)->head != 0x00) || ((*ppst_bbInfoAddr)->tail != 0xFF))
     {
         return HAL_BUSY;
     }
@@ -633,4 +647,3 @@ HAL_RET_T HAL_BB_GetInfo(STRU_WIRELESS_INFO_DISPLAY *pst_bbInfoAddr)
         return HAL_OK;
     }
 }
-

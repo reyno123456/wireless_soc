@@ -92,12 +92,20 @@
                                                          (MPU_DEFS_RASR_SIZE_64KB) | \
                                                          (MPU_RASR_ENABLE_Msk)                                                    
 
-#define QUAD_SPI_MPU_REGION_NUMBER                       6
+#define SDRAM_MPU_REGION_NUMBER                          6
+#define SDRAM_MPU_REGION_ST_ADDR                         0x81f00000
+#define SDRAM_MPU_REGION_ATTR                            (MPU_DEFS_RASE_AP_RO) | \
+                                                         (1  << 19) | \
+                                                         (MPU_DEFS_RASR_SIZE_512KB) | \
+                                                         (MPU_RASR_ENABLE_Msk)
+
+#define QUAD_SPI_MPU_REGION_NUMBER                       7
 #define QUAD_SPI_MPU_REGION_ST_ADDR                      0x40C00000
 #define QUAD_SPI_MPU_REGION_ATTR                         (MPU_DEFS_RASE_AP_RO) | \
                                                          (1  << 19) | \
                                                          (MPU_DEFS_RASR_SIZE_512B) | \
                                                          (MPU_RASR_ENABLE_Msk)
+
 
 
 int32_t MPU_QuadspiProtectDisable(void);

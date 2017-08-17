@@ -38,6 +38,7 @@ static int BB_before_RF_cali(void);
 static void BB_GetRcIdFromFlash(uint8_t *pu8_rcid);
 static void BB_after_RF_cali(ENUM_BB_MODE en_mode);
 static void BB_RF_start_cali( void );
+static void BB_HandleEventsCallback(void *p);
 
 
 
@@ -165,26 +166,6 @@ int BB_softReset(ENUM_BB_MODE en_mode)
     return 0;
 }
 
-
-int32_t cal_chk_sum(uint8_t *pu8_data, uint32_t u32_len, uint8_t *u8_check)
-{
-    uint8_t u8_i;
-    uint8_t u8_chk = 0;
-
-    if (NULL == pu8_data)
-    {
-        return -1;
-    }
-
-    for (u8_i = 0; u8_i < u32_len; u8_i++)
-    {
-        u8_chk += pu8_data[u8_i];
-    }
-    
-    *u8_check = u8_chk;
-
-    return 0;
-}
 
 STRU_CUSTOMER_CFG stru_defualtCfg = 
 {
@@ -355,7 +336,6 @@ void BB_saveRcid(uint8_t *u8_idArray)
     // parament set
     st_nvMsg.u8_nvPar[0] = 1;
     memcpy(&(st_nvMsg.u8_nvPar[1]), u8_idArray, 5);
-    cal_chk_sum(&(st_nvMsg.u8_nvPar[1]), 5, &(st_nvMsg.u8_nvPar[6]));
 
     // send msg
     SYS_EVENT_Notify(SYS_EVENT_ID_NV_MSG, (void *)(&(st_nvMsg)));
@@ -759,7 +739,7 @@ int BB_add_cmds(uint8_t type, uint32_t param0, uint32_t param1, uint32_t param2,
 }
 
 
-void BB_HandleEventsCallback(void *p)
+static void BB_HandleEventsCallback(void *p)
 {
     STRU_WIRELESS_CONFIG_CHANGE* pcmd = (STRU_WIRELESS_CONFIG_CHANGE* )p;
     uint8_t  class  = pcmd->u8_configClass;
@@ -1065,16 +1045,13 @@ static void BB_GetRcIdFromFlash(uint8_t *pu8_rcid)
     if (flag_found)
     {
         uint8_t sum = 0;
-        if (0==cal_chk_sum(pst_nv->st_nvDataUpd.u8_nvBbRcId, RC_ID_SIZE, &sum))
+        if (pst_nv->st_nvMng.u8_nvVld == TRUE)
         {
-            if (sum==pst_nv->st_nvDataUpd.u8_nvChk)
-            {
-                memcpy( (void *)pu8_rcid, (void *)(pst_nv->st_nvDataUpd.u8_nvBbRcId), RC_ID_SIZE);
-            }
-            else
-            {
-                dlog_warning("ERROR: Not Find rcid");
-            }
+            memcpy( (void *)pu8_rcid, (void *)(pst_nv->st_nvDataUpd.u8_nvBbRcId), RC_ID_SIZE);
+        }
+        else
+        {
+            dlog_warning("ERROR: Not Find rcid");
         }
     }
 }
@@ -1279,4 +1256,3 @@ uint32_t BB_GetRcRate(ENUM_BB_MODE en_mode)
 
     return ret;
 }
-

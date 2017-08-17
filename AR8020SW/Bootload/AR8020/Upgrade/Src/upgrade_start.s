@@ -41,33 +41,48 @@
   .weak  Reset_Handler
   .type  Reset_Handler, %function
 Reset_Handler:  
+   movs r0, #0
+   movs r1, #0
+   movs r2, #0
+   movs r3, #0
+   movs r4, #0
+   movs r5, #0
+   movs r6, #0
+   movs r7, #0
+   movs r8, #0
+   movs r9, #0
+   movs r10, #0
+   movs r11, #0
+   movs r12, #0
+
   ldr  sp,  =_estack             /* set stack pointer */
 
-/* copy the BOOT data to DTCM0 */
-  movs r1, #0
-  ldr  r4, =_data_start           /* The start addr of data image */
-  b  LoopCopyData
-CopyInitData:
-  ldr  r3, =_data_start
-  ldr  r3, [r3, r1]
-  str  r3, [r0, r1]
-  adds  r1, r1, #4
-LoopCopyData:
-  ldr  r0, =DTCM0                 /* The start addr of Dtcm0 */
-  ldr  r3, =_data_end             /* The end addr of data image */
-  adds  r2, r4, r1
-  cmp  r2, r3
-  bcc  CopyInitData
+/* copy the data to DTCM0 */
+  ldr r0, =_data_start
+  ldr r1, =_data_end
+  ldr r2, =DTCM0
+  loop_mov:
+	  cmp r0,r1
+	  beq loop_end
+	  ldr r3, [r0]
+      str r3, [r2]
+      add r0, #4
+      add r2, #4
+      b loop_mov
+loop_end:
 
-  /* clear the bss section */
-  ldr r0, =0x0
-  ldr r1, =_bss_start
-  ldr r2, =_bss_end
-LoopClearBss:
-  str r0, [r1]
-  add r1, r1, #4
-  cmp r1, r2
-  bcc LoopClearBss
+/* clear bss */
+     ldr r0, =_bss_start
+     ldr r1, =_bss_end
+     mov r2, #0
+
+loop_bss:
+     cmp r0, r1
+     beq loop_bss_end
+     str r2, [r0]
+     add r0, #4
+     b loop_bss
+loop_bss_end:
 
 /* branch to main */
   bl main

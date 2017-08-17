@@ -17,7 +17,8 @@ sed -i '/^OUTPUT_HEADER_STAGING_DIR ?= /cOUTPUT_HEADER_STAGING_DIR ?= $(OUTPUT_D
 sed -i '/^OUTPUT_LIB_STAGING_DIR ?= /cOUTPUT_LIB_STAGING_DIR ?= $(OUTPUT_DIR)/Lib'  ./Makefile
 sed -i '/cp \*\.bin/d' ./Makefile
 
-
+#modify config data src in src.cfg
+sed -i '/^CONFIG_DATA_DIR ?= /cCONFIG_DATA_DIR ?= ./ConfigData'  ./src.cfg
 
 #modify the cpu0 sample top makefile
 sed -i '/^TOP_DIR ?= /cTOP_DIR ?= ../..'  ./cpu0/Makefile
@@ -48,3 +49,5 @@ sed -i '/^cpu2=/ccpu2=../Lib/ar8020_cpu2.bin'  ./joint2flash.sh
 sed -i '/^ve=/cve=../Utility/imageinfo'  ./joint2flash.sh
 sed -i '/^Bin=/cBin=../Bin'  ./joint2flash.sh
 
+#modify the jointbin.sh
+sed -i '/^Bin=/cBin=../Output/Staging/Config'  ./jointbin.sh

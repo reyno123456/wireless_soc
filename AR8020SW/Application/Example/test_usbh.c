@@ -17,6 +17,8 @@ void USBH_USBHostStatus(void const *argument)
 {
     dlog_info("USBH_USBHostStatus TASK");
 
+    USBH_MountUSBDisk();
+
     while (1)
     {
         HAL_USB_HostProcess();

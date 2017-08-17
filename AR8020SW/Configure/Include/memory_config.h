@@ -263,8 +263,8 @@ typedef struct
 // nonvolatile variable data struct 
 typedef struct
 {
-    uint8_t u8_nvChk;        // data checksum,in bytes. 
-    uint8_t u8_nvBbRcId[5];  //
+    uint8_t u8_nvChk            __attribute__ ((aligned (4)));  // data checksum,in bytes. 
+    uint8_t u8_nvBbRcId[5]      __attribute__ ((aligned (4)));  //
 }STRU_NV_DATA;
 
 typedef struct

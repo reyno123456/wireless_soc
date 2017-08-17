@@ -121,7 +121,7 @@ void BB_GRD_start(void)
     grd_set_ItFrq(context.e_curBand, 1);
     BB_grd_NotifyItFreqByCh(context.e_curBand, 1);
 
-    BB_SweepStart(context.e_curBand, context.e_bandwidth);
+    BB_SweepStart(context.e_bandsupport, context.e_bandwidth);
 
     grd_init_rc_frq_mask_func();
 
@@ -747,7 +747,7 @@ void Grd_Timer2_6_Init(void)
 //=====================================Grd RC funcions =====
 void grd_rc_hopfreq(void)
 {
-	uint8_t max_ch_size = ((context.e_curBand == RF_2G) || (context.e_curBand == RF_600M)) ? MAX_2G_RC_FRQ_SIZE : MAX_5G_RC_FRQ_SIZE;
+	uint8_t max_ch_size = BB_GetRcFrqNum(context.e_curBand);
 
     grd_rc_channel++;
     if(grd_rc_channel >= max_ch_size)
@@ -1305,11 +1305,6 @@ static void BB_grd_OSDPlot(void)
     uint8_t u8_data;
     STRU_WIRELESS_INFO_DISPLAY *osdptr = (STRU_WIRELESS_INFO_DISPLAY *)(SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR);
 
-    if (osdptr->osd_enable == 0)
-    {
-        return;
-    }
-
     osdptr->messageId    = 0x33;
     osdptr->head         = 0xff; //starting writing
     osdptr->tail         = 0x00;
@@ -1321,11 +1316,16 @@ static void BB_grd_OSDPlot(void)
     osdptr->agc_value[3] = BB_ReadReg(PAGE2, RX4_GAIN_ALL_R);
     */
 
-    osdptr->lock_status  = context.u8_harqcnt_lock;
+    osdptr->lock_status  = u_grdRcIdSearchStatus.stru_rcIdStatus.u8_itLock;
     
     osdptr->snr_vlaue[0] = grd_get_it_snr();
     osdptr->snr_vlaue[1] = get_snr_average();
 
+
+    if (osdptr->osd_enable == 0)
+    {
+        return;
+    }
     //masoic
     osdptr->u16_afterErr = (((uint16_t)BB_ReadReg(PAGE2, LDPC_ERR_AFTER_HARQ_HIGH_8)) << 8) | BB_ReadReg(PAGE2, LDPC_ERR_AFTER_HARQ_LOW_8);
     osdptr->ldpc_error   = (((uint16_t)BB_ReadReg(PAGE2, LDPC_ERR_HIGH_8)) << 8) | BB_ReadReg(PAGE2, LDPC_ERR_LOW_8); //1byte is enough

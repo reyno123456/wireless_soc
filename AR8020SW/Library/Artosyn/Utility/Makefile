@@ -31,7 +31,8 @@ ifeq ($(CPU_NUMBER), cpu2)
 endif
 
 # source file(s), including c file(s)
-SRC_C   := Src/wireless_interface.c
+SRC_C   := Src/wireless_interface.c \
+		   Src/upgrade.c
 
 INCDIRS :=  -IInc \
             -I$(TOP_DIR)/Configure/Include \
@@ -42,6 +43,7 @@ INCDIRS :=  -IInc \
             -I$(TOP_DIR)/Driver/Chip/AR8020/SysCtl/Inc \
             -I$(TOP_DIR)/Kernel/FreeRTOS/CMSIS_RTOS \
             -I$(TOP_DIR)/Library/ThirdParty/CMSIS/Include \
+            -I$(TOP_DIR)/Library/ThirdParty/FatFs/Inc/ \
             -I$(TOP_DIR)/Kernel/FreeRTOS/include \
             -I$(TOP_DIR)/Kernel/FreeRTOS/portable/GCC/ARM_CM7/r0p1 \
             -I$(TOP_DIR)/Driver/Board/Common/NORFlash/Inc \
@@ -61,6 +63,7 @@ install:
 	@mkdir -p $(OUTPUT_HEADER_STAGING_DIR)
 	@cp -f $(LIB) $(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER)
 	@cp -f Inc/wireless_interface.h $(OUTPUT_HEADER_STAGING_DIR)
+	@cp -f Inc/upgrade.h $(OUTPUT_HEADER_STAGING_DIR)
 
 clean:
 	@echo "Cleaning..."

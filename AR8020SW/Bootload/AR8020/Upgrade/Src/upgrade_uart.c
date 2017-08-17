@@ -32,7 +32,6 @@ static char *g_pDst = (char *)RECEIVE_ADDR;
 static uint8_t g_u8Amd5Sum[16];
 
 #define READ_DATA_SIZE  1024*4  
-#define MD5_SIZE        16  
 
 static void UPGRADE_EraseWriteFlash(uint32_t u32_addr);
 

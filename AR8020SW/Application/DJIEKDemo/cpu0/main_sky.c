@@ -12,11 +12,12 @@
 #include "hal_usb_otg.h"
 #include "hal_sys_ctl.h"
 #include "wireless_interface.h"
+#include "upgrade.h"
 #include "hal_nv.h"
 #include "test_bb_led_ctrl.h"
 
 
-
+void BB_sky_uartDataHandler(void *p);
 void console_init(uint32_t uart_num, uint32_t baut_rate)
 {
     dlog_init(command_run, NULL, DLOG_CLIENT_PROCESSOR);
@@ -47,7 +48,7 @@ int main(void)
     HAL_SYS_CTL_GetConfig( &pst_cfg);
     pst_cfg->u8_workMode = 0;
     HAL_SYS_CTL_Init(pst_cfg);
-
+    dlog_set_output_level(LOG_LEVEL_INFO);
     /* initialize the uart */
     console_init(0,115200);
     dlog_critical("cpu0 start!!! \n");
@@ -74,6 +75,8 @@ int main(void)
 
     HAL_NV_Init();
 
+    UPGRADE_SKYInit();
+    
     portDISABLE_INTERRUPTS();
     /* Create Main Task */
     osThreadDef(USBMAIN_Task, USB_MainTask, osPriorityBelowNormal, 0, 4 * 128);

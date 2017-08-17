@@ -29,13 +29,13 @@ TARGET = ar8020_cpu1.bin
 # source file(s), including *.s *.c *.cpp file(s)
 SRC_S   := start.s
 
-SRC_C   := main.c command.c
+SRC_C   := main.c command.c ../../Example/test_bb.c
 
 SRC_CXX :=
 
 # compile flags
-CFLAGS   += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share
-CXXFLAGS += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share
+CFLAGS   += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share -I../../Example
+CXXFLAGS += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share -I../../Example
 
 # libs
 LD_LIBS := --start-group

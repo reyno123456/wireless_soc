@@ -8,7 +8,6 @@
 #include "test_i2c_adv7611.h"
 #include "test_hal_camera.h"
 #include "hal_dma.h"
-#include "upgrade.h"
 #include "memory_config.h"
 #include "hal_ret_type.h"
 #include "test_hal_mipi.h"
@@ -17,6 +16,7 @@
 #include "ar_freertos_specific.h"
 #include "test_bb.h"
 #include "test_sd.h"
+#include "test_upgrade.h"
 
 void command_readMemory(char *addr);
 void command_writeMemory(char *addr, char *value);
@@ -47,7 +47,21 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
         }
         memcpy(path,cmdArray[1],strlen(cmdArray[1]));
         path[strlen(cmdArray[1])]='\0';
-        osThreadDef(UsbUpgrade, UPGRADE_Upgrade, osPriorityNormal, 0, 15 * 128);
+        osThreadDef(UsbUpgrade, UPGRADE_LocalUpgrade, osPriorityNormal, 0, 15 * 128);
+        osThreadCreate(osThread(UsbUpgrade), path);
+        vTaskDelay(100);       
+    }
+    else if (memcmp(cmdArray[0], "gndforskyupgrade", strlen("gndforskyupgrade")) == 0)
+    {
+        char path[128];
+        memset(path,'\0',128);
+        if(strlen(cmdArray[1])>127)
+        {
+            return;
+        }
+        memcpy(path,cmdArray[1],strlen(cmdArray[1]));
+        path[strlen(cmdArray[1])]='\0';
+        osThreadDef(UsbUpgrade, UPGRADE_GndForSky, osPriorityNormal, 0, 15 * 128);
         osThreadCreate(osThread(UsbUpgrade), path);
         vTaskDelay(100);       
     }
@@ -147,6 +161,7 @@ void command_run(char *cmdArray[], uint32_t cmdNum)
         dlog_critical("hdmiread <slv address> <reg address>");
         dlog_critical("hdmiwrite <slv address> <reg address> <reg value>");
         dlog_critical("upgrade <filename>");
+        dlog_critical("gndforskyupgrade <filename>");
         dlog_critical("test_camera_init <rate 0~1> <mode 0~8> <toEncoderCh 0~1>");
         dlog_critical("test_write_camera <subAddr(hex)> <value>(hex)");
         dlog_critical("test_read_camera <subAddr(hex)>");

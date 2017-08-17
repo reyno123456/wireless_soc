@@ -20,6 +20,8 @@ function dec2hex()
     printf "%x" $1
 }
 
+TOP_DIR=
+
 outputtmp=tmp.bin
 outputconfig=config.bin
 output=cfgdata.bin

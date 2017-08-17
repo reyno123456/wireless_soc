@@ -18,9 +18,9 @@ STRU_cfgNode AR8020_9363Test_bbcfg_nodeInfo=
 
 STRU_BOARD_BB_PARA stru_9363Test_bb_boardCfg = 
 {
-    .u8_bbSkyRegsCnt    = 43,
+    .u8_bbSkyRegsCnt    = 45,
     
-    .u8_bbGrdRegsCnt    = 49,
+    .u8_bbGrdRegsCnt    = 51,
 
     .e_bandsupport      = RF_600M,
 
@@ -37,17 +37,17 @@ STRU_BOARD_BB_PARA stru_9363Test_bb_boardCfg =
 
 /////////////////////////////////////////////
 
-extern STRU_BB_REG Test9363_bb_regCfg[96];
+extern STRU_BB_REG Test9363_bb_regCfg[100];
 
 STRU_cfgNode Test9363_nodeInfo =
 {
     .nodeId       = BB_BOARDCFG_DATA_ID,
-    .nodeElemCnt  = 96,
+    .nodeElemCnt  = 100,
     .nodeDataSize = sizeof(Test9363_nodeInfo)
 };
 
 
-STRU_BB_REG Test9363_bb_regCfg[96] __attribute__ ((aligned (4)))= 
+STRU_BB_REG Test9363_bb_regCfg[100] __attribute__ ((aligned (4)))= 
 {
     //AR8020TEST9363_bb_skyregs
     {0, 0x90, 0x34},
@@ -97,6 +97,8 @@ STRU_BB_REG Test9363_bb_regCfg[96] __attribute__ ((aligned (4)))=
     {2, 0x2d, 0x00},
     {2, 0x2e, 0x00},
     {2, 0x2f, 0x00},
+	{0, 0x09, 0x3F}, // baseband TX power 
+    {0, 0x16, 0x3F},
 
     //AR8020TEST9363_bb_groundregs
     {0, 0x90, 0x38},
@@ -153,6 +155,8 @@ STRU_BB_REG Test9363_bb_regCfg[96] __attribute__ ((aligned (4)))=
     {2, 0x20, 0x00},
     {2, 0x21, 0x20},
     {2, 0x2f, 0x00},
+	{0, 0x09, 0x3F}, // baseband TX power 
+    {0, 0x16, 0x3F},
 
     //AR8020TEST9363_bb_skyregsAfterCali
     {1, 0x90, 0xFF}, //for 2TX
